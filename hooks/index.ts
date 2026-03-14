@@ -54,17 +54,29 @@ export function useTransactions(filters: TransactionFilters = {}) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Destructure primitives so useCallback deps don't change on every render
+  // when the caller passes an inline object literal (e.g. useTransactions({ limit: 8 }))
+  const {
+    type,
+    categoryId,
+    dateFrom,
+    dateTo,
+    search,
+    page,
+    limit,
+  } = filters
+
   const buildUrl = useCallback(() => {
     const params = new URLSearchParams()
-    if (filters.type && filters.type !== 'ALL') params.set('type', filters.type)
-    if (filters.categoryId) params.set('categoryId', filters.categoryId)
-    if (filters.dateFrom) params.set('dateFrom', filters.dateFrom.toISOString())
-    if (filters.dateTo) params.set('dateTo', filters.dateTo.toISOString())
-    if (filters.search) params.set('search', filters.search)
-    if (filters.page) params.set('page', String(filters.page))
-    if (filters.limit) params.set('limit', String(filters.limit))
+    if (type && type !== 'ALL') params.set('type', type)
+    if (categoryId) params.set('categoryId', categoryId)
+    if (dateFrom) params.set('dateFrom', dateFrom.toISOString())
+    if (dateTo) params.set('dateTo', dateTo.toISOString())
+    if (search) params.set('search', search)
+    if (page) params.set('page', String(page))
+    if (limit) params.set('limit', String(limit))
     return `/api/transactions?${params.toString()}`
-  }, [filters])
+  }, [type, categoryId, dateFrom, dateTo, search, page, limit])
 
   const load = useCallback(async () => {
     setIsLoading(true)

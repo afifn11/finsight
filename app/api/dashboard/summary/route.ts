@@ -5,7 +5,6 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import {
   startOfMonth, endOfMonth, subMonths,
-  startOfYear, endOfYear,
 } from 'date-fns'
 import type { ApiResponse, ApiError, DashboardSummary, MonthlySummary, CategoryBreakdown } from '@/types'
 
@@ -26,43 +25,40 @@ export async function GET() {
   const monthStart = startOfMonth(now)
   const monthEnd = endOfMonth(now)
 
-  // ── Run all queries in parallel ────────────────────────────
-  const [currentMonthAgg, last6MonthsData, categoryAgg] = await Promise.all([
-    // 1. Current month income + expense totals
-    prisma.transaction.groupBy({
-      by: ['type'],
-      where: { userId, date: { gte: monthStart, lte: monthEnd } },
-      _sum: { amount: true },
-      _count: true,
-    }),
+  // ── 1. Current month income + expense totals ───────────────
+  const currentMonthAgg = await prisma.transaction.groupBy({
+    by: ['type'],
+    where: { userId, date: { gte: monthStart, lte: monthEnd } },
+    _sum: { amount: true },
+    _count: true,
+  })
 
-    // 2. Last 6 months data for trend chart
-    Promise.all(
-      Array.from({ length: 6 }, (_, i) => {
-        const monthDate = subMonths(now, 5 - i)
-        const start = startOfMonth(monthDate)
-        const end = endOfMonth(monthDate)
-        return prisma.transaction.groupBy({
-          by: ['type'],
-          where: { userId, date: { gte: start, lte: end } },
-          _sum: { amount: true },
-        }).then((rows) => ({ monthDate, rows }))
-      })
-    ),
+  // ── 2. Category breakdown for current month (expense only) ─
+  const categoryAgg = await prisma.transaction.groupBy({
+    by: ['categoryId'],
+    where: {
+      userId,
+      type: 'EXPENSE',
+      date: { gte: monthStart, lte: monthEnd },
+    },
+    _sum: { amount: true },
+    _count: true,
+    orderBy: { _sum: { amount: 'desc' } },
+  })
 
-    // 3. Category breakdown for current month (expense only)
-    prisma.transaction.groupBy({
-      by: ['categoryId'],
-      where: {
-        userId,
-        type: 'EXPENSE',
-        date: { gte: monthStart, lte: monthEnd },
-      },
-      _sum: { amount: true },
-      _count: true,
-      orderBy: { _sum: { amount: 'desc' } },
-    }),
-  ])
+  // ── 3. Last 6 months data for trend chart ──────────────────
+  const last6MonthsData = await Promise.all(
+    Array.from({ length: 6 }, (_, i) => {
+      const monthDate = subMonths(now, 5 - i)
+      const start = startOfMonth(monthDate)
+      const end = endOfMonth(monthDate)
+      return prisma.transaction.groupBy({
+        by: ['type'],
+        where: { userId, date: { gte: start, lte: end } },
+        _sum: { amount: true },
+      }).then((rows) => ({ monthDate, rows }))
+    })
+  )
 
   // ── Compute summary ────────────────────────────────────────
   const totalIncome = Number(
