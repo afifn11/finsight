@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { TrendingUp, CheckCircle, Loader2 } from 'lucide-react'
+import { CheckCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { StepWelcome } from './StepWelcome'
 import { StepPreferences } from './StepPreferences'
@@ -72,16 +72,26 @@ export function OnboardingFlow({ user }: Props) {
     >
       <div className="w-full max-w-lg">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-8">
+        <div className="flex items-center justify-center gap-2.5 mb-8">
           <div
-            className="flex items-center justify-center w-9 h-9 rounded-xl"
+            className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0"
             style={{ background: 'var(--color-primary-800)' }}
           >
-            <TrendingUp className="w-4 h-4 text-white" />
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="2.5" width="4" height="15" rx="1.5" fill="white"/>
+              <rect x="3" y="2.5" width="13" height="4" rx="1.5" fill="white"/>
+              <rect x="3" y="8.5" width="10" height="4" rx="1.5" fill="white"/>
+              <circle cx="17" cy="17" r="2.8" fill="#4ade80"/>
+            </svg>
           </div>
-          <span className="text-lg font-semibold" style={{ color: 'var(--color-primary-800)' }}>
-            FinSight
-          </span>
+          <div>
+            <span className="text-lg font-bold leading-none" style={{ color: 'var(--color-primary-800)' }}>
+              FinSight
+            </span>
+            <p className="text-xs leading-none mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              Personal Finance
+            </p>
+          </div>
         </div>
 
         {/* Step indicators */}

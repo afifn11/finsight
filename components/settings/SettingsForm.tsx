@@ -58,7 +58,6 @@ export function SettingsForm({ user }: Props) {
       setIsDeleting(false)
     }
   }
-  }
 
   return (
     <div className="space-y-5">
