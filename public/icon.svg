@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Rounded square background -->
+  <rect width="32" height="32" rx="7" fill="#0F4C75"/>
+  <!-- F stem (vertical) -->
+  <rect x="8" y="6" width="4" height="20" rx="1" fill="white"/>
+  <!-- F top bar -->
+  <rect x="8" y="6" width="15" height="4" rx="1" fill="white"/>
+  <!-- F middle bar -->
+  <rect x="8" y="14" width="11" height="4" rx="1" fill="white"/>
+  <!-- Green growth dot — bottom right -->
+  <circle cx="23" cy="24" r="3.5" fill="#4ade80"/>
+</svg>

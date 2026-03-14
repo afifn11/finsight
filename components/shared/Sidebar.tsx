@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, ArrowLeftRight, PiggyBank,
-  BarChart3, Settings, LogOut, TrendingUp,
+  BarChart3, Settings, LogOut,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { cn, getInitials } from '@/lib/utils'
@@ -36,17 +36,31 @@ export function Sidebar({ user }: SidebarProps) {
       style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2 px-6 py-5 border-b" style={{ borderColor: 'var(--border-default)' }}>
+      <Link
+        href="/"
+        className="flex items-center gap-2.5 px-6 py-5 border-b hover:opacity-90 transition-opacity"
+        style={{ borderColor: 'var(--border-default)' }}
+      >
         <div
-          className="flex items-center justify-center w-8 h-8 rounded-lg"
+          className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
           style={{ background: 'var(--color-primary-800)' }}
         >
-          <TrendingUp className="w-4 h-4 text-white" />
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2.5" y="2" width="3" height="12" rx="1" fill="white"/>
+            <rect x="2.5" y="2" width="10" height="3" rx="1" fill="white"/>
+            <rect x="2.5" y="6.5" width="8" height="3" rx="1" fill="white"/>
+            <circle cx="13" cy="13" r="2.2" fill="#4ade80"/>
+          </svg>
         </div>
-        <span className="font-semibold text-lg" style={{ color: 'var(--color-primary-800)' }}>
-          FinSight
-        </span>
-      </div>
+        <div>
+          <span className="font-bold text-lg leading-none" style={{ color: 'var(--color-primary-800)' }}>
+            FinSight
+          </span>
+          <p className="text-xs leading-none mt-0.5" style={{ color: 'var(--text-muted)' }}>
+            Personal Finance
+          </p>
+        </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">

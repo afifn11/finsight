@@ -23,8 +23,8 @@ export default async function DashboardLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header user={session.user} />
         <main
-          className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8"
-          style={{ paddingBottom: 'calc(1.5rem + 64px)' }} // extra space for bottom nav on mobile
+          className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8 pt-[calc(4rem+1.5rem)] md:pt-6"
+          style={{ paddingBottom: 'calc(1.5rem + 64px)' }}
         >
           {children}
         </main>

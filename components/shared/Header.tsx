@@ -2,7 +2,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, Menu } from 'lucide-react'
+import Link from 'next/link'
+import { Bell } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { getInitials, getBudgetStatus, formatCurrencyShort } from '@/lib/utils'
 import type { BudgetWithCategory } from '@/types'
@@ -22,6 +23,45 @@ interface BudgetAlert {
 export function Header({ user }: HeaderProps) {
   const [alerts, setAlerts] = useState<BudgetAlert[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
+  const [visible, setVisible] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Deteksi mobile sekali saat mount, update saat resize
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  useEffect(() => {
+    const scrollEl = document.querySelector('main') as HTMLElement | null
+    if (!scrollEl) return
+
+    let lastY = scrollEl.scrollTop
+    let ticking = false
+
+    function onScroll() {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const currentY = scrollEl.scrollTop
+        const diff = currentY - lastY
+        if (window.innerWidth < 768) {
+          if (diff > 4 && currentY > 60) {
+            setVisible(false)
+          } else if (diff < -4) {
+            setVisible(true)
+          }
+        }
+        lastY = currentY
+        ticking = false
+      })
+    }
+
+    scrollEl.addEventListener('scroll', onScroll, { passive: true })
+    return () => scrollEl.removeEventListener('scroll', onScroll)
+  }, [])
 
   useEffect(() => {
     // Fetch budgets dan cek yang mendekati/melewati limit
@@ -46,16 +86,33 @@ export function Header({ user }: HeaderProps) {
 
   return (
     <header
-      className="flex items-center justify-between px-4 md:px-6 h-16 shrink-0 border-b"
-      style={{
-        background: 'var(--bg-card)',
-        borderColor: 'var(--border-default)',
-      }}
-    >
-      {/* Mobile: hamburger */}
-      <button className="md:hidden p-2 rounded-lg" style={{ color: 'var(--text-secondary)' }}>
-        <Menu className="w-5 h-5" />
-      </button>
+        className="fixed top-0 left-0 right-0 md:static flex items-center justify-between px-4 md:px-6 h-16 shrink-0 border-b"
+        style={{
+          background: 'var(--bg-card)',
+          borderColor: 'var(--border-default)',
+          zIndex: 30,
+          // Hanya hide di mobile — desktop selalu translateY(0)
+          transform: (isMobile && !visible) ? 'translateY(-100%)' : 'translateY(0)',
+          transition: 'transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+      {/* Mobile: logo — hamburger dihapus karena navigasi menggunakan BottomNav */}
+      <Link href="/" className="md:hidden flex items-center gap-2">
+        <div
+          className="flex items-center justify-center w-7 h-7 rounded-lg shrink-0"
+          style={{ background: 'var(--color-primary-800)' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="3" height="10" rx="1" fill="white"/>
+            <rect x="2" y="2" width="9" height="2.5" rx="1" fill="white"/>
+            <rect x="2" y="6" width="7" height="2.5" rx="1" fill="white"/>
+            <circle cx="11" cy="11" r="2" fill="#4ade80"/>
+          </svg>
+        </div>
+        <span className="font-semibold text-base" style={{ color: 'var(--color-primary-800)' }}>
+          FinSight
+        </span>
+      </Link>
 
       <div className="hidden md:block" />
 

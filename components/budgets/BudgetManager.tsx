@@ -327,43 +327,92 @@ export function BudgetManager() {
 
   return (
     <>
-      {/* Summary strip */}
-      {!isLoading && budgets.length > 0 && (
-        <div
-          className="flex items-center gap-4 p-4 rounded-xl border"
-          style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
-        >
-          <div>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Total budget</p>
-            <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {formatCurrency(budgets.reduce((s, b) => s + Number(b.amount), 0))}
-            </p>
+      {/* Summary card */}
+      {!isLoading && budgets.length > 0 && (() => {
+        const totalBudget = budgets.reduce((s, b) => s + Number(b.amount), 0)
+        const totalSpent  = budgets.reduce((s, b) => s + b.spent, 0)
+        const safeCount   = budgets.filter((b) => getBudgetStatus(b.percentage) === 'safe').length
+        const overallPct  = totalBudget > 0 ? Math.min(Math.round((totalSpent / totalBudget) * 100), 100) : 0
+        const overallColor = overallPct >= 90
+          ? 'var(--color-danger-500)'
+          : overallPct >= 70
+          ? 'var(--color-warning-500)'
+          : 'var(--color-success-500)'
+        return (
+          <div
+            className="rounded-2xl border p-4"
+            style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
+          >
+            {/* Top: title + add button */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Ringkasan Budget
+              </p>
+              <button
+                onClick={() => { setEditingBudget(null); setModalOpen(true) }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
+                style={{ background: 'var(--color-primary-800)' }}
+              >
+                <Plus className="w-4 h-4" /> Tambah
+              </button>
+            </div>
+
+            {/* Overall spend vs budget */}
+            <div className="mb-3">
+              <div className="flex items-end justify-between mb-1.5">
+                <div>
+                  <span className="text-2xl font-bold" style={{ color: overallColor }}>
+                    {formatCurrencyShort(totalSpent)}
+                  </span>
+                  <span className="text-sm ml-1.5" style={{ color: 'var(--text-muted)' }}>
+                    / {formatCurrencyShort(totalBudget)}
+                  </span>
+                </div>
+                <span className="text-sm font-semibold" style={{ color: overallColor }}>
+                  {overallPct}%
+                </span>
+              </div>
+              <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-muted)' }}>
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{ width: `${overallPct}%`, background: overallColor }}
+                />
+              </div>
+            </div>
+
+            {/* 3 stat pills */}
+            <div className="grid grid-cols-3 gap-2 mt-3">
+              <div
+                className="rounded-xl p-3 text-center"
+                style={{ background: 'var(--bg-muted)' }}
+              >
+                <p className="text-xs mb-0.5" style={{ color: 'var(--text-muted)' }}>Total budget</p>
+                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  {formatCurrencyShort(totalBudget)}
+                </p>
+              </div>
+              <div
+                className="rounded-xl p-3 text-center"
+                style={{ background: 'var(--bg-muted)' }}
+              >
+                <p className="text-xs mb-0.5" style={{ color: 'var(--text-muted)' }}>Terpakai</p>
+                <p className="text-sm font-bold" style={{ color: 'var(--color-danger-500)' }}>
+                  {formatCurrencyShort(totalSpent)}
+                </p>
+              </div>
+              <div
+                className="rounded-xl p-3 text-center"
+                style={{ background: 'var(--bg-muted)' }}
+              >
+                <p className="text-xs mb-0.5" style={{ color: 'var(--text-muted)' }}>Aman</p>
+                <p className="text-sm font-bold" style={{ color: 'var(--color-success-500)' }}>
+                  {safeCount}<span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>/{budgets.length}</span>
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="w-px h-8" style={{ background: 'var(--border-default)' }} />
-          <div>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Total terpakai</p>
-            <p className="font-semibold" style={{ color: 'var(--color-danger-500)' }}>
-              {formatCurrency(budgets.reduce((s, b) => s + b.spent, 0))}
-            </p>
-          </div>
-          <div className="w-px h-8" style={{ background: 'var(--border-default)' }} />
-          <div>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Budget aman</p>
-            <p className="font-semibold" style={{ color: 'var(--color-success-500)' }}>
-              {budgets.filter((b) => getBudgetStatus(b.percentage) === 'safe').length} / {budgets.length}
-            </p>
-          </div>
-          <div className="ml-auto">
-            <button
-              onClick={() => { setEditingBudget(null); setModalOpen(true) }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
-              style={{ background: 'var(--color-primary-800)' }}
-            >
-              <Plus className="w-4 h-4" /> Tambah
-            </button>
-          </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Grid */}
       {isLoading ? (
