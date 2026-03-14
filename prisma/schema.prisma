@@ -1,0 +1,227 @@
+// prisma/schema.prisma
+// FinSight — Database Schema
+// PostgreSQL via Supabase
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────
+// AUTH (NextAuth.js v4 required tables)
+// ─────────────────────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // User preferences
+  currency      String    @default("IDR")
+  timezone      String    @default("Asia/Jakarta")
+  onboardingDone Boolean  @default(false)
+
+  // Relations
+  accounts     Account[]
+  sessions     Session[]
+  transactions Transaction[]
+  categories   Category[]
+  budgets      Budget[]
+  aiInsights   AiInsight[]
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────────────────────
+// CATEGORY
+// ─────────────────────────────────────────────────────────────
+
+enum CategoryType {
+  SYSTEM  // Default categories (cannot be deleted)
+  CUSTOM  // User-created categories
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model Category {
+  id        String          @id @default(cuid())
+  userId    String?         // null = system category (shared)
+  name      String
+  icon      String          // Lucide icon name, e.g. "utensils"
+  color     String          // Hex color, e.g. "#10b981"
+  type      CategoryType    @default(CUSTOM)
+  forType   TransactionType // Which transaction type this category is for
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  budgets      Budget[]
+
+  @@index([userId])
+  @@index([forType])
+  @@map("categories")
+}
+
+// ─────────────────────────────────────────────────────────────
+// TRANSACTION
+// ─────────────────────────────────────────────────────────────
+
+enum RecurringPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  userId      String
+  categoryId  String
+  amount      Decimal         @db.Decimal(15, 2) // Support large amounts
+  type        TransactionType
+  description String?
+  date        DateTime
+  notes       String?         @db.Text
+
+  // Recurring transaction support
+  isRecurring      Boolean          @default(false)
+  recurringPeriod  RecurringPeriod?
+  recurringEndDate DateTime?
+  parentId         String?          // For recurring children, reference to parent
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+  parent   Transaction?  @relation("RecurringChildren", fields: [parentId], references: [id])
+  children Transaction[] @relation("RecurringChildren")
+
+  @@index([userId])
+  @@index([userId, date])
+  @@index([userId, type])
+  @@index([categoryId])
+  @@map("transactions")
+}
+
+// ─────────────────────────────────────────────────────────────
+// BUDGET
+// ─────────────────────────────────────────────────────────────
+
+enum BudgetPeriod {
+  MONTHLY
+  YEARLY
+}
+
+model Budget {
+  id               String      @id @default(cuid())
+  userId           String
+  categoryId       String
+  amount           Decimal     @db.Decimal(15, 2)
+  period           BudgetPeriod @default(MONTHLY)
+  alertThreshold   Int         @default(80) // Percentage (0-100)
+  isActive         Boolean     @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+  alerts   BudgetAlert[]
+
+  @@unique([userId, categoryId, period]) // One budget per category per period
+  @@index([userId])
+  @@map("budgets")
+}
+
+model BudgetAlert {
+  id          String   @id @default(cuid())
+  budgetId    String
+  percentage  Int      // e.g. 85 = triggered at 85%
+  triggeredAt DateTime @default(now())
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId])
+  @@map("budget_alerts")
+}
+
+// ─────────────────────────────────────────────────────────────
+// AI INSIGHT (Cache Claude API responses)
+// ─────────────────────────────────────────────────────────────
+
+model AiInsight {
+  id        String   @id @default(cuid())
+  userId    String
+  content   Json     // Array of insight objects: { title, description, type }
+  month     Int      // 1-12
+  year      Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month, year]) // One insight per user per month
+  @@index([userId])
+  @@map("ai_insights")
+}
