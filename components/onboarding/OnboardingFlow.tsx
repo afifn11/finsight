@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { CheckCircle, Loader2 } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { StepWelcome } from './StepWelcome'
 import { StepPreferences } from './StepPreferences'

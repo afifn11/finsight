@@ -7,7 +7,6 @@ import {
   LayoutDashboard, ArrowLeftRight,
   PiggyBank, BarChart3, Settings,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },

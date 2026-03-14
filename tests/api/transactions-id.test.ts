@@ -11,7 +11,6 @@ import {
 } from '../helpers'
 
 const ROUTE_PARAMS = { params: Promise.resolve({ id: 'tx-001' }) }
-const OTHER_USER_PARAMS = { params: Promise.resolve({ id: 'tx-other' }) }
 
 describe('GET /api/transactions/:id', () => {
   beforeEach(() => mockAuthenticatedSession())

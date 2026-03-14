@@ -78,7 +78,7 @@ export function SummaryCards() {
     {
       label: 'Total Pemasukan',
       value: formatCurrencyShort(s?.totalIncome ?? 0),
-      subtext: s?.periodLabel,
+      ...(s?.periodLabel ? { subtext: s.periodLabel } : {}),
       icon: TrendingUp,
       iconBg: 'var(--color-success-50)',
       iconColor: 'var(--color-success-600)',

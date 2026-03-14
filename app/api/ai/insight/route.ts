@@ -30,7 +30,7 @@ export async function GET() {
 
   if (cached) {
     return NextResponse.json<ApiResponse<AiInsightData>>({
-      data: cached.content as AiInsightData,
+      data: cached.content as unknown as AiInsightData,
     })
   }
 
@@ -182,12 +182,12 @@ Balas HANYA dengan JSON array berikut, tanpa teks lain, tanpa markdown:
   // ── Cache result ───────────────────────────────────────────
   await prisma.aiInsight.upsert({
     where: { userId_month_year: { userId, month: currentMonth, year: currentYear } },
-    update: { content: insightData },
+    update: { content: insightData as unknown as import('@prisma/client').Prisma.InputJsonValue },
     create: {
       userId,
       month: currentMonth,
       year: currentYear,
-      content: insightData,
+      content: insightData as unknown as import('@prisma/client').Prisma.InputJsonValue,
     },
   })
 

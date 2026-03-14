@@ -19,7 +19,7 @@ function createPrismaClient() {
     ssl: isProduction ? { rejectUnauthorized: false } : false,
   })
 
-  const adapter = new PrismaPg(pool)
+  const adapter = new PrismaPg(pool as never)
 
   return new PrismaClient({
     adapter,

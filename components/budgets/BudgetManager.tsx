@@ -7,7 +7,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useBudgets, useCategories } from '@/hooks'
-import { formatCurrency, formatCurrencyShort, getBudgetStatus, getBudgetStatusColor } from '@/lib/utils'
+import { formatCurrencyShort, getBudgetStatus, getBudgetStatusColor } from '@/lib/utils'
 import { budgetSchema, type BudgetInput } from '@/lib/validations'
 import type { BudgetWithCategory } from '@/types'
 import { BudgetCardSkeleton } from '@/components/ui/Skeleton'
@@ -142,6 +142,7 @@ function BudgetFormModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<BudgetInput>({
+    // @ts-expect-error — zodResolver v5 inference difference with exactOptionalPropertyTypes
     resolver: zodResolver(budgetSchema),
     defaultValues: { period: 'MONTHLY', alertThreshold: 80 },
   })
@@ -198,7 +199,7 @@ function BudgetFormModal({
           <button onClick={onClose} style={{ color: 'var(--text-muted)' }}>✕</button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit as unknown as Parameters<typeof handleSubmit>[0])} className="p-5 space-y-4">
           {/* Category */}
           <div>
             <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -305,10 +306,6 @@ export function BudgetManager() {
   const { data: budgets, isLoading, refresh } = useBudgets()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<BudgetWithCategory | null>(null)
-
-  function watch(name: string) {
-    return name === 'alertThreshold' ? 80 : undefined
-  }
 
   async function handleDelete(id: string) {
     if (!confirm('Hapus budget ini?')) return

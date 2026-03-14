@@ -24,6 +24,7 @@ export function SettingsForm({ user }: Props) {
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<UserSettingsInput>({
+    // @ts-expect-error — zodResolver v5 inference difference with exactOptionalPropertyTypes
     resolver: zodResolver(userSettingsSchema),
     defaultValues: {
       name: user.name ?? '',
@@ -88,7 +89,7 @@ export function SettingsForm({ user }: Props) {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit as unknown as Parameters<typeof handleSubmit>[0])} className="space-y-4">
           <div>
             <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               Nama

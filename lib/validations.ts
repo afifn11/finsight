@@ -24,7 +24,7 @@ export const registerSchema = z.object({
 // ── Transaction ────────────────────────────────────────────────
 export const transactionSchema = z.object({
   amount: z
-    .number({ invalid_type_error: 'Nominal harus angka' })
+    .number({ error: 'Nominal harus angka' })
     .positive('Nominal harus lebih dari 0')
     .max(999_999_999_999, 'Nominal terlalu besar'),
   type: z.enum(['INCOME', 'EXPENSE']),
@@ -47,7 +47,7 @@ export const updateTransactionSchema = transactionSchema.partial().extend({
 export const budgetSchema = z.object({
   categoryId: z.string().min(1, 'Pilih kategori'),
   amount: z
-    .number({ invalid_type_error: 'Budget harus angka' })
+    .number({ error: 'Budget harus angka' })
     .positive('Budget harus lebih dari 0'),
   period: z.enum(['MONTHLY', 'YEARLY']).default('MONTHLY'),
   alertThreshold: z.number().min(1).max(100).default(80),

@@ -2,10 +2,9 @@
 // FinSight — Custom React Hooks
 // All data fetching hooks using native fetch + SWR-like pattern
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import type {
-  TransactionWithCategory,
   BudgetWithCategory,
   PaginatedTransactions,
   TransactionFilters,

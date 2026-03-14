@@ -31,6 +31,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<TransactionInput>({
+    // @ts-expect-error — zodResolver v5 inference difference with exactOptionalPropertyTypes
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: 'EXPENSE',
@@ -108,7 +109,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit as unknown as Parameters<typeof handleSubmit>[0])} className="p-5 space-y-4">
           {/* Type toggle */}
           <div>
             <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>

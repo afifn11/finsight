@@ -96,10 +96,15 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Strip undefined fields — exactOptionalPropertyTypes requires null not undefined for Prisma
+  const { notes, recurringPeriod, recurringEndDate, ...requiredData } = parsed.data
   const transaction = await prisma.transaction.create({
     data: {
-      ...parsed.data,
+      ...requiredData,
       userId: session.user.id,
+      ...(notes !== undefined ? { notes } : {}),
+      ...(recurringPeriod !== undefined ? { recurringPeriod } : {}),
+      ...(recurringEndDate !== undefined ? { recurringEndDate } : {}),
     },
     include: { category: true },
   })

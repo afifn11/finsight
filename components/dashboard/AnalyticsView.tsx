@@ -3,7 +3,7 @@
 
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, Cell,
+  CartesianGrid, Tooltip, Legend,
 } from 'recharts'
 import { useDashboard } from '@/hooks'
 import { formatCurrencyShort, formatCurrency, formatPercentage } from '@/lib/utils'
@@ -65,7 +65,7 @@ export function AnalyticsView() {
               width={70}
             />
             <Tooltip
-              formatter={(v: number, name: string) => [formatCurrencyShort(v), name]}
+              formatter={(v: unknown, name: unknown) => [formatCurrencyShort(v as number), String(name)]}
               contentStyle={{
                 background: 'var(--bg-card)',
                 border: '1px solid var(--border-default)',

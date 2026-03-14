@@ -32,7 +32,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
   const updated = await prisma.budget.update({
     where: { id },
-    data: parsed.data,
+    data: parsed.data as Parameters<typeof prisma.budget.update>[0]['data'],
     include: { category: true },
   })
 

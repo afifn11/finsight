@@ -98,7 +98,7 @@ describe('GET /api/export', () => {
       await GET(buildRequest('GET', undefined, { type: 'csv' }))
 
       const call = vi.mocked(prisma.transaction.findMany).mock.calls[0]![0]
-      const dateFilter = call.where.date
+      const dateFilter = (call!.where as Record<string, unknown>)?.date
       expect(dateFilter).toBeDefined()
     })
 
@@ -106,8 +106,9 @@ describe('GET /api/export', () => {
       await GET(buildRequest('GET', undefined, { type: 'csv', period: 'last3' }))
 
       const call = vi.mocked(prisma.transaction.findMany).mock.calls[0]![0]
-      const startDate = call.where.date.gte as Date
-      const endDate = call.where.date.lte as Date
+      const dateWhere = (call!.where as Record<string, unknown>)?.date as Record<string, Date> | undefined
+      const startDate = dateWhere?.gte as Date
+      const endDate = dateWhere?.lte as Date
 
       // 3-month range: start should be at least 60 days before end
       const diffDays = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)

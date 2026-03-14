@@ -26,7 +26,7 @@ const SUGGESTIONS: Record<string, { icon: string; suggested: number }> = {
   'Pendidikan':        { icon: '🎓', suggested: 300000 },
 }
 
-export function StepFirstBudget({ data, onChange, onFinish, onBack, isSubmitting }: Props) {
+export function StepFirstBudget({ data, onChange: _onChange, onFinish, onBack, isSubmitting }: Props) {
   const [categories, setCategories] = useState<Category[]>([])
   const [loadingCats, setLoadingCats] = useState(true)
   const [selected, setSelected] = useState<Record<string, number>>({})

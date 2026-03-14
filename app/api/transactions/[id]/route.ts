@@ -60,7 +60,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
   const updated = await prisma.transaction.update({
     where: { id },
-    data: parsed.data,
+    data: parsed.data as Parameters<typeof prisma.transaction.update>[0]['data'],
     include: { category: true },
   })
 

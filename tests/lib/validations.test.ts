@@ -208,3 +208,15 @@ describe('transactionFiltersSchema', () => {
     expect(r.success).toBe(false)
   })
 })
+
+describe('userSettingsSchema', () => {
+  it('validates correct settings', () => {
+    const result = userSettingsSchema.safeParse({ currency: 'IDR', timezone: 'Asia/Jakarta' })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects empty currency', () => {
+    const result = userSettingsSchema.safeParse({ currency: '', timezone: 'Asia/Jakarta' })
+    expect(result.success).toBe(false)
+  })
+})

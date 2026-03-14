@@ -9,6 +9,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 const isProduction = process.env.NODE_ENV === 'production'
 
 export default defineConfig({
+  // @ts-expect-error — earlyAccess is valid in Prisma 7 but not yet typed
   earlyAccess: true,
   schema: path.join('prisma', 'schema.prisma'),
 
@@ -23,7 +24,7 @@ export default defineConfig({
         max: 3,
         ssl: isProduction ? { rejectUnauthorized: false } : false,
       })
-      return new PrismaPg(pool)
+      return new PrismaPg(pool as never)
     },
   },
 })

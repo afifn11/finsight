@@ -45,6 +45,7 @@ export function Header({ user }: HeaderProps) {
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
+        if (!scrollEl) return
         const currentY = scrollEl.scrollTop
         const diff = currentY - lastY
         if (window.innerWidth < 768) {

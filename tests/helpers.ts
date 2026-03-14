@@ -40,7 +40,7 @@ export function buildRequest(
   return new NextRequest(url.toString(), {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: body && method !== 'GET' ? JSON.stringify(body) : undefined,
+    body: body && method !== 'GET' ? JSON.stringify(body) : null,
   })
 }
 

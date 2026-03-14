@@ -5,7 +5,7 @@ import { Pool } from 'pg'
 
 // Seed pakai DIRECT_URL (koneksi langsung, bukan pooled)
 const pool = new Pool({ connectionString: process.env.DIRECT_URL })
-const adapter = new PrismaPg(pool)
+const adapter = new PrismaPg(pool as never)
 const prisma = new PrismaClient({ adapter })
 
 // ── System Categories ──────────────────────────────────────────

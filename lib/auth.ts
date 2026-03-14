@@ -26,7 +26,7 @@ const credentialsSchema = z.object({
 
 // ── NextAuth config ────────────────────────────────────────────
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as NextAuthOptions['adapter'],
+  adapter: PrismaAdapter(prisma) as Required<NextAuthOptions>['adapter'],
 
   providers: [
     GoogleProvider({
@@ -75,19 +75,19 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         // Fetch onboardingDone on first login
-        const dbUser = await prisma.user.findUnique({
+        const dbUser1 = await prisma.user.findUnique({
           where: { id: user.id as string },
           select: { onboardingDone: true },
         })
-        token.onboardingDone = dbUser?.onboardingDone ?? false
+        token.onboardingDone = dbUser1?.onboardingDone ?? false
       }
       // Refresh onboardingDone when session is updated (after onboarding completes)
       if (trigger === 'update' && token.id) {
-        const dbUser = await prisma.user.findUnique({
+        const dbUser2 = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: { onboardingDone: true },
         })
-        token.onboardingDone = dbUser?.onboardingDone ?? false
+        token.onboardingDone = dbUser2?.onboardingDone ?? false
       }
       return token
     },
@@ -103,7 +103,8 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       // Auto-complete onboarding check for OAuth users
       if (account?.provider === 'google' && user.id) {
-        const dbUser = await prisma.user.findUnique({
+        // Check handled by middleware — onboardingDone checked on redirect
+        void prisma.user.findUnique({
           where: { id: user.id },
           select: { onboardingDone: true },
         })
@@ -120,7 +121,7 @@ export const authOptions: NextAuthOptions = {
     error: '/login',
   },
 
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET ?? 'fallback-secret-change-in-production',
   debug: process.env.NODE_ENV === 'development',
 }
 

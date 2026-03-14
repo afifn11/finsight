@@ -103,7 +103,7 @@ export function TransactionsList() {
 
   // Sync debounced search ke filters (reset ke page 1 saat search berubah)
   useEffect(() => {
-    setFilters((prev) => ({ ...prev, search: debouncedSearch || undefined, page: 1 }))
+    setFilters((prev) => ({ ...prev, ...(debouncedSearch ? { search: debouncedSearch } : {}), page: 1 }))
   }, [debouncedSearch])
 
   const { data, isLoading, refresh } = useTransactions(filters)
