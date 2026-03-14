@@ -34,3 +34,16 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Debug files
+test-db.js
+test-db.ts
+
+# Build artifacts
+.next/
+out/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db

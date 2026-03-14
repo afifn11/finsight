@@ -1,10 +1,12 @@
 // components/settings/SettingsForm.tsx
 'use client'
 
-import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { Loader2, AlertTriangle } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
+import { signOut } from 'next-auth/react'
 import { userSettingsSchema, type UserSettingsInput } from '@/lib/validations'
 import { getInitials } from '@/lib/utils'
 
@@ -13,6 +15,10 @@ interface Props {
 }
 
 export function SettingsForm({ user }: Props) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -38,6 +44,20 @@ export function SettingsForm({ user }: Props) {
     } catch {
       toast.error('Gagal menyimpan pengaturan')
     }
+  }
+
+  async function handleDeleteAccount() {
+    setIsDeleting(true)
+    try {
+      const res = await fetch('/api/user/delete', { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      toast.success('Akun berhasil dihapus')
+      await signOut({ callbackUrl: '/login' })
+    } catch {
+      toast.error('Gagal menghapus akun. Coba lagi.')
+      setIsDeleting(false)
+    }
+  }
   }
 
   return (
@@ -151,16 +171,83 @@ export function SettingsForm({ user }: Props) {
           Danger Zone
         </h2>
         <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+          Menghapus akun akan menghapus semua transaksi, budget, dan data keuanganmu secara permanen.
           Tindakan ini tidak dapat dibatalkan.
         </p>
         <button
-          onClick={() => toast.error('Fitur hapus akun akan segera tersedia')}
+          onClick={() => setShowDeleteModal(true)}
           className="px-4 py-2 rounded-lg text-sm font-medium border transition-colors hover:opacity-80"
           style={{ borderColor: 'var(--color-danger-500)', color: 'var(--color-danger-500)' }}
         >
           Hapus akun & semua data
         </button>
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowDeleteModal(false) }}
+        >
+          <div className="card w-full max-w-sm" style={{ background: 'var(--bg-card)' }}>
+            <div className="p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="flex items-center justify-center w-10 h-10 rounded-full shrink-0"
+                  style={{ background: 'var(--color-danger-500)' + '22' }}
+                >
+                  <AlertTriangle className="w-5 h-5" style={{ color: 'var(--color-danger-500)' }} />
+                </div>
+                <div>
+                  <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    Hapus akun?
+                  </h3>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    Semua data akan dihapus permanen
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+                Ketik <span className="font-mono font-semibold" style={{ color: 'var(--color-danger-500)' }}>hapus akun saya</span> untuk mengkonfirmasi.
+              </p>
+
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="hapus akun saya"
+                className="w-full px-3 py-2 rounded-lg border text-sm outline-none mb-4"
+                style={{
+                  background: 'var(--bg-card)',
+                  borderColor: 'var(--border-default)',
+                  color: 'var(--text-primary)',
+                }}
+              />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowDeleteModal(false); setDeleteConfirmText('') }}
+                  className="flex-1 py-2 rounded-lg text-sm font-medium border"
+                  style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleteConfirmText !== 'hapus akun saya' || isDeleting}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40"
+                  style={{ background: 'var(--color-danger-500)' }}
+                >
+                  {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Hapus permanen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

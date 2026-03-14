@@ -1,11 +1,12 @@
 // components/transactions/TransactionsList.tsx
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Plus, Search, Filter, ArrowUpRight, ArrowDownLeft, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useTransactions, useDeleteTransaction } from '@/hooks'
+import { useTransactions, useDeleteTransaction, useDebounce } from '@/hooks'
 import { formatCurrency, formatDateShort, cn } from '@/lib/utils'
 import { TransactionFormModal } from './TransactionFormModal'
+import { TransactionRowSkeleton } from '@/components/ui/Skeleton'
 import type { TransactionWithCategory, TransactionFilters } from '@/types'
 
 // ── Transaction row ────────────────────────────────────────────
@@ -95,8 +96,15 @@ export function TransactionsList() {
     page: 1,
     limit: 20,
   })
+  const [searchInput, setSearchInput] = useState('')
+  const debouncedSearch = useDebounce(searchInput, 300)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingTx, setEditingTx] = useState<TransactionWithCategory | null>(null)
+
+  // Sync debounced search ke filters (reset ke page 1 saat search berubah)
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, search: debouncedSearch || undefined, page: 1 }))
+  }, [debouncedSearch])
 
   const { data, isLoading, refresh } = useTransactions(filters)
 
@@ -136,8 +144,8 @@ export function TransactionsList() {
               <input
                 type="text"
                 placeholder="Cari transaksi..."
-                value={filters.search ?? ''}
-                onChange={(e) => handleFiltersChange({ search: e.target.value, page: 1 })}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm outline-none"
                 style={{
                   background: 'var(--bg-card)',
@@ -190,11 +198,7 @@ export function TransactionsList() {
         {isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-16 rounded-lg animate-pulse"
-                style={{ background: 'var(--bg-muted)' }}
-              />
+              <TransactionRowSkeleton key={i} />
             ))}
           </div>
         ) : !data?.data.length ? (

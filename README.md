@@ -8,6 +8,7 @@
 ![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?style=for-the-badge&logo=prisma)
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss)
 ![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=for-the-badge&logo=vercel)
+![CI](https://github.com/afifn11/finsight/actions/workflows/ci.yml/badge.svg)
 
 **A full-stack personal finance SaaS dashboard built with Next.js 16 App Router, TypeScript, PostgreSQL, and Google Gemini AI.**
 
@@ -187,6 +188,9 @@ App runs at `http://localhost:3000`
 
 ### Environment Variables
 
+> Copy `.env.example` to `.env.local` and fill in your values.
+> `.env.local` is gitignored and should **never** be committed.
+
 ```env
 # App
 NEXTAUTH_URL=http://localhost:3000
@@ -216,6 +220,19 @@ After running `npm run db:seed`:
 | Demo User | demo@finsight.app | demo123456 |
 
 **Live Demo:** [https://finsight.vercel.app](https://finsight.vercel.app)
+
+---
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration. On every push to `main`:
+
+1. **Type check** — `tsc --noEmit`
+2. **Lint** — ESLint
+3. **Tests** — `vitest run` (163 unit tests)
+4. **Build** — `next build`
+
+The CI badge above shows the current status.
 
 ---
 

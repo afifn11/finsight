@@ -10,6 +10,7 @@ import { useBudgets, useCategories } from '@/hooks'
 import { formatCurrency, formatCurrencyShort, getBudgetStatus, getBudgetStatusColor } from '@/lib/utils'
 import { budgetSchema, type BudgetInput } from '@/lib/validations'
 import type { BudgetWithCategory } from '@/types'
+import { BudgetCardSkeleton } from '@/components/ui/Skeleton'
 
 // ── Budget Card ────────────────────────────────────────────────
 function BudgetCard({
@@ -418,7 +419,7 @@ export function BudgetManager() {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="card p-5 h-40 animate-pulse" style={{ background: 'var(--bg-muted)' }} />
+            <BudgetCardSkeleton key={i} />
           ))}
         </div>
       ) : budgets.length === 0 ? (

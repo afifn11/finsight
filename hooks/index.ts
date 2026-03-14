@@ -2,7 +2,7 @@
 // FinSight — Custom React Hooks
 // All data fetching hooks using native fetch + SWR-like pattern
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import type {
   TransactionWithCategory,
@@ -22,6 +22,19 @@ async function fetcher<T>(url: string): Promise<T> {
   }
   const json = await res.json() as { data: T }
   return json.data
+}
+
+
+// ── useDebounce ────────────────────────────────────────────────
+export function useDebounce<T>(value: T, delay = 300): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+
+  return debouncedValue
 }
 
 // ── useDashboard ───────────────────────────────────────────────
