@@ -1,6 +1,6 @@
 // prisma.config.ts
 // Prisma 7 — konfigurasi koneksi database
-import 'dotenv/config'
+// dotenv loaded by Next.js automatically — not needed for prisma generate
 import path from 'node:path'
 import { defineConfig } from 'prisma/config'
 import { Pool } from 'pg'
