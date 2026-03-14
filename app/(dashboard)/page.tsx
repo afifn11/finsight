@@ -1,25 +1,21 @@
-// app/(dashboard)/settings/page.tsx
+// app/(dashboard)/analytics/page.tsx
 import type { Metadata } from 'next'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { SettingsForm } from '@/components/settings/SettingsForm'
+import { AnalyticsView } from '@/components/dashboard/AnalyticsView'
 
-export const metadata: Metadata = { title: 'Pengaturan' }
+export const metadata: Metadata = { title: 'Analitik' }
 
-export default async function SettingsPage() {
-  const session = await getServerSession(authOptions)
-
+export default function AnalyticsPage() {
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <div>
         <h1 className="text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-          Pengaturan
+          Analitik
         </h1>
         <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-          Kelola preferensi akun dan profil kamu
+          Analisis mendalam pola keuanganmu
         </p>
       </div>
-      <SettingsForm user={session!.user} />
+      <AnalyticsView />
     </div>
   )
 }
