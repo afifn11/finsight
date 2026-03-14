@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { TrendingUp, CheckCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { StepWelcome } from './StepWelcome'
@@ -23,6 +24,7 @@ const STEPS = ['Selamat datang', 'Preferensi', 'Budget awal']
 
 export function OnboardingFlow({ user }: Props) {
   const router = useRouter()
+  const { update: updateSession } = useSession()
   const [step, setStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [data, setData] = useState<OnboardingData>({
@@ -53,6 +55,8 @@ export function OnboardingFlow({ user }: Props) {
       })
       if (!res.ok) throw new Error()
       toast.success('Selamat datang di FinSight!')
+      // Trigger session update agar token.onboardingDone diperbarui
+      await updateSession()
       router.push('/')
       router.refresh()
     } catch {

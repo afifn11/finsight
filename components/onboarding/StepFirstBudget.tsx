@@ -16,44 +16,29 @@ interface Props {
 }
 
 // Suggested amounts per category name
-const SUGGESTED: Record<string, number> = {
-  'Makanan & Minuman': 1500000,
-  'Transportasi': 500000,
-  'Hiburan': 300000,
-  'Belanja': 700000,
-  'Tagihan & Utilitas': 600000,
-  'Kesehatan': 400000,
-  'Pendidikan': 500000,
-}
-
-const EMOJI: Record<string, string> = {
-  'Makanan & Minuman': '🍽',
-  'Transportasi': '🚗',
-  'Hiburan': '📺',
-  'Belanja': '🛍',
-  'Tagihan & Utilitas': '⚡',
-  'Kesehatan': '❤️',
-  'Pendidikan': '🎓',
-  'Investasi': '📈',
-  'Lainnya': '💰',
+const SUGGESTIONS: Record<string, { icon: string; suggested: number }> = {
+  'Makanan & Minuman': { icon: '🍽', suggested: 1500000 },
+  'Transportasi':      { icon: '🚗', suggested: 500000 },
+  'Hiburan':           { icon: '📺', suggested: 300000 },
+  'Belanja':           { icon: '🛍', suggested: 700000 },
+  'Tagihan & Utilitas':{ icon: '⚡', suggested: 600000 },
+  'Kesehatan':         { icon: '❤️', suggested: 400000 },
+  'Pendidikan':        { icon: '🎓', suggested: 300000 },
 }
 
 export function StepFirstBudget({ data, onChange, onFinish, onBack, isSubmitting }: Props) {
   const [categories, setCategories] = useState<Category[]>([])
   const [loadingCats, setLoadingCats] = useState(true)
   const [selected, setSelected] = useState<Record<string, number>>({})
-  const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({})
 
-  // Fetch expense categories from API (uses real IDs from DB)
+  // Fetch EXPENSE system categories from API
   useEffect(() => {
     fetch('/api/categories?forType=EXPENSE')
       .then((r) => r.json())
       .then((json: { data: Category[] }) => {
-        // Only show system categories in onboarding, max 7
-        const systemCats = json.data
-          .filter((c) => c.type === 'SYSTEM')
-          .slice(0, 7)
-        setCategories(systemCats)
+        // Only show categories that have a suggestion (common ones)
+        const filtered = json.data.filter((c) => SUGGESTIONS[c.name] !== undefined)
+        setCategories(filtered)
       })
       .catch(() => setCategories([]))
       .finally(() => setLoadingCats(false))
@@ -71,7 +56,6 @@ export function StepFirstBudget({ data, onChange, onFinish, onBack, isSubmitting
   }
 
   function updateAmount(categoryId: string, value: string) {
-    setCustomAmounts((prev) => ({ ...prev, [categoryId]: value }))
     const num = parseInt(value.replace(/\D/g, ''), 10)
     if (!isNaN(num) && num > 0) {
       setSelected((prev) => ({ ...prev, [categoryId]: num }))
@@ -92,9 +76,7 @@ export function StepFirstBudget({ data, onChange, onFinish, onBack, isSubmitting
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
         <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--color-primary-600)' }} />
-        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Memuat kategori...
-        </p>
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Memuat kategori...</p>
       </div>
     )
   }
@@ -109,11 +91,11 @@ export function StepFirstBudget({ data, onChange, onFinish, onBack, isSubmitting
       </p>
 
       {/* Category list */}
-      <div className="space-y-2 mb-4 max-h-72 overflow-y-auto pr-1">
+      <div className="space-y-2 mb-4">
         {categories.map((cat) => {
+          const meta = SUGGESTIONS[cat.name]
+          if (!meta) return null
           const isSelected = selected[cat.id] !== undefined
-          const suggested = SUGGESTED[cat.name] ?? 500000
-          const emoji = EMOJI[cat.name] ?? '💰'
 
           return (
             <div
@@ -128,7 +110,7 @@ export function StepFirstBudget({ data, onChange, onFinish, onBack, isSubmitting
                 {/* Checkbox */}
                 <button
                   type="button"
-                  onClick={() => toggleCategory(cat.id, suggested)}
+                  onClick={() => toggleCategory(cat.id, meta.suggested)}
                   className="flex items-center justify-center w-5 h-5 rounded border-2 shrink-0 transition-colors"
                   style={{
                     borderColor: isSelected ? 'var(--color-primary-600)' : 'var(--border-default)',
@@ -136,30 +118,30 @@ export function StepFirstBudget({ data, onChange, onFinish, onBack, isSubmitting
                   }}
                 >
                   {isSelected && (
-                    <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
+                    <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
                       <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   )}
                 </button>
 
-                <span className="text-lg">{emoji}</span>
-
+                {/* Icon + name */}
+                <span className="text-lg">{meta.icon}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                     {cat.name}
                   </p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Saran: {formatCurrency(suggested)}
+                    Saran: {formatCurrency(meta.suggested)}
                   </p>
                 </div>
 
-                {/* Amount input (shown when selected) */}
+                {/* Amount input when selected */}
                 {isSelected && (
                   <div className="flex items-center gap-1 shrink-0">
                     <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Rp</span>
                     <input
                       type="number"
-                      defaultValue={suggested}
+                      defaultValue={meta.suggested}
                       onChange={(e) => updateAmount(cat.id, e.target.value)}
                       className="w-24 px-2 py-1 rounded-lg border text-xs text-right outline-none"
                       style={{

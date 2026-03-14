@@ -1,15 +1,49 @@
 // components/shared/Header.tsx
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Bell, Menu } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
-import { getInitials } from '@/lib/utils'
+import { getInitials, getBudgetStatus, formatCurrencyShort } from '@/lib/utils'
+import type { BudgetWithCategory } from '@/types'
 
 interface HeaderProps {
   user: { name?: string | null; email: string; image?: string | null }
 }
 
+interface BudgetAlert {
+  id: string
+  categoryName: string
+  percentage: number
+  spent: number
+  amount: number
+}
+
 export function Header({ user }: HeaderProps) {
+  const [alerts, setAlerts] = useState<BudgetAlert[]>([])
+  const [showDropdown, setShowDropdown] = useState(false)
+
+  useEffect(() => {
+    // Fetch budgets dan cek yang mendekati/melewati limit
+    fetch('/api/budgets')
+      .then((r) => r.json())
+      .then((json: { data: BudgetWithCategory[] }) => {
+        const nearLimit = json.data
+          .filter((b) => b.percentage >= 80)
+          .map((b) => ({
+            id: b.id,
+            categoryName: b.category.name,
+            percentage: b.percentage,
+            spent: b.spent,
+            amount: Number(b.amount),
+          }))
+        setAlerts(nearLimit)
+      })
+      .catch(() => {})
+  }, [])
+
+  const alertCount = alerts.length
+
   return (
     <header
       className="flex items-center justify-between px-4 md:px-6 h-16 shrink-0 border-b"
@@ -31,12 +65,108 @@ export function Header({ user }: HeaderProps) {
         <ThemeToggle />
 
         {/* Notification bell */}
-        <button
-          className="relative p-2 rounded-lg transition-colors hover:opacity-80"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          <Bell className="w-5 h-5" />
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowDropdown((o) => !o)}
+            className="relative flex items-center justify-center w-9 h-9 rounded-lg border transition-colors hover:opacity-80"
+            style={{
+              borderColor: 'var(--border-default)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-secondary)',
+            }}
+            title={alertCount > 0 ? `${alertCount} budget mendekati limit` : 'Tidak ada notifikasi'}
+          >
+            <Bell className="w-4 h-4" />
+            {alertCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 rounded-full text-white"
+                style={{ background: 'var(--color-danger-500)', fontSize: '10px', fontWeight: 600 }}
+              >
+                {alertCount}
+              </span>
+            )}
+          </button>
+
+          {/* Dropdown notifikasi */}
+          {showDropdown && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
+              <div
+                className="absolute right-0 top-full mt-1 z-20 w-72 rounded-xl border shadow-lg overflow-hidden"
+                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
+              >
+                <div
+                  className="px-4 py-3 border-b"
+                  style={{ borderColor: 'var(--border-default)' }}
+                >
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Notifikasi Budget
+                  </p>
+                </div>
+
+                {alertCount === 0 ? (
+                  <div className="px-4 py-8 text-center">
+                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                      Semua budget aman
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                      Tidak ada yang mendekati batas pengeluaran
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y" style={{ borderColor: 'var(--border-default)' }}>
+                    {alerts.map((alert) => {
+                      const status = getBudgetStatus(alert.percentage)
+                      const color = status === 'exceeded'
+                        ? 'var(--color-danger-500)'
+                        : 'var(--color-warning-500)'
+
+                      return (
+                        <div key={alert.id} className="px-4 py-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                                {alert.categoryName}
+                              </p>
+                              <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                                {formatCurrencyShort(alert.spent)} dari {formatCurrencyShort(alert.amount)}
+                              </p>
+                            </div>
+                            <span
+                              className="text-xs font-semibold shrink-0"
+                              style={{ color }}
+                            >
+                              {alert.percentage}%
+                            </span>
+                          </div>
+
+                          <div
+                            className="mt-2 h-1.5 rounded-full overflow-hidden"
+                            style={{ background: 'var(--bg-muted)' }}
+                          >
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${Math.min(alert.percentage, 100)}%`,
+                                background: color,
+                              }}
+                            />
+                          </div>
+
+                          <p className="text-xs mt-1" style={{ color }}>
+                            {status === 'exceeded'
+                              ? 'Melewati batas!'
+                              : 'Mendekati batas pengeluaran'}
+                          </p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
 
         {/* Avatar */}
         {user.image ? (

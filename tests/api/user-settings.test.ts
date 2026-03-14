@@ -1,61 +1,62 @@
 // tests/api/user-settings.test.ts
-import { describe, it, expect, vi } from 'vitest'
-import { getServerSession } from 'next-auth'
-import { prisma } from '@/lib/prisma'
-import { MOCK_SESSION, buildRequest } from '../setup'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { PATCH } from '@/app/api/user/settings/route'
-
-const mockSession = vi.mocked(getServerSession)
-const mockPrisma = vi.mocked(prisma)
-
-const MOCK_USER = {
-  id: 'user-test-123', name: 'Test User', email: 'test@example.com',
-  currency: 'IDR', timezone: 'Asia/Jakarta',
-}
+import { prisma } from '@/lib/prisma'
+import {
+  mockAuthenticatedSession,
+  mockUnauthenticatedSession,
+  buildRequest,
+  MOCK_USER,
+} from '../helpers'
 
 describe('PATCH /api/user/settings', () => {
+  const validBody = {
+    name: 'Afif Updated',
+    currency: 'IDR',
+    timezone: 'Asia/Jakarta',
+  }
+
+  beforeEach(() => mockAuthenticatedSession())
+
   it('returns 401 when not authenticated', async () => {
-    mockSession.mockResolvedValueOnce(null)
-    expect((await PATCH(buildRequest('/api/user/settings', { method: 'PATCH', body: {} }))).status).toBe(401)
+    mockUnauthenticatedSession()
+    const res = await PATCH(buildRequest('PATCH', {}))
+    expect(res.status).toBe(401)
   })
 
   it('updates user settings successfully', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    vi.mocked(mockPrisma.user.update).mockResolvedValueOnce(MOCK_USER as never)
-    const res = await PATCH(buildRequest('/api/user/settings', {
-      method: 'PATCH',
-      body: { name: 'Updated Name', currency: 'USD', timezone: 'Asia/Makassar' },
-    }))
+    vi.mocked(prisma.user.update).mockResolvedValue({
+      id: MOCK_USER.id,
+      name: 'Afif Updated',
+      email: MOCK_USER.email,
+      currency: 'IDR',
+      timezone: 'Asia/Jakarta',
+    } as never)
+
+    const res = await PATCH(buildRequest('PATCH', validBody))
     expect(res.status).toBe(200)
-    expect(mockPrisma.user.update).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 'user-test-123' } })
-    )
+    const body = await res.json()
+    expect(body.message).toBe('Pengaturan disimpan')
   })
 
   it('updates only name (partial update)', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    vi.mocked(mockPrisma.user.update).mockResolvedValueOnce({ ...MOCK_USER, name: 'New Name' } as never)
-    const res = await PATCH(buildRequest('/api/user/settings', {
-      method: 'PATCH', body: { name: 'New Name' },
-    }))
+    vi.mocked(prisma.user.update).mockResolvedValue({
+      ...MOCK_USER, name: 'New Name',
+    } as never)
+    const res = await PATCH(buildRequest('PATCH', { name: 'New Name' }))
     expect(res.status).toBe(200)
   })
 
   it('returns 400 — currency must be 3 chars', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    expect((await PATCH(buildRequest('/api/user/settings', {
-      method: 'PATCH', body: { currency: 'RUPIAH' },
-    }))).status).toBe(400)
+    const res = await PATCH(buildRequest('PATCH', { ...validBody, currency: 'RUPIAH' }))
+    expect(res.status).toBe(400)
   })
 
   it('uses correct userId from session', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    vi.mocked(mockPrisma.user.update).mockResolvedValueOnce(MOCK_USER as never)
-    await PATCH(buildRequest('/api/user/settings', {
-      method: 'PATCH', body: { name: 'Test' },
-    }))
-    expect(mockPrisma.user.update).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 'user-test-123' } })
+    vi.mocked(prisma.user.update).mockResolvedValue({} as never)
+    await PATCH(buildRequest('PATCH', { name: 'Test' }))
+    expect(prisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: MOCK_USER.id } })
     )
   })
 })

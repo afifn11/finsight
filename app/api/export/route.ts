@@ -9,7 +9,7 @@ import { id as localeId } from 'date-fns/locale'
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
-    return new NextResponse('Unauthorized', { status: 401 })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const { searchParams } = req.nextUrl
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     const csv = [header.join(','), ...rows.map((r) => r.join(','))].join('\n')
     const filename = `finsight-${periodLabel.replace(/\s/g, '-')}.csv`
 
-    return new NextResponse(csv, {
+    return new Response(csv, {
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': `attachment; filename="${filename}"`,

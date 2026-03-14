@@ -1,77 +1,118 @@
 // tests/api/categories.test.ts
-import { describe, it, expect, vi } from 'vitest'
-import { getServerSession } from 'next-auth'
-import { prisma } from '@/lib/prisma'
-import { MOCK_SESSION, MOCK_CATEGORY, buildRequest } from '../setup'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GET, POST } from '@/app/api/categories/route'
-
-const mockSession = vi.mocked(getServerSession)
-const mockPrisma = vi.mocked(prisma)
+import { prisma } from '@/lib/prisma'
+import {
+  mockAuthenticatedSession,
+  mockUnauthenticatedSession,
+  buildRequest,
+  factory,
+  MOCK_USER,
+} from '../helpers'
 
 describe('GET /api/categories', () => {
+  beforeEach(() => mockAuthenticatedSession())
+
   it('returns 401 when not authenticated', async () => {
-    mockSession.mockResolvedValueOnce(null)
-    expect((await GET(buildRequest('/api/categories'))).status).toBe(401)
+    mockUnauthenticatedSession()
+    const res = await GET(buildRequest('GET'))
+    expect(res.status).toBe(401)
   })
 
   it('returns categories for user', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    vi.mocked(mockPrisma.category.findMany).mockResolvedValueOnce([MOCK_CATEGORY])
-    const body = await (await GET(buildRequest('/api/categories'))).json()
-    expect(body.data).toHaveLength(1)
+    const cats = [
+      factory.category({ userId: null, type: 'SYSTEM' }),
+      factory.category({ id: 'cat-002', userId: MOCK_USER.id, type: 'CUSTOM' }),
+    ]
+    vi.mocked(prisma.category.findMany).mockResolvedValue(cats as never)
+    const res = await GET(buildRequest('GET'))
+    const body = await res.json()
+    expect(res.status).toBe(200)
+    expect(body.data).toHaveLength(2)
   })
 
   it('filters by forType=EXPENSE', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    vi.mocked(mockPrisma.category.findMany).mockResolvedValueOnce([MOCK_CATEGORY])
-    await GET(buildRequest('/api/categories', { searchParams: { forType: 'EXPENSE' } }))
-    expect(mockPrisma.category.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: expect.objectContaining({ forType: 'EXPENSE' }) })
+    vi.mocked(prisma.category.findMany).mockResolvedValue([])
+    await GET(buildRequest('GET', undefined, { forType: 'EXPENSE' }))
+    expect(prisma.category.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ forType: 'EXPENSE' }),
+      })
     )
   })
 
   it('filters by forType=INCOME', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    vi.mocked(mockPrisma.category.findMany).mockResolvedValueOnce([])
-    await GET(buildRequest('/api/categories', { searchParams: { forType: 'INCOME' } }))
-    expect(mockPrisma.category.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: expect.objectContaining({ forType: 'INCOME' }) })
+    vi.mocked(prisma.category.findMany).mockResolvedValue([])
+    await GET(buildRequest('GET', undefined, { forType: 'INCOME' }))
+    expect(prisma.category.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ forType: 'INCOME' }),
+      })
+    )
+  })
+
+  it('queries both system and user categories', async () => {
+    vi.mocked(prisma.category.findMany).mockResolvedValue([])
+    await GET(buildRequest('GET'))
+    expect(prisma.category.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          OR: [{ userId: null }, { userId: MOCK_USER.id }],
+        }),
+      })
     )
   })
 })
 
 describe('POST /api/categories', () => {
-  const validBody = { name: 'Hobi', icon: 'music', color: '#8b5cf6', forType: 'EXPENSE' }
+  const validBody = {
+    name: 'Liburan',
+    icon: 'plane',
+    color: '#3b82f6',
+    forType: 'EXPENSE',
+  }
+
+  beforeEach(() => mockAuthenticatedSession())
 
   it('returns 401 when not authenticated', async () => {
-    mockSession.mockResolvedValueOnce(null)
-    expect((await POST(buildRequest('/api/categories', { method: 'POST', body: {} }))).status).toBe(401)
+    mockUnauthenticatedSession()
+    const res = await POST(buildRequest('POST', {}))
+    expect(res.status).toBe(401)
   })
 
   it('creates custom category', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    vi.mocked(mockPrisma.category.create).mockResolvedValueOnce({ ...MOCK_CATEGORY, name: 'Hobi', type: 'CUSTOM' })
-    const res = await POST(buildRequest('/api/categories', { method: 'POST', body: validBody }))
+    vi.mocked(prisma.category.create).mockResolvedValue(
+      factory.category({ name: 'Liburan', type: 'CUSTOM' }) as never
+    )
+    const res = await POST(buildRequest('POST', validBody))
     const body = await res.json()
     expect(res.status).toBe(201)
-    expect(mockPrisma.category.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ userId: 'user-test-123', type: 'CUSTOM' }) })
+    expect(body.message).toBe('Kategori berhasil dibuat')
+  })
+
+  it('always sets type to CUSTOM', async () => {
+    vi.mocked(prisma.category.create).mockResolvedValue(factory.category() as never)
+    await POST(buildRequest('POST', validBody))
+    expect(prisma.category.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ type: 'CUSTOM', userId: MOCK_USER.id }),
+      })
     )
   })
 
   it('returns 400 — missing name', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    const { name: _, ...b } = validBody
-    expect((await POST(buildRequest('/api/categories', { method: 'POST', body: b }))).status).toBe(400)
+    const { name: _, ...noName } = validBody
+    const res = await POST(buildRequest('POST', noName))
+    expect(res.status).toBe(400)
   })
 
   it('returns 400 — invalid hex color', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    expect((await POST(buildRequest('/api/categories', { method: 'POST', body: { ...validBody, color: 'purple' } }))).status).toBe(400)
+    const res = await POST(buildRequest('POST', { ...validBody, color: 'blue' }))
+    expect(res.status).toBe(400)
   })
 
   it('returns 400 — invalid forType', async () => {
-    mockSession.mockResolvedValueOnce(MOCK_SESSION)
-    expect((await POST(buildRequest('/api/categories', { method: 'POST', body: { ...validBody, forType: 'TRANSFER' } }))).status).toBe(400)
+    const res = await POST(buildRequest('POST', { ...validBody, forType: 'INVALID' }))
+    expect(res.status).toBe(400)
   })
 })

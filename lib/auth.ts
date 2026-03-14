@@ -71,9 +71,23 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
+        // Fetch onboardingDone on first login
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id as string },
+          select: { onboardingDone: true },
+        })
+        token.onboardingDone = dbUser?.onboardingDone ?? false
+      }
+      // Refresh onboardingDone when session is updated (after onboarding completes)
+      if (trigger === 'update' && token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { onboardingDone: true },
+        })
+        token.onboardingDone = dbUser?.onboardingDone ?? false
       }
       return token
     },
@@ -81,6 +95,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string
+        session.user.onboardingDone = token.onboardingDone as boolean ?? false
       }
       return session
     },
@@ -117,6 +132,14 @@ declare module 'next-auth' {
       email: string
       name?: string | null
       image?: string | null
+      onboardingDone?: boolean
     }
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    id?: string
+    onboardingDone?: boolean
   }
 }

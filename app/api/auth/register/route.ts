@@ -2,8 +2,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { registerSchema } from '@/lib/validations'
-import { hashPassword } from '@/lib/auth'
+import crypto from 'crypto'
 import type { ApiResponse, ApiError } from '@/types'
+
+// Simple password hash — tidak perlu bcrypt untuk portfolio
+function hashPassword(password: string): string {
+  // Generate random salt per user
+  const salt = crypto.randomBytes(16).toString('hex')
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex')
+  return `${salt}:${hash}`
+}
+
+export function verifyPassword(password: string, stored: string): boolean {
+  const [salt, hash] = stored.split(':')
+  if (!salt || !hash) return false
+  const testHash = crypto.scryptSync(password, salt, 64).toString('hex')
+  return testHash === hash
+}
 
 export async function POST(req: NextRequest) {
   const body: unknown = await req.json()
@@ -27,20 +42,20 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Create user — store hashed password in a dedicated field
-  // Note: In production expand the User model with a `passwordHash String?` field
+  // Hash password dan simpan di field image sebagai workaround
+  // Catatan: idealnya tambah field `passwordHash String?` di schema Prisma
+  // Untuk portfolio ini, kita simpan hash di image field dengan prefix `[pw]`
+  const passwordHash = hashPassword(password)
+
   const user = await prisma.user.create({
     data: {
       name,
       email,
-      // Store hash temporarily in image field as workaround (or add passwordHash field to schema)
-      // For portfolio: recommended to add `passwordHash String?` to User model in schema.prisma
+      image: `[pw]${passwordHash}`, // prefix agar bisa dibedakan dari URL gambar
+      onboardingDone: false,
     },
     select: { id: true, email: true, name: true },
   })
-
-  // Suppress unused variable warning — password hash would be stored here
-  void hashPassword(password)
 
   return NextResponse.json<ApiResponse<{ id: string; email: string }>>(
     { data: { id: user.id, email: user.email ?? '' }, message: 'Akun berhasil dibuat' },

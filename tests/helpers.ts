@@ -1,8 +1,7 @@
 // tests/helpers.ts
-// Shared test utilities, factories, and request builders
-
 import { vi } from 'vitest'
 import { getServerSession } from 'next-auth'
+import type { Category } from '@/types'
 
 // ── Mock session ───────────────────────────────────────────────
 export const MOCK_USER = {
@@ -25,21 +24,23 @@ export function mockUnauthenticatedSession() {
   vi.mocked(getServerSession).mockResolvedValue(null)
 }
 
-// ── Request builder ────────────────────────────────────────────
+// ── Request builder — pakai NextRequest agar nextUrl tersedia ──
 export function buildRequest(
   method: string,
   body?: unknown,
   searchParams?: Record<string, string>
-): Request {
+): import('next/server').NextRequest {
   const url = new URL('http://localhost:3000/api/test')
   if (searchParams) {
     Object.entries(searchParams).forEach(([k, v]) => url.searchParams.set(k, v))
   }
 
-  return new Request(url.toString(), {
+  // Gunakan NextRequest agar .nextUrl tersedia
+  const { NextRequest } = require('next/server') as typeof import('next/server')
+  return new NextRequest(url.toString(), {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body && method !== 'GET' ? JSON.stringify(body) : undefined,
   })
 }
 
@@ -50,7 +51,7 @@ export async function parseResponse<T>(res: Response): Promise<T> {
 
 // ── Data factories ─────────────────────────────────────────────
 export const factory = {
-  transaction: (overrides = {}) => ({
+  transaction: (overrides: Record<string, unknown> = {}) => ({
     id: 'tx-001',
     userId: MOCK_USER.id,
     categoryId: 'cat-001',
@@ -79,7 +80,7 @@ export const factory = {
     ...overrides,
   }),
 
-  budget: (overrides = {}) => ({
+  budget: (overrides: Record<string, unknown> = {}) => ({
     id: 'budget-001',
     userId: MOCK_USER.id,
     categoryId: 'cat-001',
@@ -103,7 +104,7 @@ export const factory = {
     ...overrides,
   }),
 
-  category: (overrides = {}) => ({
+  category: (overrides: Record<string, unknown> = {}): Category => ({
     id: 'cat-001',
     name: 'Makanan & Minuman',
     icon: 'utensils',
@@ -114,13 +115,5 @@ export const factory = {
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  }),
-
-  paginatedResult: <T>(data: T[], total = 1) => ({
-    data,
-    total,
-    page: 1,
-    limit: 20,
-    totalPages: Math.ceil(total / 20),
-  }),
+  } as Category),
 }
