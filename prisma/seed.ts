@@ -1,5 +1,4 @@
 // prisma/seed.ts
-import 'dotenv/config'
 import { PrismaClient, CategoryType, TransactionType } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'

@@ -82,6 +82,7 @@
   --color-expense:  var(--color-danger-500);
 }
 
+/* Dark mode — next-themes adds class="dark" to <html> */
 .dark {
   --bg-page:        var(--color-neutral-950);
   --bg-card:        var(--color-neutral-900);

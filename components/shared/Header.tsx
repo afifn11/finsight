@@ -2,6 +2,7 @@
 'use client'
 
 import { Bell, Menu } from 'lucide-react'
+import { ThemeToggle } from './ThemeToggle'
 import { getInitials } from '@/lib/utils'
 
 interface HeaderProps {
@@ -17,17 +18,19 @@ export function Header({ user }: HeaderProps) {
         borderColor: 'var(--border-default)',
       }}
     >
-      {/* Mobile: hamburger (future mobile nav) */}
+      {/* Mobile: hamburger */}
       <button className="md:hidden p-2 rounded-lg" style={{ color: 'var(--text-secondary)' }}>
         <Menu className="w-5 h-5" />
       </button>
 
-      {/* Desktop: page context (empty space, title comes from page) */}
       <div className="hidden md:block" />
 
       {/* Right actions */}
       <div className="flex items-center gap-2">
-        {/* Notification bell (placeholder) */}
+        {/* Theme toggle */}
+        <ThemeToggle />
+
+        {/* Notification bell */}
         <button
           className="relative p-2 rounded-lg transition-colors hover:opacity-80"
           style={{ color: 'var(--text-secondary)' }}
