@@ -39,5 +39,7 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|public).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|site.webmanifest|manifest.webmanifest|manifest.json|sw.js|icon-192.png|icon-512.png|apple-touch-icon.png|offline|.*\.png$|.*\.ico$|.*\.svg$|.*\.webmanifest$).*)' 
+  ],
 }
