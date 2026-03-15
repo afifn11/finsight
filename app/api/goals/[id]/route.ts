@@ -8,8 +8,8 @@ import { z } from 'zod'
 
 const updateSchema = z.object({
   name: z.string().min(1).max(50).optional(),
-  targetAmount: z.number().positive().optional(),
-  currentAmount: z.number().min(0).optional(),
+  targetAmount: z.coerce.number().positive().optional(),
+  currentAmount: z.coerce.number().min(0).optional(),
   deadline: z.coerce.date().optional().nullable(),
   icon: z.string().optional(),
   color: z.string().optional(),

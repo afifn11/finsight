@@ -157,12 +157,12 @@ export function GoalsManager() {
 
   async function updateAmount(goal: Goal, addedAmount: number) {
     if (addedAmount <= 0) return
-    const newAmount = goal.currentAmount + addedAmount
+    const newAmount = Number(goal.currentAmount) + Number(addedAmount)
     try {
       const res = await fetch(`/api/goals/${goal.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentAmount: newAmount }),
+        body: JSON.stringify({ currentAmount: Number(newAmount) }),
       })
       if (!res.ok) throw new Error()
       toast.success(`+${formatCurrency(addedAmount)} ditambahkan ke "${goal.name}"`)
