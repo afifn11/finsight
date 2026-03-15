@@ -68,8 +68,10 @@ export async function GET() {
     .filter((t) => t.type === 'EXPENSE')
     .reduce((sum: number, t) => sum + Number(t.amount), 0)
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const prevAggList = prevMonthAgg as any[]
   const prevExpense = Number(
-    prevMonthAgg.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0
+    prevAggList.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0
   )
 
   const categorySpend: Record<string, { name: string; total: number; count: number }> = {}
@@ -84,7 +86,9 @@ export async function GET() {
     .sort((a, b) => b.total - a.total)
     .slice(0, 5)
 
-  const budgetStatus = budgets.map((b) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const budgetList = budgets as any[]
+  const budgetStatus = budgetList.map((b) => {
     const spent = categorySpend[b.category.name]?.total ?? 0
     const percentage = Math.round((spent / Number(b.amount)) * 100)
     return { category: b.category.name, budget: Number(b.amount), spent, percentage }
