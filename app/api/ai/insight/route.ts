@@ -188,12 +188,12 @@ Balas HANYA dengan JSON array berikut, tanpa teks lain, tanpa markdown:
   // ── Cache result ───────────────────────────────────────────
   await prisma.aiInsight.upsert({
     where: { userId_month_year: { userId, month: currentMonth, year: currentYear } },
-    update: { content: insightData as unknown as import('@prisma/client').Prisma.InputJsonValue },
+    update: { content: insightData as unknown as object },
     create: {
       userId,
       month: currentMonth,
       year: currentYear,
-      content: insightData as unknown as import('@prisma/client').Prisma.InputJsonValue,
+      content: insightData as unknown as object,
     },
   })
 
