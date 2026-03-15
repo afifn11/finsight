@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import type { Transaction, Category } from '@prisma/client'
 import { GoogleGenAI } from '@google/genai'
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
@@ -59,20 +58,22 @@ export async function GET() {
   ])
 
   // ── Aggregate context data ─────────────────────────────────
-  const totalIncome = currentTxs
-    .filter((t: Transaction & { category: Category }) => t.type === 'INCOME')
-    .reduce((sum, t: Transaction & { category: Category }) => sum + Number(t.amount), 0)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const txList = currentTxs as any[]
+  const totalIncome = txList
+    .filter((t) => t.type === 'INCOME')
+    .reduce((sum: number, t) => sum + Number(t.amount), 0)
 
-  const totalExpense = currentTxs
-    .filter((t: Transaction & { category: Category }) => t.type === 'EXPENSE')
-    .reduce((sum, t: Transaction & { category: Category }) => sum + Number(t.amount), 0)
+  const totalExpense = txList
+    .filter((t) => t.type === 'EXPENSE')
+    .reduce((sum: number, t) => sum + Number(t.amount), 0)
 
   const prevExpense = Number(
     prevMonthAgg.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0
   )
 
   const categorySpend: Record<string, { name: string; total: number; count: number }> = {}
-  for (const tx of currentTxs.filter((t: Transaction & { category: Category }) => t.type === 'EXPENSE')) {
+  for (const tx of txList.filter((t) => t.type === 'EXPENSE')) {
     const key = tx.category.name
     if (!categorySpend[key]) categorySpend[key] = { name: key, total: 0, count: 0 }
     categorySpend[key]!.total += Number(tx.amount)
