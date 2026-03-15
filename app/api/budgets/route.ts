@@ -37,7 +37,7 @@ export async function GET(_req: NextRequest) {
   })
 
   const spendingMap = new Map(
-    spendingAgg.map((s) => [s.categoryId, Number(s._sum.amount ?? 0)])
+    (spendingAgg as any[]).map((s) => [s.categoryId, Number(s._sum.amount ?? 0)])
   )
 
   const budgetsWithSpending: BudgetWithCategory[] = budgets.map((budget) => {

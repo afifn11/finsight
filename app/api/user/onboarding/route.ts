@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     }),
 
     // 2. Create initial budgets (if any selected)
-    ...budgets.map((b) =>
+    ...(budgets as any[]).map((b) =>
       prisma.budget.upsert({
         where: {
           userId_categoryId_period: {

@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
       Number(tx.amount).toString(),
     ])
 
-    const csv = [header.join(','), ...rows.map((r) => r.join(','))].join('\n')
+    const csv = [header.join(','), ...rows.map((r: string[]) => r.join(','))].join('\n')
     const filename = `finsight-${periodLabel.replace(/\s/g, '-')}.csv`
 
     return new Response(csv, {
@@ -60,12 +60,14 @@ export async function GET(req: NextRequest) {
 
   // ── PDF Export (server-side data, client renders PDF) ─────
   // Return structured JSON — client uses jsPDF to render
-  const totalIncome = transactions
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const txArr = transactions as any[]
+  const totalIncome = txArr
     .filter((t) => t.type === 'INCOME')
-    .reduce((s, t) => s + Number(t.amount), 0)
-  const totalExpense = transactions
+    .reduce((s: number, t) => s + Number(t.amount), 0)
+  const totalExpense = txArr
     .filter((t) => t.type === 'EXPENSE')
-    .reduce((s, t) => s + Number(t.amount), 0)
+    .reduce((s: number, t) => s + Number(t.amount), 0)
 
   return NextResponse.json({
     period: periodLabel,

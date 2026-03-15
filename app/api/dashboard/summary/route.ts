@@ -61,13 +61,11 @@ export async function GET() {
   )
 
   // ── Compute summary ────────────────────────────────────────
-  const totalIncome = Number(
-    currentMonthAgg.find((r) => r.type === 'INCOME')?._sum.amount ?? 0
-  )
-  const totalExpense = Number(
-    currentMonthAgg.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0
-  )
-  const transactionCount = currentMonthAgg.reduce((acc, r) => acc + r._count, 0)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const monthAgg = currentMonthAgg as any[]
+  const totalIncome = Number(monthAgg.find((r) => r.type === 'INCOME')?._sum.amount ?? 0)
+  const totalExpense = Number(monthAgg.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0)
+  const transactionCount = monthAgg.reduce((acc: number, r) => acc + r._count, 0)
 
   const summary: DashboardSummary = {
     totalIncome,
@@ -82,8 +80,9 @@ export async function GET() {
 
   // ── Compute monthly trend ──────────────────────────────────
   const monthlyTrend: MonthlySummary[] = last6MonthsData.map(({ monthDate, rows }) => {
-    const income = Number(rows.find((r) => r.type === 'INCOME')?._sum.amount ?? 0)
-    const expense = Number(rows.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0)
+    const rowList = rows as any[]
+    const income = Number(rowList.find((r) => r.type === 'INCOME')?._sum.amount ?? 0)
+    const expense = Number(rowList.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0)
     return {
       month: monthDate.toLocaleDateString('id-ID', { month: 'short' }),
       year: monthDate.getFullYear(),
@@ -94,14 +93,16 @@ export async function GET() {
   })
 
   // ── Compute category breakdown ─────────────────────────────
-  const categoryIds = categoryAgg.map((c) => c.categoryId)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const catAgg = categoryAgg as any[]
+  const categoryIds = catAgg.map((c) => c.categoryId)
   const categories = await prisma.category.findMany({
     where: { id: { in: categoryIds } },
     select: { id: true, name: true, icon: true, color: true },
   })
   const catMap = new Map(categories.map((c) => [c.id, c]))
 
-  const categoryBreakdown: CategoryBreakdown[] = categoryAgg.map((agg) => {
+  const categoryBreakdown: CategoryBreakdown[] = catAgg.map((agg) => {
     const cat = catMap.get(agg.categoryId)
     const total = Number(agg._sum.amount ?? 0)
     return {
