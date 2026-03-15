@@ -23,7 +23,6 @@ export const metadata: Metadata = {
   description:
     'Kelola keuangan pribadi dengan dashboard analytics, budget management, dan AI-powered spending insights.',
   keywords: ['finance', 'dashboard', 'budget', 'analytics', 'keuangan pribadi'],
-  manifest: '/site.webmanifest',
   authors: [{ name: 'Muhammad Afif Naufal' }],
   creator: 'Muhammad Afif Naufal',
   openGraph: {
@@ -52,6 +51,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="FinSight" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="FinSight" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

@@ -1,83 +1,38 @@
-// app/layout.tsx
-import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import Script from 'next/script'
-import './globals.css'
-import { Providers } from '@/components/shared/Providers'
+// app/(dashboard)/layout.tsx
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { Sidebar } from '@/components/shared/Sidebar'
+import { Header } from '@/components/shared/Header'
+import { BottomNav } from '@/components/shared/BottomNav'
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
-
-export const metadata: Metadata = {
-  title: {
-    default: 'FinSight — Personal Finance Dashboard',
-    template: '%s | FinSight',
-  },
-  description:
-    'Kelola keuangan pribadi dengan dashboard analytics, budget management, dan AI-powered spending insights.',
-  keywords: ['finance', 'dashboard', 'budget', 'analytics', 'keuangan pribadi'],
-  authors: [{ name: 'Muhammad Afif Naufal' }],
-  creator: 'Muhammad Afif Naufal',
-  openGraph: {
-    type: 'website',
-    locale: 'id_ID',
-    url: 'https://finsight.vercel.app',
-    title: 'FinSight — Personal Finance Dashboard',
-    description: 'Kelola keuangan pribadi dengan AI-powered insights',
-    siteName: 'FinSight',
-  },
-}
-
-export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
-  ],
-  width: 'device-width',
-  initialScale: 1,
-}
-
-export default function RootLayout({
+export default async function DashboardLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
+  const session = await getServerSession(authOptions)
+  if (!session) redirect('/login')
+
   return (
-    <html lang="id" suppressHydrationWarning>
-      <head>
-        <link rel="manifest" href="/site.webmanifest" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="FinSight" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="FinSight" />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>{children}</Providers>
-        <Script
-          id="sw-register"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function() {});
-                });
-              }
-            `,
-          }}
-        />
-      </body>
-    </html>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-page)' }}>
+      {/* Sidebar — desktop only */}
+      <Sidebar user={session.user} />
+
+      {/* Main content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header user={session.user} />
+        <main
+          className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8 pt-[calc(4rem+1.5rem)] md:pt-6"
+          style={{ paddingBottom: 'calc(1.5rem + 64px)' }}
+        >
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
+      </div>
+
+      {/* Bottom navigation — mobile only */}
+      <BottomNav />
+    </div>
   )
 }
