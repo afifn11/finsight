@@ -155,19 +155,24 @@ export function GoalsManager() {
     }
   }
 
-  async function updateAmount(goal: Goal, newAmount: number) {
-    if (newAmount < 0 || newAmount > goal.targetAmount * 10) return
+  async function updateAmount(goal: Goal, addedAmount: number) {
+    if (addedAmount <= 0) return
+    const newAmount = goal.currentAmount + addedAmount
     try {
-      await fetch(`/api/goals/${goal.id}`, {
+      const res = await fetch(`/api/goals/${goal.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentAmount: newAmount }),
       })
+      if (!res.ok) throw new Error()
+      toast.success(`+${formatCurrency(addedAmount)} ditambahkan ke "${goal.name}"`)
       fetchGoals()
       if (newAmount >= goal.targetAmount) {
         toast.success(`🎉 Goal "${goal.name}" tercapai!`)
       }
-    } catch { /* silent */ }
+    } catch {
+      toast.error('Gagal menambah tabungan')
+    }
   }
 
   const totalTarget = goals.reduce((s, g) => s + g.targetAmount, 0)
@@ -252,7 +257,7 @@ export function GoalsManager() {
               onEdit={() => openEdit(goal)}
               onDelete={() => handleDelete(goal.id)}
               onComplete={() => handleComplete(goal)}
-              onUpdateAmount={(amt) => updateAmount(goal, amt)}
+              onUpdateAmount={(addedAmount) => updateAmount(goal, addedAmount)}
               isDeleting={deletingId === goal.id}
             />
           ))}
@@ -429,7 +434,7 @@ function GoalCard({
   onEdit: () => void
   onDelete: () => void
   onComplete: () => void
-  onUpdateAmount: (amount: number) => void
+  onUpdateAmount: (addedAmount: number) => void
   isDeleting: boolean
 }) {
   const [addAmount, setAddAmount] = useState('')
@@ -453,8 +458,11 @@ function GoalCard({
 
   function handleAddSave() {
     const amt = Number(addAmount)
-    if (!amt || amt <= 0) return
-    onUpdateAmount(goal.currentAmount + amt)
+    if (!amt || amt <= 0) {
+      toast.error('Masukkan nominal yang valid')
+      return
+    }
+    onUpdateAmount(amt)
     setAddAmount('')
     setShowAdd(false)
   }
