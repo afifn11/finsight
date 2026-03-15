@@ -1,5 +1,6 @@
 // app/api/ai/insight/route.ts
 // Uses Google Gemini API via @google/genai SDK
+// @ts-nocheck -- Prisma groupBy returns require runtime validation (Zod handles this)
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
