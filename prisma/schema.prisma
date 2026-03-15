@@ -81,6 +81,7 @@ model User {
   categories   Category[]
   budgets      Budget[]
   aiInsights   AiInsight[]
+  goals        FinancialGoal[]
 
   @@map("users")
 }
@@ -205,11 +206,45 @@ model BudgetAlert {
   budgetId    String
   percentage  Int      // e.g. 85 = triggered at 85%
   triggeredAt DateTime @default(now())
+  month       Int      // 1-12 — prevent duplicate alerts same month
+  year        Int
 
   budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
 
+  @@unique([budgetId, month, year]) // one alert per budget per month
   @@index([budgetId])
   @@map("budget_alerts")
+}
+
+// ─────────────────────────────────────────────────────────────
+// FINANCIAL GOAL
+// ─────────────────────────────────────────────────────────────
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model FinancialGoal {
+  id          String     @id @default(cuid())
+  userId      String
+  name        String
+  targetAmount Decimal   @db.Decimal(15, 2)
+  currentAmount Decimal  @db.Decimal(15, 2) @default(0)
+  deadline    DateTime?
+  icon        String     @default("target")
+  color       String     @default("#4ade80")
+  status      GoalStatus @default(ACTIVE)
+  notes       String?    @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("financial_goals")
 }
 
 // ─────────────────────────────────────────────────────────────

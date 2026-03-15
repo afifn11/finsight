@@ -5,14 +5,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, ArrowLeftRight,
-  PiggyBank, BarChart3, Settings,
+  PiggyBank, Settings, Target,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
   { label: 'Transaksi', href: '/transactions', icon: ArrowLeftRight },
   { label: 'Budget', href: '/budgets', icon: PiggyBank },
-  { label: 'Analitik', href: '/analytics', icon: BarChart3 },
+  { label: 'Goals', href: '/goals', icon: Target },
   { label: 'Pengaturan', href: '/settings', icon: Settings },
 ]
 

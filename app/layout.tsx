@@ -1,6 +1,7 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import { Providers } from '@/components/shared/Providers'
 
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
   description:
     'Kelola keuangan pribadi dengan dashboard analytics, budget management, dan AI-powered spending insights.',
   keywords: ['finance', 'dashboard', 'budget', 'analytics', 'keuangan pribadi'],
+  manifest: '/site.webmanifest',
   authors: [{ name: 'Muhammad Afif Naufal' }],
   creator: 'Muhammad Afif Naufal',
   openGraph: {
@@ -54,6 +56,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>{children}</Providers>
+        <Script
+          id="sw-register"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   )

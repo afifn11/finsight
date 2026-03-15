@@ -2,7 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, ScanLine } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -12,6 +12,7 @@ import { useCategories } from '@/hooks'
 import { cn } from '@/lib/utils'
 import type { TransactionWithCategory } from '@/types'
 import { ReceiptUploader } from './ReceiptUploader'
+import { OcrScanner } from './OcrScanner'
 
 interface Props {
   open: boolean
@@ -51,6 +52,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
   )
   // After creating new transaction, store its ID so user can upload receipt immediately
   const [newTransactionId, setNewTransactionId] = useState<string | null>(null)
+  const [showOcr, setShowOcr] = useState(false)
 
   // Populate form when editing
   useEffect(() => {
@@ -99,10 +101,39 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
         setNewTransactionId(txId)
         toast.success('Transaksi ditambahkan — upload bukti atau lewati')
         onSuccess(false) // refresh list but keep modal open
+        // Silently check budget alerts after new expense
+        if (data.type === 'EXPENSE') {
+          fetch('/api/budgets/check-alerts', { method: 'POST' })
+            .then((r) => r.json())
+            .then((alertRes) => {
+              const triggered = alertRes.data ?? []
+              triggered.forEach((a: { categoryName: string; percentage: number }) => {
+                toast.warning(
+                  `Budget ${a.categoryName} sudah ${a.percentage}% terpakai!`,
+                  { duration: 6000 }
+                )
+              })
+            })
+            .catch(() => {})
+        }
       }
     } catch {
       toast.error('Terjadi kesalahan. Coba lagi.')
     }
+  }
+
+  function handleOcrResult(data: {
+    amount: number | null
+    date: string | null
+    description: string | null
+    category: string | null
+    type: 'INCOME' | 'EXPENSE'
+    confidence: number
+  }) {
+    if (data.amount) setValue('amount', data.amount)
+    if (data.description) setValue('description', data.description)
+    if (data.date) setValue('date', new Date(data.date))
+    if (data.type) setValue('type', data.type)
   }
 
   if (!open) return null
@@ -122,9 +153,23 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
           <h2 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
             {isEdit ? 'Edit Transaksi' : 'Tambah Transaksi'}
           </h2>
-          <button onClick={onClose} style={{ color: 'var(--text-muted)' }}>
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {!isEdit && (
+              <button
+                type="button"
+                onClick={() => setShowOcr(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors hover:opacity-80"
+                style={{ borderColor: 'var(--color-primary-600)', color: 'var(--color-primary-600)' }}
+                title="Scan struk otomatis"
+              >
+                <ScanLine className="w-3.5 h-3.5" />
+                Scan Struk
+              </button>
+            )}
+            <button onClick={onClose} style={{ color: 'var(--text-muted)' }}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Form */}
@@ -391,6 +436,12 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
           </div>}
         </form>
       </div>
+      {showOcr && (
+        <OcrScanner
+          onResult={handleOcrResult}
+          onClose={() => setShowOcr(false)}
+        />
+      )}
     </div>
   )
 }
