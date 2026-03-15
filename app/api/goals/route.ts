@@ -8,8 +8,8 @@ import { z } from 'zod'
 
 const goalSchema = z.object({
   name: z.string().min(1).max(50),
-  targetAmount: z.number().positive(),
-  currentAmount: z.number().min(0).default(0),
+  targetAmount: z.coerce.number().positive().transform(v => Math.round(v)),
+  currentAmount: z.coerce.number().min(0).default(0).transform(v => Math.round(v)),
   deadline: z.coerce.date().optional().nullable(),
   icon: z.string().default('target'),
   color: z.string().default('#4ade80'),

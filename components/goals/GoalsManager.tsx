@@ -99,8 +99,8 @@ export function GoalsManager() {
     try {
       const payload = {
         name: form.name.trim(),
-        targetAmount: Number(form.targetAmount),
-        currentAmount: Number(form.currentAmount) || 0,
+        targetAmount: Math.round(Number(form.targetAmount.toString().replace(/[^0-9]/g, ''))),
+        currentAmount: Math.round(Number(form.currentAmount.toString().replace(/[^0-9]/g, ''))) || 0,
         deadline: form.deadline || null,
         icon: form.icon,
         color: form.color,
@@ -157,7 +157,7 @@ export function GoalsManager() {
 
   async function updateAmount(goal: Goal, addedAmount: number) {
     if (addedAmount <= 0) return
-    const newAmount = Number(goal.currentAmount) + Number(addedAmount)
+    const newAmount = Math.round(Number(goal.currentAmount)) + Math.round(Number(addedAmount))
     try {
       const res = await fetch(`/api/goals/${goal.id}`, {
         method: 'PATCH',
@@ -165,9 +165,9 @@ export function GoalsManager() {
         body: JSON.stringify({ currentAmount: Number(newAmount) }),
       })
       if (!res.ok) throw new Error()
-      toast.success(`+${formatCurrency(addedAmount)} ditambahkan ke "${goal.name}"`)
+      toast.success(`+${formatCurrency(Math.round(Number(addedAmount)))} ditambahkan ke "${goal.name}"`)
       fetchGoals()
-      if (newAmount >= goal.targetAmount) {
+      if (newAmount >= Math.round(Number(goal.targetAmount))) {
         toast.success(`🎉 Goal "${goal.name}" tercapai!`)
       }
     } catch {
@@ -175,8 +175,8 @@ export function GoalsManager() {
     }
   }
 
-  const totalTarget = goals.reduce((s, g) => s + g.targetAmount, 0)
-  const totalSaved = goals.reduce((s, g) => s + g.currentAmount, 0)
+  const totalTarget = goals.reduce((s, g) => s + Math.round(Number(g.targetAmount)), 0)
+  const totalSaved = goals.reduce((s, g) => s + Math.round(Number(g.currentAmount)), 0)
   const overallPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0
 
   return (
@@ -440,8 +440,10 @@ function GoalCard({
   const [addAmount, setAddAmount] = useState('')
   const [showAdd, setShowAdd] = useState(false)
 
-  const pct = Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100)
-  const remaining = goal.targetAmount - goal.currentAmount
+  const current = Math.round(Number(goal.currentAmount))
+  const target = Math.round(Number(goal.targetAmount))
+  const pct = Math.min(Math.round((current / target) * 100), 100)
+  const remaining = target - current
   const isComplete = pct >= 100
   const emoji = ICON_EMOJI[goal.icon] ?? '🎯'
 
@@ -508,7 +510,7 @@ function GoalCard({
             {isComplete && <Trophy className="inline w-4 h-4 ml-1 text-yellow-500" />}
           </div>
           <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
+            {formatCurrency(current)} / {formatCurrency(target)}
           </span>
         </div>
         <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-muted)' }}>
@@ -519,7 +521,7 @@ function GoalCard({
         </div>
         {!isComplete && (
           <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-            Kurang {formatCurrency(remaining)} lagi
+            Kurang {formatCurrency(Math.max(0, remaining))} lagi
           </p>
         )}
       </div>
