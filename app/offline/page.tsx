@@ -1,3 +1,5 @@
+'use client'
+
 // app/offline/page.tsx
 export default function OfflinePage() {
   return (
