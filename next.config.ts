@@ -5,6 +5,25 @@ const nextConfig: NextConfig = {
   // React Compiler is stable in Next.js 16
   reactCompiler: false, // Enable when ready: set to true for auto-memoization
 
+  async headers() {
+    return [
+      {
+        source: '/site.webmanifest',
+        headers: [
+          { key: 'Content-Type', value: 'application/manifest+json' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+        ],
+      },
+      {
+        source: '/sw.js',
+        headers: [
+          { key: 'Content-Type', value: 'application/javascript' },
+          { key: 'Service-Worker-Allowed', value: '/' },
+        ],
+      },
+    ]
+  },
+
   images: {
     remotePatterns: [
       {
