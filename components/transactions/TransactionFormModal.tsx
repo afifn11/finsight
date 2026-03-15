@@ -57,7 +57,6 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
   // Populate form when editing
   useEffect(() => {
     setReceiptData(editData?.receiptName ? { receiptName: editData.receiptName, receiptUrl: editData.receiptUrl ?? '' } : null)
-    setNewTransactionId(null)
     if (editData) {
       reset({
         amount: Number(editData.amount),
@@ -73,6 +72,14 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
       reset({ type: 'EXPENSE', date: new Date(), isRecurring: false })
     }
   }, [editData, reset, open])
+
+  // Reset newTransactionId ONLY when modal fully closes
+  useEffect(() => {
+    if (!open) {
+      setNewTransactionId(null)
+      setShowOcr(false)
+    }
+  }, [open])
 
   async function onSubmit(data: TransactionInput) {
     try {
