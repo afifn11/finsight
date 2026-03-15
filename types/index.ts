@@ -9,6 +9,9 @@ export type { Transaction, Category, Budget, User }
 // ── Extended types with relations ─────────────────────────────
 export type TransactionWithCategory = Transaction & {
   category: Category
+  receiptUrl?: string | null
+  receiptPath?: string | null
+  receiptName?: string | null
 }
 
 export type BudgetWithCategory = Budget & {

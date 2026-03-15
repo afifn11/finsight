@@ -74,12 +74,16 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
+        token.image = user.image ?? null
+        token.name = user.name ?? null
         // Fetch onboardingDone on first login
         const dbUser1 = await prisma.user.findUnique({
           where: { id: user.id as string },
-          select: { onboardingDone: true },
+          select: { onboardingDone: true, image: true, name: true },
         })
         token.onboardingDone = dbUser1?.onboardingDone ?? false
+        if (dbUser1?.image) token.image = dbUser1.image
+        if (dbUser1?.name) token.name = dbUser1.name
       }
       // Refresh onboardingDone when session is updated (after onboarding completes)
       if (trigger === 'update' && token.id) {
@@ -96,6 +100,8 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.id) {
         session.user.id = token.id as string
         session.user.onboardingDone = token.onboardingDone as boolean ?? false
+        if (token.image) session.user.image = token.image as string
+        if (token.name) session.user.name = token.name as string
       }
       return session
     },

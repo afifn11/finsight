@@ -2,9 +2,20 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, FileText, Table, Loader2, ChevronDown } from 'lucide-react'
+import { Download, FileText, Table, Loader2, ChevronDown, Paperclip } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils'
+
+interface ExportTransaction {
+  date: string
+  description: string
+  category: string
+  categoryColor: string
+  type: string
+  amount: number
+  receiptName: string | null
+  receiptUrl: string | null
+}
 
 interface ExportData {
   period: string
@@ -15,13 +26,23 @@ interface ExportData {
     netBalance: number
     transactionCount: number
   }
-  transactions: Array<{
-    date: string
-    description: string
-    category: string
-    type: string
-    amount: number
-  }>
+  transactions: ExportTransaction[]
+}
+
+async function loadImageAsBase64(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const blob = await res.blob()
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.onerror = () => resolve(null)
+      reader.readAsDataURL(blob)
+    })
+  } catch {
+    return null
+  }
 }
 
 export function ExportButton() {
@@ -57,14 +78,14 @@ export function ExportButton() {
       if (!res.ok) throw new Error()
       const data: ExportData = await res.json() as ExportData
 
-      // Dynamically import jsPDF (client-side only)
       const { default: jsPDF } = await import('jspdf')
       const { default: autoTable } = await import('jspdf-autotable')
 
       const doc = new jsPDF()
       const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
 
-      // Header
+      // ── Header ──────────────────────────────────────────────
       doc.setFillColor(15, 76, 117)
       doc.rect(0, 0, pageWidth, 35, 'F')
       doc.setTextColor(255, 255, 255)
@@ -76,73 +97,187 @@ export function ExportButton() {
       doc.text(`Laporan Keuangan — ${data.period}`, 14, 24)
       doc.text(`Dibuat: ${new Date(data.generatedAt).toLocaleDateString('id-ID')}`, 14, 31)
 
-      // Summary cards
+      const receiptCount = data.transactions.filter((t) => t.receiptUrl).length
+      if (receiptCount > 0) {
+        doc.setFontSize(8)
+        doc.text(`${receiptCount} bukti transaksi terlampir`, pageWidth - 14, 31, { align: 'right' })
+      }
+
+      // ── Summary ─────────────────────────────────────────────
       doc.setTextColor(30, 41, 59)
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold')
       doc.text('Ringkasan', 14, 48)
 
-      const summaryData = [
-        ['Total Pemasukan', formatCurrency(data.summary.totalIncome)],
-        ['Total Pengeluaran', formatCurrency(data.summary.totalExpense)],
-        ['Saldo Bersih', formatCurrency(data.summary.netBalance)],
-        ['Jumlah Transaksi', `${data.summary.transactionCount} transaksi`],
-      ]
-
       autoTable(doc, {
         startY: 52,
-        body: summaryData,
+        body: [
+          ['Total Pemasukan', formatCurrency(data.summary.totalIncome)],
+          ['Total Pengeluaran', formatCurrency(data.summary.totalExpense)],
+          ['Saldo Bersih', formatCurrency(data.summary.netBalance)],
+          ['Jumlah Transaksi', `${data.summary.transactionCount} transaksi`],
+        ],
         theme: 'plain',
         styles: { fontSize: 10, cellPadding: 3 },
-        columnStyles: {
-          0: { fontStyle: 'bold', cellWidth: 60 },
-          1: { halign: 'right' },
-        },
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60 }, 1: { halign: 'right' } },
         alternateRowStyles: { fillColor: [241, 245, 249] },
       })
 
-      // Transactions table
-      const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10
+      // ── Transactions table ───────────────────────────────────
+      const tableStartY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold')
-      doc.text('Detail Transaksi', 14, finalY)
+      doc.setTextColor(30, 41, 59)
+      doc.text('Detail Transaksi', 14, tableStartY)
 
       autoTable(doc, {
-        startY: finalY + 4,
-        head: [['Tanggal', 'Deskripsi', 'Kategori', 'Tipe', 'Nominal']],
+        startY: tableStartY + 4,
+        head: [['Tanggal', 'Deskripsi', 'Kategori', 'Tipe', 'Nominal', '📎']],
         body: data.transactions.map((tx) => [
           tx.date,
           tx.description,
           tx.category,
           tx.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran',
           formatCurrency(tx.amount),
+          tx.receiptName ? '✓' : '—',
         ]),
         styles: { fontSize: 8, cellPadding: 2 },
         headStyles: { fillColor: [15, 76, 117], textColor: 255 },
         alternateRowStyles: { fillColor: [248, 250, 252] },
         columnStyles: {
           0: { cellWidth: 24 },
-          4: { halign: 'right' },
+          3: { cellWidth: 22 },
+          4: { halign: 'right', cellWidth: 30 },
+          5: { halign: 'center', cellWidth: 12 },
         },
-        didDrawCell: (hookData) => {
-          // Color income/expense rows
+        didParseCell: (hookData) => {
           if (hookData.column.index === 3 && hookData.section === 'body') {
-            const val = hookData.cell.text[0]
-            doc.setTextColor(val === 'Pemasukan' ? '#059669' : '#dc2626')
+            const val = hookData.cell.raw as string
+            hookData.cell.styles.textColor = val === 'Pemasukan' ? [5, 150, 105] : [220, 38, 38]
+          }
+          if (hookData.column.index === 5 && hookData.section === 'body') {
+            if ((hookData.cell.raw as string) === '✓') {
+              hookData.cell.styles.textColor = [5, 150, 105]
+              hookData.cell.styles.fontStyle = 'bold'
+            }
           }
         },
       })
 
-      // Footer
+      // ── Receipt Appendix ─────────────────────────────────────
+      const imgReceipts = data.transactions.filter(
+        (tx) => tx.receiptUrl && !tx.receiptName?.toLowerCase().endsWith('.pdf')
+      )
+
+      if (imgReceipts.length > 0) {
+        toast.loading(`Memuat ${imgReceipts.length} bukti transaksi...`, { id: 'receipt-load' })
+
+        const loaded = await Promise.all(
+          imgReceipts.map(async (tx) => ({
+            tx,
+            base64: tx.receiptUrl ? await loadImageAsBase64(tx.receiptUrl) : null,
+          }))
+        )
+        toast.dismiss('receipt-load')
+
+        const valid = loaded.filter((r) => r.base64 !== null)
+
+        if (valid.length > 0) {
+          doc.addPage()
+          doc.setFillColor(15, 76, 117)
+          doc.rect(0, 0, pageWidth, 20, 'F')
+          doc.setTextColor(255, 255, 255)
+          doc.setFontSize(14)
+          doc.setFont('helvetica', 'bold')
+          doc.text('Lampiran — Bukti Transaksi', 14, 13)
+
+          let yPos = 28
+
+          for (const { tx, base64 } of valid) {
+            if (!base64) continue
+
+            if (yPos > pageHeight - 115) {
+              doc.addPage()
+              yPos = 14
+            }
+
+            // Transaction info card
+            doc.setFillColor(241, 245, 249)
+            doc.roundedRect(12, yPos, pageWidth - 24, 16, 2, 2, 'F')
+            doc.setTextColor(30, 41, 59)
+            doc.setFontSize(9)
+            doc.setFont('helvetica', 'bold')
+            doc.text(tx.description, 16, yPos + 6)
+            doc.setFont('helvetica', 'normal')
+            doc.setFontSize(8)
+            doc.setTextColor(100, 116, 139)
+            doc.text(`${tx.date}  •  ${tx.category}  •  ${formatCurrency(tx.amount)}`, 16, yPos + 12)
+
+            // Type badge
+            const isIncome = tx.type === 'INCOME'
+            if (isIncome) {
+              doc.setFillColor(5, 150, 105)
+            } else {
+              doc.setFillColor(220, 38, 38)
+            }
+            doc.roundedRect(pageWidth - 40, yPos + 4, 26, 7, 1, 1, 'F')
+            doc.setTextColor(255, 255, 255)
+            doc.setFontSize(7)
+            doc.text(isIncome ? 'Pemasukan' : 'Pengeluaran', pageWidth - 37, yPos + 8.5)
+
+            yPos += 20
+
+            // Receipt image
+            try {
+              const imgMaxW = pageWidth - 28
+              const imgMaxH = 85
+
+              const imgDims = await new Promise<{ w: number; h: number }>((resolve) => {
+                const img = new Image()
+                img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight })
+                img.onerror = () => resolve({ w: imgMaxW, h: imgMaxH })
+                img.src = base64
+              })
+
+              const ratio = imgDims.w / imgDims.h
+              let imgW = imgMaxW
+              let imgH = imgW / ratio
+              if (imgH > imgMaxH) { imgH = imgMaxH; imgW = imgH * ratio }
+
+              const imgX = 14 + (imgMaxW - imgW) / 2
+
+              doc.setDrawColor(226, 232, 240)
+              doc.setLineWidth(0.3)
+              doc.roundedRect(imgX - 1, yPos - 1, imgW + 2, imgH + 2, 2, 2, 'S')
+              doc.addImage(base64, 'JPEG', imgX, yPos, imgW, imgH)
+
+              yPos += imgH + 4
+              doc.setFontSize(7)
+              doc.setTextColor(148, 163, 184)
+              doc.text(tx.receiptName ?? '', pageWidth / 2, yPos, { align: 'center' })
+              yPos += 10
+            } catch {
+              doc.setFillColor(248, 250, 252)
+              doc.roundedRect(14, yPos, pageWidth - 28, 25, 2, 2, 'F')
+              doc.setTextColor(148, 163, 184)
+              doc.setFontSize(8)
+              doc.text('Gagal memuat gambar bukti', pageWidth / 2, yPos + 14, { align: 'center' })
+              yPos += 33
+            }
+          }
+        }
+      }
+
+      // ── Footer ───────────────────────────────────────────────
       const pageCount = doc.getNumberOfPages()
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i)
         doc.setFontSize(8)
         doc.setTextColor(148, 163, 184)
         doc.text(
-          `FinSight — finsight.vercel.app | Halaman ${i} dari ${pageCount}`,
+          `FinSight — getfinsight.vercel.app  |  Halaman ${i} dari ${pageCount}`,
           pageWidth / 2,
-          doc.internal.pageSize.getHeight() - 8,
+          pageHeight - 8,
           { align: 'center' }
         )
       }
@@ -171,75 +306,47 @@ export function ExportButton() {
           color: 'var(--text-secondary)',
         }}
       >
-        {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          <Download className="w-4 h-4" />
-        )}
+        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
         Export
         <ChevronDown className="w-3.5 h-3.5" />
       </button>
 
       {open && (
         <>
-          {/* Backdrop */}
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
-            className="fixed inset-0 z-10"
-            onClick={() => setOpen(false)}
-          />
-          {/* Dropdown */}
-          <div
-            className="absolute right-0 top-full mt-1 z-20 w-52 rounded-xl border shadow-lg overflow-hidden"
+            className="absolute right-0 top-full mt-1 z-20 w-56 rounded-xl border shadow-lg overflow-hidden"
             style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
           >
-            {/* CSV section */}
             <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--border-default)' }}>
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
-                CSV
-              </p>
+              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>CSV</p>
             </div>
-            <button
-              onClick={() => handleCSV('current')}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-left hover:opacity-80"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              <Table className="w-3.5 h-3.5" style={{ color: 'var(--color-success-600)' }} />
-              Bulan ini
-            </button>
-            <button
-              onClick={() => handleCSV('last3')}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-left hover:opacity-80"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              <Table className="w-3.5 h-3.5" style={{ color: 'var(--color-success-600)' }} />
-              3 bulan terakhir
-            </button>
+            {(['current', 'last3'] as const).map((period) => (
+              <button key={`csv-${period}`} onClick={() => handleCSV(period)}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-left hover:opacity-80"
+                style={{ color: 'var(--text-primary)' }}>
+                <Table className="w-3.5 h-3.5" style={{ color: 'var(--color-success-600)' }} />
+                {period === 'current' ? 'Bulan ini' : '3 bulan terakhir'}
+              </button>
+            ))}
 
-            {/* PDF section */}
-            <div
-              className="px-3 py-2 border-t border-b"
-              style={{ borderColor: 'var(--border-default)' }}
-            >
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
-                PDF
-              </p>
+            <div className="px-3 py-2 border-t border-b" style={{ borderColor: 'var(--border-default)' }}>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>PDF</p>
+                <div className="flex items-center gap-1">
+                  <Paperclip className="w-3 h-3" style={{ color: 'var(--color-success-600)' }} />
+                  <span className="text-[10px]" style={{ color: 'var(--color-success-600)' }}>incl. bukti</span>
+                </div>
+              </div>
             </div>
-            <button
-              onClick={() => handlePDF('current')}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-left hover:opacity-80"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              <FileText className="w-3.5 h-3.5" style={{ color: 'var(--color-danger-500)' }} />
-              Bulan ini
-            </button>
-            <button
-              onClick={() => handlePDF('last3')}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-left hover:opacity-80"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              <FileText className="w-3.5 h-3.5" style={{ color: 'var(--color-danger-500)' }} />
-              3 bulan terakhir
-            </button>
+            {(['current', 'last3'] as const).map((period) => (
+              <button key={`pdf-${period}`} onClick={() => handlePDF(period)}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-left hover:opacity-80"
+                style={{ color: 'var(--text-primary)' }}>
+                <FileText className="w-3.5 h-3.5" style={{ color: 'var(--color-danger-500)' }} />
+                {period === 'current' ? 'Bulan ini' : '3 bulan terakhir'}
+              </button>
+            ))}
           </div>
         </>
       )}

@@ -32,6 +32,18 @@ export async function GET(req: NextRequest) {
     orderBy: { date: 'desc' },
   })
 
+  // Generate signed URLs for receipts
+  const { supabaseAdmin, RECEIPTS_BUCKET } = await import('@/lib/supabase')
+  const txWithReceipts = await Promise.all(
+    transactions.map(async (tx) => {
+      if (!tx.receiptPath) return { ...tx, receiptSignedUrl: null }
+      const { data } = await supabaseAdmin.storage
+        .from(RECEIPTS_BUCKET)
+        .createSignedUrl(tx.receiptPath, 3600)
+      return { ...tx, receiptSignedUrl: data?.signedUrl ?? null }
+    })
+  )
+
   const periodLabel =
     period === 'last3'
       ? `${format(dateRange.start, 'MMM', { locale: localeId })}-${format(dateRange.end, 'MMM yyyy', { locale: localeId })}`
@@ -39,13 +51,14 @@ export async function GET(req: NextRequest) {
 
   // ── CSV Export ─────────────────────────────────────────────
   if (type === 'csv') {
-    const header = ['Tanggal', 'Deskripsi', 'Kategori', 'Tipe', 'Nominal (IDR)']
-    const rows = transactions.map((tx) => [
+    const header = ['Tanggal', 'Deskripsi', 'Kategori', 'Tipe', 'Nominal (IDR)', 'Bukti']
+    const rows = txWithReceipts.map((tx) => [
       format(new Date(tx.date), 'dd/MM/yyyy'),
       `"${(tx.description ?? '').replace(/"/g, '""')}"`,
       tx.category.name,
       tx.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran',
       Number(tx.amount).toString(),
+      tx.receiptName ? tx.receiptName : '',
     ])
 
     const csv = [header.join(','), ...rows.map((r: string[]) => r.join(','))].join('\n')
@@ -62,7 +75,7 @@ export async function GET(req: NextRequest) {
   // ── PDF Export (server-side data, client renders PDF) ─────
   // Return structured JSON — client uses jsPDF to render
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const txArr = transactions as any[]
+  const txArr = txWithReceipts as any[]
   const totalIncome = txArr
     .filter((t) => t.type === 'INCOME')
     .reduce((s: number, t) => s + Number(t.amount), 0)
@@ -79,12 +92,15 @@ export async function GET(req: NextRequest) {
       netBalance: totalIncome - totalExpense,
       transactionCount: transactions.length,
     },
-    transactions: transactions.map((tx) => ({
+    transactions: txWithReceipts.map((tx) => ({
       date: format(new Date(tx.date), 'dd MMM yyyy', { locale: localeId }),
       description: tx.description ?? '',
       category: tx.category.name,
+      categoryColor: tx.category.color,
       type: tx.type,
       amount: Number(tx.amount),
+      receiptName: tx.receiptName ?? null,
+      receiptUrl: tx.receiptSignedUrl ?? null,
     })),
   })
 }

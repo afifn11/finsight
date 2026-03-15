@@ -1,7 +1,7 @@
 // components/transactions/TransactionFormModal.tsx
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { X, Loader2 } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,11 +11,12 @@ import { transactionSchema, type TransactionInput } from '@/lib/validations'
 import { useCategories } from '@/hooks'
 import { cn } from '@/lib/utils'
 import type { TransactionWithCategory } from '@/types'
+import { ReceiptUploader } from './ReceiptUploader'
 
 interface Props {
   open: boolean
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (closeModal?: boolean) => void
   editData?: TransactionWithCategory | null
 }
 
@@ -44,8 +45,17 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
   const isRecurring = watch('isRecurring')
   const { data: categories } = useCategories(selectedType)
 
+  // Receipt state
+  const [receiptData, setReceiptData] = useState<{ receiptName: string; receiptUrl: string } | null>(
+    editData?.receiptName ? { receiptName: editData.receiptName, receiptUrl: editData.receiptUrl ?? '' } : null
+  )
+  // After creating new transaction, store its ID so user can upload receipt immediately
+  const [newTransactionId, setNewTransactionId] = useState<string | null>(null)
+
   // Populate form when editing
   useEffect(() => {
+    setReceiptData(editData?.receiptName ? { receiptName: editData.receiptName, receiptUrl: editData.receiptUrl ?? '' } : null)
+    setNewTransactionId(null)
     if (editData) {
       reset({
         amount: Number(editData.amount),
@@ -79,8 +89,17 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
         return
       }
 
-      toast.success(isEdit ? 'Transaksi diperbarui' : 'Transaksi ditambahkan')
-      onSuccess()
+      if (isEdit) {
+        toast.success('Transaksi diperbarui')
+        onSuccess(true)
+      } else {
+        // For new transactions: stay open so user can upload receipt
+        const saved = await res.json() as { data: { id: string } }
+        const txId = saved.data?.id ?? null
+        setNewTransactionId(txId)
+        toast.success('Transaksi ditambahkan — upload bukti atau lewati')
+        onSuccess(false) // refresh list but keep modal open
+      }
     } catch {
       toast.error('Terjadi kesalahan. Coba lagi.')
     }
@@ -310,8 +329,35 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          {/* Receipt uploader — show when editing OR after creating new transaction */}
+          {(isEdit && editData) ? (
+            <ReceiptUploader
+              transactionId={editData.id}
+              receiptName={receiptData?.receiptName ?? editData.receiptName ?? null}
+              receiptUrl={receiptData?.receiptUrl ?? editData.receiptUrl ?? null}
+              onUpdate={(data) => setReceiptData(data)}
+            />
+          ) : newTransactionId ? (
+            <div className="space-y-2">
+              <ReceiptUploader
+                transactionId={newTransactionId}
+                receiptName={receiptData?.receiptName ?? null}
+                receiptUrl={receiptData?.receiptUrl ?? null}
+                onUpdate={(data) => setReceiptData(data)}
+              />
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-2 text-sm rounded-lg transition-colors hover:opacity-80"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Lewati, tutup
+              </button>
+            </div>
+          ) : null}
+
+          {/* Actions — hide after new transaction saved (showing receipt uploader) */}
+          {!newTransactionId && <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
@@ -342,7 +388,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
               {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {isEdit ? 'Simpan perubahan' : 'Tambah transaksi'}
             </button>
-          </div>
+          </div>}
         </form>
       </div>
     </div>

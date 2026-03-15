@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Plus, Search, Filter, ArrowUpRight, ArrowDownLeft, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Search, Filter, ArrowUpRight, ArrowDownLeft, Pencil, Trash2, ChevronLeft, ChevronRight, Paperclip } from 'lucide-react'
 import { useTransactions, useDeleteTransaction, useDebounce } from '@/hooks'
 import { formatCurrency, formatDateShort, cn } from '@/lib/utils'
 import { TransactionFormModal } from './TransactionFormModal'
@@ -56,6 +56,9 @@ function TransactionRow({
           </span>
           {tx.isRecurring && (
             <span className="text-xs shrink-0" style={{ color: 'var(--color-primary-600)' }}>↻</span>
+          )}
+          {tx.receiptName && (
+            <Paperclip className="w-3 h-3 shrink-0" style={{ color: 'var(--text-muted)' }} />
           )}
         </div>
       </div>
@@ -266,7 +269,10 @@ export function TransactionsList() {
       <TransactionFormModal
         open={modalOpen}
         onClose={handleModalClose}
-        onSuccess={() => { handleModalClose(); refresh() }}
+        onSuccess={(closeModal?: boolean) => {
+          refresh()
+          if (closeModal !== false) handleModalClose()
+        }}
         editData={editingTx}
       />
     </>

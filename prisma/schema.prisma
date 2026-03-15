@@ -142,6 +142,11 @@ model Transaction {
   date        DateTime
   notes       String?         @db.Text
 
+  // Receipt/attachment support
+  receiptUrl  String?  // Signed URL (temporary, regenerated on access)
+  receiptPath String?  // Supabase Storage path: {userId}/{transactionId}/{filename}
+  receiptName String?  // Original filename for display
+
   // Recurring transaction support
   isRecurring      Boolean          @default(false)
   recurringPeriod  RecurringPeriod?

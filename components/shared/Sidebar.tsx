@@ -97,7 +97,8 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="flex items-center gap-3 px-3 py-2">
           {/* Avatar */}
           {user.image ? (
-            <img src={user.image} alt="" className="w-8 h-8 rounded-full object-cover" />
+            <img src={user.image}
+            referrerPolicy="no-referrer" alt="" className="w-8 h-8 rounded-full object-cover" />
           ) : (
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"

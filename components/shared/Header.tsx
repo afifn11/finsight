@@ -243,6 +243,8 @@ export function Header({ user }: HeaderProps) {
             src={user.image}
             alt={user.name ?? 'avatar'}
             className="w-8 h-8 rounded-full object-cover"
+            referrerPolicy="no-referrer"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
         ) : (
           <div
