@@ -2,8 +2,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { Bell } from 'lucide-react'
+import { Bell, LogOut } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { getInitials, getBudgetStatus, formatCurrencyShort } from '@/lib/utils'
 import type { BudgetWithCategory } from '@/types'
@@ -225,6 +226,16 @@ export function Header({ user }: HeaderProps) {
             </>
           )}
         </div>
+
+        {/* Logout button — mobile only */}
+        <button
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className="flex md:hidden items-center justify-center w-8 h-8 rounded-lg transition-colors hover:opacity-70"
+          style={{ color: 'var(--text-muted)' }}
+          title="Keluar"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
 
         {/* Avatar */}
         {user.image ? (

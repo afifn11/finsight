@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Loader2, AlertTriangle } from 'lucide-react'
+import { Loader2, AlertTriangle, LogOut } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -160,6 +160,24 @@ export function SettingsForm({ user }: Props) {
             Simpan perubahan
           </button>
         </form>
+      </div>
+
+      {/* Logout card */}
+      <div className="card p-6">
+        <h2 className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+          Keluar
+        </h2>
+        <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+          Keluar dari akun FinSight di perangkat ini.
+        </p>
+        <button
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors hover:opacity-80"
+          style={{ borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
+        >
+          <LogOut className="w-4 h-4" />
+          Keluar dari akun
+        </button>
       </div>
 
       {/* Danger zone */}
