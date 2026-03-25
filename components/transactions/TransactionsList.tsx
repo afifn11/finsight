@@ -25,67 +25,99 @@ function TransactionRow({
 
   return (
     <div
-      className="flex items-center gap-3 px-3 py-3 rounded-xl border transition-colors hover:opacity-90"
+      className="rounded-xl border transition-colors"
       style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
     >
-      {/* Icon */}
-      <div
-        className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
-        style={{ background: tx.category.color + '22' }}
-      >
-        {isIncome
-          ? <ArrowUpRight className="w-4 h-4" style={{ color: 'var(--color-success-600)' }} />
-          : <ArrowDownLeft className="w-4 h-4" style={{ color: 'var(--color-danger-600)' }} />
-        }
-      </div>
+      {/* Main row */}
+      <div className="flex items-start gap-3 px-4 py-3.5">
 
-      {/* Description + meta */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-          {tx.description}
-        </p>
-        <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+        {/* Type icon */}
+        <div
+          className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0 mt-0.5"
+          style={{ background: isIncome ? 'var(--color-success-50)' : 'var(--color-danger-50)' }}
+        >
+          {isIncome
+            ? <ArrowUpRight className="w-4 h-4" style={{ color: 'var(--color-success-600)' }} />
+            : <ArrowDownLeft className="w-4 h-4" style={{ color: 'var(--color-danger-600)' }} />
+          }
+        </div>
+
+        {/* Center: description + meta */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium leading-snug" style={{ color: 'var(--text-primary)' }}>
+            {tx.description}
+          </p>
+
+          {/* Meta row: category chip + date */}
+          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+            <span
+              className="inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium max-w-[110px] truncate"
+              style={{
+                background: tx.category.color + '18',
+                color: tx.category.color,
+              }}
+            >
+              {tx.category.name}
+            </span>
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {formatDateShort(tx.date)}
+            </span>
+            {tx.isRecurring && (
+              <span
+                className="text-xs px-1.5 py-0.5 rounded-full"
+                style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary-700)' }}
+              >
+                ↻ Berulang
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Right: amount */}
+        <div className="shrink-0 text-right pt-0.5">
           <span
-            className="text-xs px-1.5 py-0.5 rounded-md shrink-0 max-w-[100px] truncate"
-            style={{ background: tx.category.color + '22', color: tx.category.color }}
+            className={cn('text-sm font-bold tabular-nums', isIncome ? 'text-income' : 'text-expense')}
           >
-            {tx.category.name}
+            {isIncome ? '+' : '-'}{formatCurrency(Number(tx.amount))}
           </span>
-          <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>
-            {formatDateShort(tx.date)}
-          </span>
-          {tx.isRecurring && (
-            <span className="text-xs shrink-0" style={{ color: 'var(--color-primary-600)' }}>↻</span>
-          )}
           {tx.receiptName && (
-            <Paperclip className="w-3 h-3 shrink-0" style={{ color: 'var(--text-muted)' }} />
+            <div className="flex items-center justify-end gap-0.5 mt-1">
+              <Paperclip className="w-3 h-3" style={{ color: 'var(--text-muted)' }} />
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Bukti</span>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Amount + Actions */}
-      <div className="flex items-center gap-1 shrink-0">
-        <span
-          className={cn('text-sm font-semibold', isIncome ? 'text-income' : 'text-expense')}
-        >
-          {isIncome ? '+' : '-'}{formatCurrency(Number(tx.amount))}
-        </span>
+      {/* Action row — separated with subtle border, easier tap target on mobile */}
+      <div
+        className="flex items-center justify-end gap-1 px-3 py-2 border-t"
+        style={{ borderColor: 'var(--border-default)' }}
+      >
         <button
           onClick={() => onEdit(tx)}
-          className="p-1.5 rounded-md transition-colors hover:opacity-70"
-          style={{ color: 'var(--text-muted)' }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:opacity-80"
+          style={{
+            background: 'var(--bg-muted)',
+            color: 'var(--text-secondary)',
+          }}
           title="Edit"
         >
           <Pencil className="w-3.5 h-3.5" />
+          Edit
         </button>
         <button
           onClick={() => onDelete(tx.id)}
           disabled={isDeleting}
-          className="p-1.5 rounded-md transition-colors hover:opacity-70 disabled:opacity-40"
-          style={{ color: 'var(--color-danger-500)' }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:opacity-80 disabled:opacity-40"
+          style={{
+            background: 'var(--color-danger-50)',
+            color: 'var(--color-danger-600)',
+          }}
           title="Hapus"
         >
           <Trash2 className="w-3.5 h-3.5" />
+          Hapus
         </button>
       </div>
     </div>

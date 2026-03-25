@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Camera, Upload, X, FileText, Eye, Loader2, ImageIcon } from 'lucide-react'
+import { Camera, Upload, X, FileText, Eye, Download, Loader2, ImageIcon, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface Props {
@@ -15,16 +15,17 @@ interface Props {
 export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpdate }: Props) {
   const [isUploading, setIsUploading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const hasReceipt = !!receiptName
+  const isPdf = receiptName?.toLowerCase().endsWith('.pdf')
 
   async function handleFileSelect(file: File) {
     if (!file) return
 
-    // Client-side validation
     const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'application/pdf']
     if (!allowed.includes(file.type)) {
       toast.error('Format tidak didukung. Gunakan JPG, PNG, WEBP, atau PDF.')
@@ -35,7 +36,6 @@ export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpda
       return
     }
 
-    // Show local preview for images
     if (file.type.startsWith('image/')) {
       const reader = new FileReader()
       reader.onload = (e) => setPreviewUrl(e.target?.result as string)
@@ -71,9 +71,7 @@ export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpda
   async function handleDelete() {
     setIsDeleting(true)
     try {
-      const res = await fetch(`/api/transactions/${transactionId}/receipt`, {
-        method: 'DELETE',
-      })
+      const res = await fetch(`/api/transactions/${transactionId}/receipt`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Gagal menghapus')
       onUpdate(null)
       setPreviewUrl(null)
@@ -85,18 +83,56 @@ export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpda
     }
   }
 
-  async function handleView() {
+  async function getFreshSignedUrl(): Promise<string | null> {
     try {
       const res = await fetch(`/api/transactions/${transactionId}/receipt`)
       if (!res.ok) throw new Error()
       const { data } = await res.json()
-      if (data.url) window.open(data.url, '_blank')
+      return data.url ?? null
     } catch {
+      return null
+    }
+  }
+
+  async function handleView() {
+    const url = await getFreshSignedUrl()
+    if (url) {
+      window.open(url, '_blank')
+    } else {
       toast.error('Gagal membuka bukti transaksi')
     }
   }
 
-  const isPdf = receiptName?.toLowerCase().endsWith('.pdf')
+  // ── Download handler ─────────────────────────────────────────
+  // Fetch fresh signed URL → download via <a> element
+  async function handleDownload() {
+    setIsDownloading(true)
+    try {
+      const url = await getFreshSignedUrl()
+      if (!url) throw new Error('URL tidak tersedia')
+
+      // Fetch the file as blob so browser treats it as download (not navigation)
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('Gagal mengunduh file')
+
+      const blob = await response.blob()
+      const objectUrl = URL.createObjectURL(blob)
+
+      const a = document.createElement('a')
+      a.href = objectUrl
+      a.download = receiptName ?? `bukti-${transactionId}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(objectUrl)
+
+      toast.success('Bukti berhasil diunduh')
+    } catch {
+      toast.error('Gagal mengunduh bukti transaksi')
+    } finally {
+      setIsDownloading(false)
+    }
+  }
 
   return (
     <div className="space-y-2">
@@ -108,81 +144,103 @@ export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpda
       </label>
 
       {hasReceipt ? (
-        // Receipt exists — show preview + actions
+        // ── Receipt exists ──────────────────────────────────────
         <div
-          className="rounded-xl border p-3 flex items-center gap-3"
+          className="rounded-xl border p-3 space-y-2"
           style={{ borderColor: 'var(--border-default)', background: 'var(--bg-muted)' }}
         >
-          {/* Thumbnail */}
-          <div
-            className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
-            style={{ background: 'var(--bg-card)' }}
-          >
-            {isPdf ? (
-              <FileText className="w-6 h-6" style={{ color: 'var(--color-primary-600)' }} />
-            ) : previewUrl || receiptUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={previewUrl ?? receiptUrl ?? ''}
-                alt="Receipt preview"
-                className="w-full h-full object-cover rounded-lg"
-                onError={() => setPreviewUrl(null)}
-              />
-            ) : (
-              <ImageIcon className="w-6 h-6" style={{ color: 'var(--text-muted)' }} />
-            )}
+          {/* File info row */}
+          <div className="flex items-center gap-3">
+            {/* Thumbnail */}
+            <div
+              className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
+              style={{ background: 'var(--bg-card)' }}
+            >
+              {isPdf ? (
+                <FileText className="w-6 h-6" style={{ color: 'var(--color-primary-600)' }} />
+              ) : previewUrl || receiptUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewUrl ?? receiptUrl ?? ''}
+                  alt="Receipt preview"
+                  className="w-full h-full object-cover rounded-lg"
+                  onError={() => setPreviewUrl(null)}
+                />
+              ) : (
+                <ImageIcon className="w-6 h-6" style={{ color: 'var(--text-muted)' }} />
+              )}
+            </div>
+
+            {/* Filename + type */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                {receiptName}
+              </p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {isPdf ? 'PDF Document' : 'Gambar'}
+              </p>
+            </div>
           </div>
 
-          {/* Filename */}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-              {receiptName}
-            </p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {isPdf ? 'PDF Document' : 'Gambar'}
-            </p>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-1 shrink-0">
+          {/* Action buttons row — full width, easier to tap on mobile */}
+          <div className="grid grid-cols-4 gap-1.5">
             <button
               type="button"
               onClick={handleView}
-              className="p-1.5 rounded-lg transition-colors hover:opacity-70"
-              style={{ color: 'var(--color-primary-600)' }}
+              className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-xs transition-colors hover:opacity-80"
+              style={{ background: 'var(--bg-card)', color: 'var(--color-primary-600)' }}
               title="Lihat bukti"
             >
               <Eye className="w-4 h-4" />
+              <span>Lihat</span>
             </button>
+
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={isDownloading}
+              className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-xs transition-colors hover:opacity-80 disabled:opacity-50"
+              style={{ background: 'var(--bg-card)', color: 'var(--color-success-600)' }}
+              title="Unduh bukti"
+            >
+              {isDownloading
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <Download className="w-4 h-4" />
+              }
+              <span>{isDownloading ? '...' : 'Unduh'}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="p-1.5 rounded-lg transition-colors hover:opacity-70"
-              style={{ color: 'var(--text-muted)' }}
+              disabled={isUploading}
+              className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-xs transition-colors hover:opacity-80 disabled:opacity-50"
+              style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}
               title="Ganti bukti"
             >
-              <Upload className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4" />
+              <span>Ganti</span>
             </button>
+
             <button
               type="button"
               onClick={handleDelete}
               disabled={isDeleting}
-              className="p-1.5 rounded-lg transition-colors hover:opacity-70"
-              style={{ color: 'var(--color-danger-500)' }}
+              className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-xs transition-colors hover:opacity-80 disabled:opacity-50"
+              style={{ background: 'var(--bg-card)', color: 'var(--color-danger-500)' }}
               title="Hapus bukti"
             >
-              {isDeleting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <X className="w-4 h-4" />
-              )}
+              {isDeleting
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <X className="w-4 h-4" />
+              }
+              <span>Hapus</span>
             </button>
           </div>
         </div>
       ) : (
-        // No receipt — upload buttons
+        // ── No receipt — upload buttons ─────────────────────────
         <div className="flex gap-2">
-          {/* Upload from file */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -202,7 +260,6 @@ export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpda
             {isUploading ? 'Mengupload...' : 'Upload Bukti'}
           </button>
 
-          {/* Capture from camera (mobile) */}
           <button
             type="button"
             onClick={() => cameraInputRef.current?.click()}
