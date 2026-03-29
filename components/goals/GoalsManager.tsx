@@ -471,44 +471,32 @@ function GoalCard({
   }
 
   return (
-    <div className="card p-5 space-y-4" style={{ borderLeft: `4px solid ${goal.color}` }}>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{emoji}</span>
-          <div>
-            <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{goal.name}</p>
+    <div
+      className="card overflow-hidden"
+      style={{ borderLeft: `4px solid ${goal.color}` }}
+    >
+      {/* Card body */}
+      <div className="p-5 space-y-4">
+        {/* Header — goal info only, no action buttons */}
+        <div className="flex items-start gap-3">
+          <span className="text-2xl shrink-0 mt-0.5">{emoji}</span>
+          <div className="flex-1 min-w-0">
+            <p
+              className="font-semibold text-sm leading-snug"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {goal.name}
+            </p>
             {deadlineLabel && (
-              <p className="text-xs mt-0.5" style={{ color: deadlineLabel.warn ? 'var(--color-danger-500)' : 'var(--text-muted)' }}>
+              <p
+                className="text-xs mt-1"
+                style={{ color: deadlineLabel.warn ? 'var(--color-danger-500)' : 'var(--text-muted)' }}
+              >
                 ⏰ {deadlineLabel.text}
               </p>
             )}
           </div>
         </div>
-        <ActionGroup>
-          {!isComplete && (
-            <ActionButton
-              icon={<CheckCircle className="w-3.5 h-3.5" />}
-              label="Selesai"
-              onClick={onComplete}
-              variant="success"
-            />
-          )}
-          <ActionButton
-            icon={<Pencil className="w-3.5 h-3.5" />}
-            label="Edit"
-            onClick={onEdit}
-            variant="default"
-          />
-          <ActionButton
-            icon={isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-            label="Hapus"
-            onClick={onDelete}
-            disabled={isDeleting}
-            variant="danger"
-          />
-        </ActionGroup>
-      </div>
 
       {/* Progress */}
       <div>
@@ -572,9 +560,45 @@ function GoalCard({
         )
       )}
 
-      {goal.notes && (
-        <p className="text-xs italic" style={{ color: 'var(--text-muted)' }}>"{goal.notes}"</p>
-      )}
+        {goal.notes && (
+          <p className="text-xs italic" style={{ color: 'var(--text-muted)' }}>
+            "{goal.notes}"
+          </p>
+        )}
+      </div>{/* end card body */}
+
+      {/* Action bar — separated, full-width tap targets */}
+      <div
+        className="flex items-center justify-end gap-1 px-4 py-2.5 border-t"
+        style={{ borderColor: 'var(--border-default)' }}
+      >
+        <ActionGroup>
+          {!isComplete && (
+            <ActionButton
+              icon={<CheckCircle className="w-3.5 h-3.5" />}
+              label="Selesai"
+              onClick={onComplete}
+              variant="success"
+            />
+          )}
+          <ActionButton
+            icon={<Pencil className="w-3.5 h-3.5" />}
+            label="Edit"
+            onClick={onEdit}
+            variant="default"
+          />
+          <ActionButton
+            icon={isDeleting
+              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              : <Trash2 className="w-3.5 h-3.5" />
+            }
+            label="Hapus"
+            onClick={onDelete}
+            disabled={isDeleting}
+            variant="danger"
+          />
+        </ActionGroup>
+      </div>
     </div>
   )
 }
