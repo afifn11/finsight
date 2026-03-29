@@ -123,11 +123,12 @@ export function TransactionsList() {
   const [editingTx, setEditingTx] = useState<TransactionWithCategory | null>(null)
 
   useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      ...(debouncedSearch ? { search: debouncedSearch } : { search: undefined }),
-      page: 1,
-    }))
+    setFilters((prev) => {
+      const { search: _, ...rest } = prev
+      return debouncedSearch
+        ? { ...rest, search: debouncedSearch, page: 1 }
+        : { ...rest, page: 1 }
+    })
   }, [debouncedSearch])
 
   const { data, isLoading, refresh } = useTransactions(filters)
