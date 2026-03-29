@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react'
+import { ActionButton, ActionGroup } from '@/components/ui/ActionButton'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -54,26 +55,26 @@ function BudgetCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {status === 'danger' || status === 'exceeded' ? (
             <AlertTriangle className="w-4 h-4" style={{ color }} />
           ) : status === 'safe' && budget.percentage < 40 ? (
             <CheckCircle className="w-4 h-4" style={{ color: 'var(--color-success-500)' }} />
           ) : null}
-          <button
-            onClick={() => onEdit(budget)}
-            className="p-1.5 rounded-md hover:opacity-70"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            <Pencil className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => onDelete(budget.id)}
-            className="p-1.5 rounded-md hover:opacity-70"
-            style={{ color: 'var(--color-danger-500)' }}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          <ActionGroup>
+            <ActionButton
+              icon={<Pencil className="w-3.5 h-3.5" />}
+              label="Edit"
+              onClick={() => onEdit(budget)}
+              variant="default"
+            />
+            <ActionButton
+              icon={<Trash2 className="w-3.5 h-3.5" />}
+              label="Hapus"
+              onClick={() => onDelete(budget.id)}
+              variant="danger"
+            />
+          </ActionGroup>
         </div>
       </div>
 

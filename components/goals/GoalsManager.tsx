@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, Target, Trophy, Pencil, Trash2, Loader2, X, CheckCircle } from 'lucide-react'
+import { ActionButton, ActionGroup } from '@/components/ui/ActionButton'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils'
 import { GoalCardSkeleton } from '@/components/ui/Skeleton'
@@ -484,20 +485,29 @@ function GoalCard({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
+        <ActionGroup>
           {!isComplete && (
-            <button onClick={onComplete} title="Tandai selesai"
-              className="p-1.5 rounded-lg hover:opacity-70" style={{ color: 'var(--color-success-500)' }}>
-              <CheckCircle className="w-4 h-4" />
-            </button>
+            <ActionButton
+              icon={<CheckCircle className="w-3.5 h-3.5" />}
+              label="Selesai"
+              onClick={onComplete}
+              variant="success"
+            />
           )}
-          <button onClick={onEdit} className="p-1.5 rounded-lg hover:opacity-70" style={{ color: 'var(--text-muted)' }}>
-            <Pencil className="w-3.5 h-3.5" />
-          </button>
-          <button onClick={onDelete} disabled={isDeleting} className="p-1.5 rounded-lg hover:opacity-70" style={{ color: 'var(--color-danger-500)' }}>
-            {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-          </button>
-        </div>
+          <ActionButton
+            icon={<Pencil className="w-3.5 h-3.5" />}
+            label="Edit"
+            onClick={onEdit}
+            variant="default"
+          />
+          <ActionButton
+            icon={isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+            label="Hapus"
+            onClick={onDelete}
+            disabled={isDeleting}
+            variant="danger"
+          />
+        </ActionGroup>
       </div>
 
       {/* Progress */}
