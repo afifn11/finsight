@@ -26,68 +26,85 @@ function TransactionRow({
 
   return (
     <div
-      className="flex items-center gap-3 px-3 py-3 rounded-xl border transition-colors hover:opacity-90"
+      className="rounded-xl border transition-colors"
       style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
     >
-      {/* Icon */}
-      <div
-        className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
-        style={{ background: tx.category.color + '22' }}
-      >
-        {isIncome
-          ? <ArrowUpRight className="w-4 h-4" style={{ color: 'var(--color-success-600)' }} />
-          : <ArrowDownLeft className="w-4 h-4" style={{ color: 'var(--color-danger-600)' }} />
-        }
-      </div>
+      {/* Main content row */}
+      <div className="flex items-start gap-3 px-4 py-3.5">
 
-      {/* Description + meta */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-          {tx.description}
-        </p>
-        <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
-          <span
-            className="text-xs px-1.5 py-0.5 rounded-md shrink-0 max-w-[100px] truncate"
-            style={{ background: tx.category.color + '22', color: tx.category.color }}
-          >
-            {tx.category.name}
+        {/* Type icon */}
+        <div
+          className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0 mt-0.5"
+          style={{
+            background: isIncome ? 'var(--color-success-50)' : 'var(--color-danger-50)',
+          }}
+        >
+          {isIncome
+            ? <ArrowUpRight className="w-4 h-4" style={{ color: 'var(--color-success-600)' }} />
+            : <ArrowDownLeft className="w-4 h-4" style={{ color: 'var(--color-danger-600)' }} />
+          }
+        </div>
+
+        {/* Center: description + meta */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium leading-snug" style={{ color: 'var(--text-primary)' }}>
+            {tx.description}
+          </p>
+          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+            <span
+              className="inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium max-w-[110px] truncate"
+              style={{ background: tx.category.color + '18', color: tx.category.color }}
+            >
+              {tx.category.name}
+            </span>
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {formatDateShort(tx.date)}
+            </span>
+            {tx.isRecurring && (
+              <span
+                className="text-xs px-1.5 py-0.5 rounded-full"
+                style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary-700)' }}
+              >
+                ↻ Berulang
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Right: amount + attachment indicator */}
+        <div className="shrink-0 text-right pt-0.5">
+          <span className={cn('text-sm font-bold tabular-nums', isIncome ? 'text-income' : 'text-expense')}>
+            {isIncome ? '+' : '-'}{formatCurrency(Number(tx.amount))}
           </span>
-          <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>
-            {formatDateShort(tx.date)}
-          </span>
-          {tx.isRecurring && (
-            <span className="text-xs shrink-0" style={{ color: 'var(--color-primary-600)' }}>↻</span>
-          )}
           {tx.receiptName && (
-            <Paperclip className="w-3 h-3 shrink-0" style={{ color: 'var(--text-muted)' }} />
+            <div className="flex items-center justify-end gap-0.5 mt-1">
+              <Paperclip className="w-3 h-3" style={{ color: 'var(--text-muted)' }} />
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Bukti</span>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Amount + Actions */}
-      <div className="flex items-center gap-1 shrink-0">
-        <span
-          className={cn('text-sm font-semibold', isIncome ? 'text-income' : 'text-expense')}
-        >
-          {isIncome ? '+' : '-'}{formatCurrency(Number(tx.amount))}
-        </span>
-        <button
-          onClick={() => onEdit(tx)}
-          className="p-1.5 rounded-md transition-colors hover:opacity-70"
-          style={{ color: 'var(--text-muted)' }}
-          title="Edit"
-        >
-          <Pencil className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => onDelete(tx.id)}
-          disabled={isDeleting}
-          className="p-1.5 rounded-md transition-colors hover:opacity-70 disabled:opacity-40"
-          style={{ color: 'var(--color-danger-500)' }}
-          title="Hapus"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+      {/* Action bar */}
+      <div
+        className="flex items-center justify-end gap-1 px-3 py-2 border-t"
+        style={{ borderColor: 'var(--border-default)' }}
+      >
+        <ActionGroup>
+          <ActionButton
+            icon={<Pencil className="w-3.5 h-3.5" />}
+            label="Edit"
+            onClick={() => onEdit(tx)}
+            variant="default"
+          />
+          <ActionButton
+            icon={<Trash2 className="w-3.5 h-3.5" />}
+            label="Hapus"
+            onClick={() => onDelete(tx.id)}
+            disabled={isDeleting}
+            variant="danger"
+          />
+        </ActionGroup>
       </div>
     </div>
   )
@@ -105,17 +122,18 @@ export function TransactionsList() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingTx, setEditingTx] = useState<TransactionWithCategory | null>(null)
 
-  // Sync debounced search ke filters (reset ke page 1 saat search berubah)
   useEffect(() => {
-    setFilters((prev) => ({ ...prev, ...(debouncedSearch ? { search: debouncedSearch } : {}), page: 1 }))
+    setFilters((prev) => ({
+      ...prev,
+      ...(debouncedSearch ? { search: debouncedSearch } : { search: undefined }),
+      page: 1,
+    }))
   }, [debouncedSearch])
 
   const { data, isLoading, refresh } = useTransactions(filters)
-
   const handleFiltersChange = useCallback((partial: Partial<TransactionFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }))
   }, [])
-
   const { deleteTransaction, isDeleting } = useDeleteTransaction(refresh)
 
   function handleEdit(tx: TransactionWithCategory) {
@@ -139,7 +157,6 @@ export function TransactionsList() {
         {/* Toolbar */}
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            {/* Search */}
             <div className="relative flex-1 min-w-0">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
@@ -158,7 +175,6 @@ export function TransactionsList() {
                 }}
               />
             </div>
-            {/* Add button */}
             <button
               onClick={handleAdd}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white shrink-0 transition-colors hover:opacity-90"
@@ -167,7 +183,7 @@ export function TransactionsList() {
               <Plus className="w-4 h-4" /> Tambah
             </button>
           </div>
-          {/* Type filter tabs — full width, always visible */}
+
           <div className="flex rounded-lg border overflow-hidden" style={{ borderColor: 'var(--border-default)' }}>
             {(['ALL', 'INCOME', 'EXPENSE'] as const).map((type) => (
               <button
@@ -186,19 +202,16 @@ export function TransactionsList() {
           </div>
         </div>
 
-        {/* Stats strip */}
         {data && (
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Menampilkan{' '}
-            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-              {data.data.length}
-            </span>{' '}
-            dari <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{data.total}</span>{' '}
+            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{data.data.length}</span>{' '}
+            dari{' '}
+            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{data.total}</span>{' '}
             transaksi
           </p>
         )}
 
-        {/* List */}
         {isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -206,9 +219,7 @@ export function TransactionsList() {
             ))}
           </div>
         ) : !data?.data.length ? (
-          <div
-            className="card flex flex-col items-center justify-center py-16 text-center"
-          >
+          <div className="card flex flex-col items-center justify-center py-16 text-center">
             <Filter className="w-10 h-10 mb-3" style={{ color: 'var(--text-muted)' }} />
             <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
               Tidak ada transaksi ditemukan
@@ -238,7 +249,6 @@ export function TransactionsList() {
           </div>
         )}
 
-        {/* Pagination */}
         {data && data.totalPages > 1 && (
           <div className="flex items-center justify-between pt-2">
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
@@ -266,7 +276,6 @@ export function TransactionsList() {
         )}
       </div>
 
-      {/* Modal */}
       <TransactionFormModal
         open={modalOpen}
         onClose={handleModalClose}
