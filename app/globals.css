@@ -1,51 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Typography ──────────────────────────────── */
   --font-sans: 'Geist', 'Inter', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Fira Code', monospace;
 
-  /* ── Color Palette ───────────────────────────── */
-  /* Primary — Navy Blue */
-  --color-primary-50:  #e8f0fe;
-  --color-primary-100: #c5d8fb;
-  --color-primary-200: #93b8f8;
-  --color-primary-400: #4285f4;
-  --color-primary-600: #1B85C7;
-  --color-primary-700: #0F6BAA;
-  --color-primary-800: #0F4C75;
-  --color-primary-900: #0a3352;
+  /* Primary — Teal Cyan */
+  --color-primary-50:  #ecfeff;
+  --color-primary-100: #cffafe;
+  --color-primary-200: #a5f3fc;
+  --color-primary-400: #22d3ee;
+  --color-primary-600: #0891b2;
+  --color-primary-700: #0e7490;
+  --color-primary-800: #155e75;
+  --color-primary-900: #164e63;
 
-  /* Success — Emerald */
   --color-success-50:  #ecfdf5;
   --color-success-500: #10b981;
   --color-success-600: #059669;
   --color-success-700: #047857;
 
-  /* Warning — Amber */
   --color-warning-50:  #fffbeb;
   --color-warning-500: #f59e0b;
   --color-warning-600: #d97706;
 
-  /* Danger — Red */
   --color-danger-50:   #fef2f2;
   --color-danger-500:  #ef4444;
   --color-danger-600:  #dc2626;
 
-  /* Neutral */
-  --color-neutral-50:  #f8fafc;
-  --color-neutral-100: #f1f5f9;
-  --color-neutral-200: #e2e8f0;
-  --color-neutral-300: #cbd5e1;
+  /* Neutral — cool blue-gray */
+  --color-neutral-50:  #f0f9ff;
+  --color-neutral-100: #e0f2fe;
+  --color-neutral-200: #bae6fd;
+  --color-neutral-300: #7dd3fc;
   --color-neutral-400: #94a3b8;
   --color-neutral-500: #64748b;
   --color-neutral-600: #475569;
   --color-neutral-700: #334155;
   --color-neutral-800: #1e293b;
-  --color-neutral-900: #0f172a;
-  --color-neutral-950: #020617;
+  --color-neutral-900: #0c1a26;
+  --color-neutral-950: #071018;
 
-  /* ── Border Radius ───────────────────────────── */
   --radius-sm:   4px;
   --radius-md:   8px;
   --radius-lg:  12px;
@@ -53,56 +47,49 @@
   --radius-2xl: 24px;
   --radius-full: 9999px;
 
-  /* ── Shadows ─────────────────────────────────── */
-  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-modal: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-card:     0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-modal:    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
-  /* ── Spacing ─────────────────────────────────── */
   --spacing-sidebar: 260px;
   --spacing-header: 64px;
 }
 
-/* ── CSS Variables for theming (light/dark) ───── */
 :root {
-  --bg-page:        var(--color-neutral-50);
+  --bg-page:        #f0f9ff;
   --bg-card:        #ffffff;
-  --bg-muted:       var(--color-neutral-100);
-  --bg-hover:       var(--color-neutral-100);
+  --bg-muted:       #e0f2fe;
+  --bg-hover:       #d4ecf8;
 
-  --text-primary:   var(--color-neutral-900);
-  --text-secondary: var(--color-neutral-600);
-  --text-muted:     var(--color-neutral-400);
+  --text-primary:   #0c1a26;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
   --text-inverse:   #ffffff;
 
-  --border-default: var(--color-neutral-200);
+  --border-default: #bae6fd;
   --border-focus:   var(--color-primary-600);
 
   --color-income:   var(--color-success-500);
   --color-expense:  var(--color-danger-500);
 }
 
-/* Dark mode — next-themes adds class="dark" to <html> */
+/* Dark mode — deep ocean */
 .dark {
-  --bg-page:        var(--color-neutral-950);
-  --bg-card:        var(--color-neutral-900);
-  --bg-muted:       var(--color-neutral-800);
-  --bg-hover:       var(--color-neutral-800);
+  --bg-page:        #071018;
+  --bg-card:        #0c1a24;
+  --bg-muted:       #122330;
+  --bg-hover:       #1a2f3e;
 
-  --text-primary:   var(--color-neutral-50);
-  --text-secondary: var(--color-neutral-400);
-  --text-muted:     var(--color-neutral-600);
+  --text-primary:   #e0f4ff;
+  --text-secondary: #7db8d4;
+  --text-muted:     #3d6478;
   --text-inverse:   var(--color-neutral-900);
 
-  --border-default: var(--color-neutral-700);
-  --border-focus:   var(--color-primary-600);
+  --border-default: #1e3a4a;
+  --border-focus:   var(--color-primary-400);
 }
 
-/* ── Base styles ─────────────────────────────── */
-* {
-  box-sizing: border-box;
-  border-color: var(--border-default);
-}
+* { box-sizing: border-box; border-color: var(--border-default); }
 
 body {
   background-color: var(--bg-page);
@@ -112,13 +99,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Scrollbar ───────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-neutral-300); border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: var(--color-neutral-400); }
+::-webkit-scrollbar-thumb { background: #7dd3fc; border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
 
-/* ── Utility classes ─────────────────────────── */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -126,7 +111,7 @@ body {
   box-shadow: var(--shadow-card);
 }
 
-.text-income { color: var(--color-income); }
+.text-income  { color: var(--color-income); }
 .text-expense { color: var(--color-expense); }
-.bg-income { background-color: var(--color-success-50); }
-.bg-expense { background-color: var(--color-danger-50); }
+.bg-income    { background-color: var(--color-success-50); }
+.bg-expense   { background-color: var(--color-danger-50); }
