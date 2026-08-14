@@ -22,7 +22,12 @@ export async function PATCH(req: NextRequest) {
     )
   }
 
-  const updateData: Prisma.UserUpdateInput = parsed.data
+  const { name, currency, timezone } = parsed.data
+  const updateData: Prisma.UserUpdateInput = {
+    currency,
+    timezone,
+    ...(name !== undefined ? { name } : {}),
+  }
 
   const user = await prisma.user.update({
     where: { id: session.user.id },

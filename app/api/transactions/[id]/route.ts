@@ -59,7 +59,22 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     )
   }
 
-  const updateData: Prisma.TransactionUpdateInput = parsed.data
+  const {
+    amount, type, categoryId, description, date,
+    notes, isRecurring, recurringPeriod, recurringEndDate,
+  } = parsed.data
+
+  const updateData: Prisma.TransactionUncheckedUpdateInput = {
+    ...(amount !== undefined ? { amount } : {}),
+    ...(type !== undefined ? { type } : {}),
+    ...(categoryId !== undefined ? { categoryId } : {}),
+    ...(description !== undefined ? { description } : {}),
+    ...(date !== undefined ? { date } : {}),
+    ...(notes !== undefined ? { notes } : {}),
+    ...(isRecurring !== undefined ? { isRecurring } : {}),
+    ...(recurringPeriod !== undefined ? { recurringPeriod } : {}),
+    ...(recurringEndDate !== undefined ? { recurringEndDate } : {}),
+  }
 
   const updated = await prisma.transaction.update({
     where: { id },

@@ -48,7 +48,17 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json<ApiError>({ error: 'Validasi gagal' }, { status: 400 })
   }
 
-  const updateData: Prisma.FinancialGoalUpdateInput = parsed.data
+  const { name, targetAmount, currentAmount, deadline, icon, color, notes, status } = parsed.data
+  const updateData: Prisma.FinancialGoalUpdateInput = {
+    ...(name !== undefined ? { name } : {}),
+    ...(targetAmount !== undefined ? { targetAmount } : {}),
+    ...(currentAmount !== undefined ? { currentAmount } : {}),
+    ...(deadline !== undefined ? { deadline } : {}),
+    ...(icon !== undefined ? { icon } : {}),
+    ...(color !== undefined ? { color } : {}),
+    ...(notes !== undefined ? { notes } : {}),
+    ...(status !== undefined ? { status } : {}),
+  }
 
   const updated = await prisma.financialGoal.update({
     where: { id },

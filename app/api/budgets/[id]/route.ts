@@ -31,7 +31,13 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     )
   }
 
-  const updateData: Prisma.BudgetUpdateInput = parsed.data
+  const { categoryId, amount, period, alertThreshold } = parsed.data
+  const updateData: Prisma.BudgetUncheckedUpdateInput = {
+    ...(categoryId !== undefined ? { categoryId } : {}),
+    ...(amount !== undefined ? { amount } : {}),
+    ...(period !== undefined ? { period } : {}),
+    ...(alertThreshold !== undefined ? { alertThreshold } : {}),
+  }
 
   const updated = await prisma.budget.update({
     where: { id },
