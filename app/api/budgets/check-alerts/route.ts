@@ -13,7 +13,7 @@ interface CategorySpendRow {
   _sum: { amount: number | null }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return NextResponse.json<ApiError>({ error: 'Unauthorized' }, { status: 401 })
