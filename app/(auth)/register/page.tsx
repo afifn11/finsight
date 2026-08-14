@@ -9,7 +9,7 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { registerSchema, type RegisterInput } from '@/lib/validations'
+import { registerFormSchema, type RegisterInput } from '@/lib/validations'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -17,10 +17,10 @@ export default function RegisterPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
   const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterInput>({ resolver: zodResolver(registerSchema) })
+  register,
+  handleSubmit,
+  formState: { errors, isSubmitting },
+  } = useForm<RegisterInput>({ resolver: zodResolver(registerFormSchema) })
 
   async function onSubmit(data: RegisterInput) {
     try {

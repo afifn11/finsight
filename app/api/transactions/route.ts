@@ -1,11 +1,11 @@
 // app/api/transactions/route.ts
-// @ts-nocheck -- Prisma types resolved at runtime, Zod validates inputs
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { transactionSchema, transactionFiltersSchema } from '@/lib/validations'
 import type { ApiResponse, ApiError, PaginatedTransactions } from '@/types'
+import type { Prisma } from '@prisma/client'
 
 // ── GET /api/transactions ──────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
   const skip = (filters.page - 1) * filters.limit
 
   // Build WHERE clause
-  const where = {
+  const where: Prisma.TransactionWhereInput = {
     userId: session.user.id,
     ...(filters.type !== 'ALL' && { type: filters.type }),
     ...(filters.categoryId && { categoryId: filters.categoryId }),
@@ -97,16 +97,19 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Strip undefined fields — exactOptionalPropertyTypes requires null not undefined for Prisma
+  // Strip undefined fields — exactOptionalPropertyTypes butuh null, bukan undefined, untuk Prisma
   const { notes, recurringPeriod, recurringEndDate, ...requiredData } = parsed.data
+
+  const createData: Prisma.TransactionUncheckedCreateInput = {
+    ...requiredData,
+    userId: session.user.id,
+    ...(notes !== undefined ? { notes } : {}),
+    ...(recurringPeriod !== undefined ? { recurringPeriod } : {}),
+    ...(recurringEndDate !== undefined ? { recurringEndDate } : {}),
+  }
+
   const transaction = await prisma.transaction.create({
-    data: {
-      ...requiredData,
-      userId: session.user.id,
-      ...(notes !== undefined ? { notes } : {}),
-      ...(recurringPeriod !== undefined ? { recurringPeriod } : {}),
-      ...(recurringEndDate !== undefined ? { recurringEndDate } : {}),
-    },
+    data: createData,
     include: { category: true },
   })
 

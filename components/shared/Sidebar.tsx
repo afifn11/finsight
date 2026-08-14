@@ -39,6 +39,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Logo */}
       <Link
         href="/"
+        aria-label="FinSight — ke Dashboard"
         className="flex items-center gap-2.5 px-6 py-5 border-b hover:opacity-90 transition-opacity"
         style={{ borderColor: 'var(--border-default)' }}
       >
@@ -46,7 +47,7 @@ export function Sidebar({ user }: SidebarProps) {
           className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
           style={{ background: 'var(--color-primary-800)' }}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <rect x="2.5" y="2" width="3" height="12" rx="1" fill="white"/>
             <rect x="2.5" y="2" width="10" height="3" rx="1" fill="white"/>
             <rect x="2.5" y="6.5" width="8" height="3" rx="1" fill="white"/>
@@ -64,7 +65,7 @@ export function Sidebar({ user }: SidebarProps) {
       </Link>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav aria-label="Navigasi utama" className="flex-1 px-3 py-4 space-y-1">
         {NAV_ITEMS.map((item) => {
           const Icon = ICON_MAP[item.icon] as React.ElementType
           const isActive =
@@ -74,6 +75,7 @@ export function Sidebar({ user }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 isActive
@@ -86,7 +88,7 @@ export function Sidebar({ user }: SidebarProps) {
                   : { color: 'var(--text-secondary)' }
               }
             >
-              <Icon className="w-4 h-4 shrink-0" />
+              <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
               {item.label}
             </Link>
           )
@@ -98,12 +100,17 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="flex items-center gap-3 px-3 py-2">
           {/* Avatar */}
           {user.image ? (
-            <img src={user.image}
-            referrerPolicy="no-referrer" alt="" className="w-8 h-8 rounded-full object-cover" />
+            <img
+              src={user.image}
+              referrerPolicy="no-referrer"
+              alt={`Foto profil ${user.name ?? user.email}`}
+              className="w-8 h-8 rounded-full object-cover"
+            />
           ) : (
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
               style={{ background: 'var(--color-primary-600)' }}
+              aria-hidden="true"
             >
               {getInitials(user.name)}
             </div>
@@ -123,7 +130,7 @@ export function Sidebar({ user }: SidebarProps) {
           className="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:opacity-80"
           style={{ color: 'var(--text-secondary)' }}
         >
-          <LogOut className="w-4 h-4 shrink-0" />
+          <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
           Keluar
         </button>
       </div>

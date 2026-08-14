@@ -1,15 +1,16 @@
 // app/api/goals/route.ts
-// @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import type { ApiError, ApiResponse } from '@/types'
+import type { FinancialGoal } from '@prisma/client'
 
 const goalSchema = z.object({
   name: z.string().min(1).max(50),
-  targetAmount: z.coerce.number().positive().transform(v => Math.round(v)),
-  currentAmount: z.coerce.number().min(0).default(0).transform(v => Math.round(v)),
+  targetAmount: z.coerce.number().positive().transform((v) => Math.round(v)),
+  currentAmount: z.coerce.number().min(0).default(0).transform((v) => Math.round(v)),
   deadline: z.coerce.date().optional().nullable(),
   icon: z.string().default('target'),
   color: z.string().default('#4ade80'),
@@ -18,24 +19,31 @@ const goalSchema = z.object({
 
 export async function GET(_req: NextRequest) {
   const session = await getServerSession(authOptions)
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!session?.user?.id) {
+    return NextResponse.json<ApiError>({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   const goals = await prisma.financialGoal.findMany({
     where: { userId: session.user.id, status: 'ACTIVE' },
     orderBy: { createdAt: 'desc' },
   })
 
-  return NextResponse.json({ data: goals })
+  return NextResponse.json<ApiResponse<FinancialGoal[]>>({ data: goals })
 }
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!session?.user?.id) {
+    return NextResponse.json<ApiError>({ error: 'Unauthorized' }, { status: 401 })
+  }
 
-  const body = await req.json()
+  const body: unknown = await req.json()
   const parsed = goalSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Validasi gagal', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+    return NextResponse.json<ApiError>(
+      { error: 'Validasi gagal', details: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    )
   }
 
   const goal = await prisma.financialGoal.create({
@@ -51,5 +59,8 @@ export async function POST(req: NextRequest) {
     },
   })
 
-  return NextResponse.json({ data: goal, message: 'Goal berhasil dibuat' }, { status: 201 })
+  return NextResponse.json<ApiResponse<FinancialGoal>>(
+    { data: goal, message: 'Goal berhasil dibuat' },
+    { status: 201 }
+  )
 }

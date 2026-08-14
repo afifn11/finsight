@@ -1,18 +1,33 @@
 // app/api/dashboard/summary/route.ts
-// @ts-nocheck -- Prisma groupBy returns require runtime validation (Zod handles this)
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import {
-  startOfMonth, endOfMonth, subMonths,
-} from 'date-fns'
-import type { ApiResponse, ApiError, DashboardSummary, MonthlySummary, CategoryBreakdown } from '@/types'
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import type {
+  ApiResponse,
+  ApiError,
+  DashboardSummary,
+  MonthlySummary,
+  CategoryBreakdown,
+} from '@/types'
 
 export interface DashboardData {
   summary: DashboardSummary
   monthlyTrend: MonthlySummary[]
   categoryBreakdown: CategoryBreakdown[]
+}
+
+interface TypeAggRow {
+  type: 'INCOME' | 'EXPENSE'
+  _sum: { amount: number | null }
+  _count: number
+}
+
+interface CategoryAggRow {
+  categoryId: string
+  _sum: { amount: number | null }
+  _count: number
 }
 
 export async function GET() {
@@ -53,37 +68,36 @@ export async function GET() {
       const monthDate = subMonths(now, 5 - i)
       const start = startOfMonth(monthDate)
       const end = endOfMonth(monthDate)
-      return prisma.transaction.groupBy({
-        by: ['type'],
-        where: { userId, date: { gte: start, lte: end } },
-        _sum: { amount: true },
-      }).then((rows) => ({ monthDate, rows }))
+      return prisma.transaction
+        .groupBy({
+          by: ['type'],
+          where: { userId, date: { gte: start, lte: end } },
+          _sum: { amount: true },
+        })
+        .then((rows) => ({ monthDate, rows: rows as unknown as TypeAggRow[] }))
     })
   )
 
   // ── Compute summary ────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const monthAgg = currentMonthAgg as any[]
+  const monthAgg = currentMonthAgg as unknown as TypeAggRow[]
   const totalIncome = Number(monthAgg.find((r) => r.type === 'INCOME')?._sum.amount ?? 0)
   const totalExpense = Number(monthAgg.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0)
-  const transactionCount = monthAgg.reduce((acc: number, r) => acc + r._count, 0)
+  const transactionCount = monthAgg.reduce((acc, r) => acc + r._count, 0)
 
   const summary: DashboardSummary = {
     totalIncome,
     totalExpense,
     netBalance: totalIncome - totalExpense,
-    savingRate: totalIncome > 0
-      ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100)
-      : 0,
+    savingRate:
+      totalIncome > 0 ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100) : 0,
     transactionCount,
     periodLabel: now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }),
   }
 
   // ── Compute monthly trend ──────────────────────────────────
   const monthlyTrend: MonthlySummary[] = last6MonthsData.map(({ monthDate, rows }) => {
-    const rowList = rows as any[]
-    const income = Number(rowList.find((r) => r.type === 'INCOME')?._sum.amount ?? 0)
-    const expense = Number(rowList.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0)
+    const income = Number(rows.find((r) => r.type === 'INCOME')?._sum.amount ?? 0)
+    const expense = Number(rows.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0)
     return {
       month: monthDate.toLocaleDateString('id-ID', { month: 'short' }),
       year: monthDate.getFullYear(),
@@ -94,8 +108,7 @@ export async function GET() {
   })
 
   // ── Compute category breakdown ─────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const catAgg = categoryAgg as any[]
+  const catAgg = categoryAgg as unknown as CategoryAggRow[]
   const categoryIds = catAgg.map((c) => c.categoryId)
   const categories = await prisma.category.findMany({
     where: { id: { in: categoryIds } },

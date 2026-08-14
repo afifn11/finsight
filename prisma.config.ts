@@ -38,7 +38,7 @@ export default defineConfig({
       const pool = new Pool({
         connectionString: process.env.DIRECT_URL,
         max: 3,
-        ssl: isProduction ? { rejectUnauthorized: false } : false,
+        ssl: isProduction ? { rejectUnauthorized: true } : false,
       })
       return new PrismaPg(pool as never)
     },

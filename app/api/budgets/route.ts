@@ -1,5 +1,4 @@
 // app/api/budgets/route.ts
-// @ts-nocheck -- Prisma groupBy returns require runtime validation (Zod handles this)
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -7,6 +6,11 @@ import { prisma } from '@/lib/prisma'
 import { budgetSchema } from '@/lib/validations'
 import { startOfMonth, endOfMonth } from 'date-fns'
 import type { ApiResponse, ApiError, BudgetWithCategory } from '@/types'
+
+interface CategorySpendRow {
+  categoryId: string
+  _sum: { amount: number | null }
+}
 
 // ── GET /api/budgets ───────────────────────────────────────────
 // Returns budgets with computed `spent` and `percentage` for current month
@@ -38,7 +42,10 @@ export async function GET(_req: NextRequest) {
   })
 
   const spendingMap = new Map(
-    (spendingAgg as any[]).map((s) => [s.categoryId, Number(s._sum.amount ?? 0)])
+    (spendingAgg as unknown as CategorySpendRow[]).map((s) => [
+      s.categoryId,
+      Number(s._sum.amount ?? 0),
+    ])
   )
 
   const budgetsWithSpending: BudgetWithCategory[] = budgets.map((budget) => {

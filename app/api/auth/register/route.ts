@@ -1,25 +1,9 @@
 // app/api/auth/register/route.ts
-// @ts-nocheck -- Prisma types resolved at runtime, Zod validates inputs
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { registerSchema } from '@/lib/validations'
-import crypto from 'crypto'
+import { hashPassword } from '@/lib/password'
 import type { ApiResponse, ApiError } from '@/types'
-
-// Simple password hash — tidak perlu bcrypt untuk portfolio
-function hashPassword(password: string): string {
-  // Generate random salt per user
-  const salt = crypto.randomBytes(16).toString('hex')
-  const hash = crypto.scryptSync(password, salt, 64).toString('hex')
-  return `${salt}:${hash}`
-}
-
-export function verifyPassword(password: string, stored: string): boolean {
-  const [salt, hash] = stored.split(':')
-  if (!salt || !hash) return false
-  const testHash = crypto.scryptSync(password, salt, 64).toString('hex')
-  return testHash === hash
-}
 
 export async function POST(req: NextRequest) {
   const body: unknown = await req.json()
@@ -43,16 +27,16 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Hash password dan simpan di field image sebagai workaround
-  // Catatan: idealnya tambah field `passwordHash String?` di schema Prisma
-  // Untuk portfolio ini, kita simpan hash di image field dengan prefix `[pw]`
+  // P0.1: passwordHash sekarang disimpan di kolom Prisma-nya sendiri,
+  // bukan di-overload lewat field `image`. Hash yang sama juga dipakai
+  // oleh lib/auth.ts (satu sumber kebenaran: lib/password.ts).
   const passwordHash = hashPassword(password)
 
   const user = await prisma.user.create({
     data: {
       name,
       email,
-      image: `[pw]${passwordHash}`, // prefix agar bisa dibedakan dari URL gambar
+      passwordHash,
       onboardingDone: false,
     },
     select: { id: true, email: true, name: true },

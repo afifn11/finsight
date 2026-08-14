@@ -1,6 +1,5 @@
 // app/api/ai/insight/route.ts
 // Uses Google Gemini API via @google/genai SDK
-// @ts-nocheck -- Prisma groupBy returns require runtime validation (Zod handles this)
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -8,9 +7,15 @@ import { prisma } from '@/lib/prisma'
 import { GoogleGenAI } from '@google/genai'
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
+import { aiInsightRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 import type { ApiResponse, ApiError, AiInsightData, Insight } from '@/types'
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! })
+
+interface TypeAggRow {
+  type: 'INCOME' | 'EXPENSE'
+  _sum: { amount: number | null }
+}
 
 // ── GET /api/ai/insight ────────────────────────────────────────
 export async function GET() {
@@ -20,6 +25,22 @@ export async function GET() {
   }
 
   const userId = session.user.id
+
+  // P0.3: rate limit sebelum melakukan query berat / panggilan Gemini.
+  const { success, remaining, reset } = await checkRateLimit(aiInsightRateLimiter, userId)
+  if (!success) {
+    return NextResponse.json<ApiError>(
+      { error: 'Terlalu banyak permintaan insight. Coba lagi nanti.' },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Remaining': String(remaining),
+          'X-RateLimit-Reset': String(reset),
+        },
+      }
+    )
+  }
+
   const now = new Date()
   const currentMonth = now.getMonth() + 1
   const currentYear = now.getFullYear()
@@ -59,24 +80,21 @@ export async function GET() {
   ])
 
   // ── Aggregate context data ─────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const txList = currentTxs as any[]
-  const totalIncome = txList
+  const totalIncome = currentTxs
     .filter((t) => t.type === 'INCOME')
-    .reduce((sum: number, t) => sum + Number(t.amount), 0)
+    .reduce((sum, t) => sum + Number(t.amount), 0)
 
-  const totalExpense = txList
+  const totalExpense = currentTxs
     .filter((t) => t.type === 'EXPENSE')
-    .reduce((sum: number, t) => sum + Number(t.amount), 0)
+    .reduce((sum, t) => sum + Number(t.amount), 0)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const prevAggList = prevMonthAgg as any[]
+  const prevAggList = prevMonthAgg as unknown as TypeAggRow[]
   const prevExpense = Number(
     prevAggList.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0
   )
 
   const categorySpend: Record<string, { name: string; total: number; count: number }> = {}
-  for (const tx of txList.filter((t) => t.type === 'EXPENSE')) {
+  for (const tx of currentTxs.filter((t) => t.type === 'EXPENSE')) {
     const key = tx.category.name
     if (!categorySpend[key]) categorySpend[key] = { name: key, total: 0, count: 0 }
     categorySpend[key]!.total += Number(tx.amount)
@@ -87,9 +105,7 @@ export async function GET() {
     .sort((a, b) => b.total - a.total)
     .slice(0, 5)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const budgetList = budgets as any[]
-  const budgetStatus = budgetList.map((b) => {
+  const budgetStatus = budgets.map((b) => {
     const spent = categorySpend[b.category.name]?.total ?? 0
     const percentage = Math.round((spent / Number(b.amount)) * 100)
     return { category: b.category.name, budget: Number(b.amount), spent, percentage }

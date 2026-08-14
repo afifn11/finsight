@@ -1,5 +1,4 @@
 // app/api/user/onboarding/route.ts
-// @ts-nocheck -- Prisma groupBy returns require runtime validation (Zod handles this)
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -10,12 +9,14 @@ import type { ApiResponse, ApiError } from '@/types'
 const onboardingSchema = z.object({
   currency: z.string().length(3).default('IDR'),
   timezone: z.string().default('Asia/Jakarta'),
-  budgets: z.array(
-    z.object({
-      categoryId: z.string().min(1),
-      amount: z.number().positive(),
-    })
-  ).default([]),
+  budgets: z
+    .array(
+      z.object({
+        categoryId: z.string().min(1),
+        amount: z.number().positive(),
+      })
+    )
+    .default([]),
 })
 
 export async function POST(req: NextRequest) {
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     }),
 
     // 2. Create initial budgets (if any selected)
-    ...(budgets as any[]).map((b) =>
+    ...budgets.map((b) =>
       prisma.budget.upsert({
         where: {
           userId_categoryId_period: {

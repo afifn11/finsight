@@ -1,20 +1,20 @@
 // app/api/export/route.ts
-// @ts-nocheck -- Prisma groupBy returns require runtime validation (Zod handles this)
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
+import type { ApiError } from '@/types'
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json<ApiError>({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const { searchParams } = req.nextUrl
-  const type = searchParams.get('type') ?? 'csv'       // 'csv' | 'pdf'
+  const type = searchParams.get('type') ?? 'csv' // 'csv' | 'pdf'
   const period = searchParams.get('period') ?? 'current' // 'current' | 'last3'
 
   const now = new Date()
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
   const { supabaseAdmin, RECEIPTS_BUCKET } = await import('@/lib/supabase')
   const txWithReceipts = await Promise.all(
     transactions.map(async (tx) => {
-      if (!tx.receiptPath) return { ...tx, receiptSignedUrl: null }
+      if (!tx.receiptPath) return { ...tx, receiptSignedUrl: null as string | null }
       const { data } = await supabaseAdmin.storage
         .from(RECEIPTS_BUCKET)
         .createSignedUrl(tx.receiptPath, 3600)
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       tx.receiptName ? tx.receiptName : '',
     ])
 
-    const csv = [header.join(','), ...rows.map((r: string[]) => r.join(','))].join('\n')
+    const csv = [header.join(','), ...rows.map((r) => r.join(','))].join('\n')
     const filename = `finsight-${periodLabel.replace(/\s/g, '-')}.csv`
 
     return new Response(csv, {
@@ -73,15 +73,13 @@ export async function GET(req: NextRequest) {
   }
 
   // ── PDF Export (server-side data, client renders PDF) ─────
-  // Return structured JSON — client uses jsPDF to render
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const txArr = txWithReceipts as any[]
-  const totalIncome = txArr
+  // Return structured JSON — client uses jsPDF untuk render
+  const totalIncome = txWithReceipts
     .filter((t) => t.type === 'INCOME')
-    .reduce((s: number, t) => s + Number(t.amount), 0)
-  const totalExpense = txArr
+    .reduce((s, t) => s + Number(t.amount), 0)
+  const totalExpense = txWithReceipts
     .filter((t) => t.type === 'EXPENSE')
-    .reduce((s: number, t) => s + Number(t.amount), 0)
+    .reduce((s, t) => s + Number(t.amount), 0)
 
   return NextResponse.json({
     period: periodLabel,

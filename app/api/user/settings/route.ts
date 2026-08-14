@@ -1,11 +1,11 @@
 // app/api/user/settings/route.ts
-// @ts-nocheck -- Prisma types resolved at runtime, Zod validates inputs
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { userSettingsSchema } from '@/lib/validations'
 import type { ApiResponse, ApiError } from '@/types'
+import type { Prisma } from '@prisma/client'
 
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -22,9 +22,11 @@ export async function PATCH(req: NextRequest) {
     )
   }
 
+  const updateData: Prisma.UserUpdateInput = parsed.data
+
   const user = await prisma.user.update({
     where: { id: session.user.id },
-    data: parsed.data as Parameters<typeof prisma.user.update>[0]['data'],
+    data: updateData,
     select: { id: true, name: true, email: true, currency: true, timezone: true },
   })
 

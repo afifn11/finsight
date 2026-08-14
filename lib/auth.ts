@@ -5,24 +5,24 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import crypto from 'crypto'
-
-// ── Simple password hash (use bcrypt in production) ─────────────
-// For portfolio: using crypto.scrypt — no extra dependency needed
-function hashPassword(password: string): string {
-  const salt = 'finsight-salt' // In prod: random salt per user stored in DB
-  return crypto.scryptSync(password, salt, 64).toString('hex')
-}
-
-export function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash
-}
+import { verifyPassword } from '@/lib/password'
 
 // ── Zod validation ─────────────────────────────────────────────
 const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 })
+
+// ── P0.5: fail fast kalau NEXTAUTH_SECRET tidak di-set ──────────
+// Fallback hardcoded sebelumnya berarti setiap deployment yang lupa
+// set env var ini akan berbagi secret yang sama & bisa di-forge.
+const nextAuthSecret = process.env.NEXTAUTH_SECRET
+if (!nextAuthSecret) {
+  throw new Error(
+    'NEXTAUTH_SECRET wajib di-set di environment variables. ' +
+      'Generate dengan: openssl rand -base64 32'
+  )
+}
 
 // ── NextAuth config ────────────────────────────────────────────
 export const authOptions: NextAuthOptions = {
@@ -50,24 +50,22 @@ export const authOptions: NextAuthOptions = {
           where: { email },
         })
 
-        if (!user) return null
+        // User tidak ada, atau daftar via Google (tidak punya passwordHash)
+        if (!user?.passwordHash) return null
 
-        // For demo account: check demo credentials
-        if (email === 'demo@finsight.app' && password === 'demo123456') {
-          return { id: user.id, email: user.email, name: user.name, image: user.image }
-        }
+        // P0.1: dulu baris ini tidak pernah dipanggil — authorize() selalu
+        // return null untuk user non-demo. Sekarang benar-benar diverifikasi.
+        const isValid = verifyPassword(password, user.passwordHash)
+        if (!isValid) return null
 
-        // For regular users: check hashed password from metadata
-        // NOTE: In production, store password hash in a separate field
-        // This is simplified for portfolio purposes
-        return null
+        return { id: user.id, email: user.email, name: user.name, image: user.image }
       },
     }),
   ],
 
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60, // 30 hari
   },
 
   callbacks: {
@@ -76,7 +74,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.image = user.image ?? null
         token.name = user.name ?? null
-        // Fetch onboardingDone on first login
+        // Fetch onboardingDone saat login pertama
         const dbUser1 = await prisma.user.findUnique({
           where: { id: user.id as string },
           select: { onboardingDone: true, image: true, name: true },
@@ -85,7 +83,7 @@ export const authOptions: NextAuthOptions = {
         if (dbUser1?.image) token.image = dbUser1.image
         if (dbUser1?.name) token.name = dbUser1.name
       }
-      // Refresh onboardingDone when session is updated (after onboarding completes)
+      // Refresh onboardingDone saat session di-update (setelah onboarding selesai)
       if (trigger === 'update' && token.id) {
         const dbUser2 = await prisma.user.findUnique({
           where: { id: token.id as string },
@@ -99,7 +97,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string
-        session.user.onboardingDone = token.onboardingDone as boolean ?? false
+        session.user.onboardingDone = (token.onboardingDone as boolean) ?? false
         if (token.image) session.user.image = token.image as string
         if (token.name) session.user.name = token.name as string
       }
@@ -107,14 +105,12 @@ export const authOptions: NextAuthOptions = {
     },
 
     async signIn({ user, account }) {
-      // Auto-complete onboarding check for OAuth users
       if (account?.provider === 'google' && user.id) {
-        // Check handled by middleware — onboardingDone checked on redirect
+        // Redirect ke onboarding kalau belum selesai ditangani middleware
         void prisma.user.findUnique({
           where: { id: user.id },
           select: { onboardingDone: true },
         })
-        // Will redirect to onboarding if not done (handled in middleware)
         return true
       }
       return true
@@ -123,15 +119,15 @@ export const authOptions: NextAuthOptions = {
 
   pages: {
     signIn: '/login',
-    newUser: '/onboarding', // Redirect new OAuth users here
+    newUser: '/onboarding', // Redirect user OAuth baru ke sini
     error: '/login',
   },
 
-  secret: process.env.NEXTAUTH_SECRET ?? 'fallback-secret-change-in-production',
+  secret: nextAuthSecret,
   debug: process.env.NODE_ENV === 'development',
 }
 
-// ── Type augmentation for session ─────────────────────────────
+// ── Type augmentation untuk session ─────────────────────────────
 declare module 'next-auth' {
   interface Session {
     user: {

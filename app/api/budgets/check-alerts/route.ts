@@ -1,18 +1,22 @@
 // app/api/budgets/check-alerts/route.ts
-// @ts-nocheck
-// Dipanggil setelah setiap transaksi baru dibuat
-// Cek apakah ada budget yang melewati threshold dan buat alert
-
+// Dipanggil setelah setiap transaksi baru dibuat.
+// Cek apakah ada budget yang melewati threshold dan buat alert.
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { startOfMonth, endOfMonth } from 'date-fns'
+import type { ApiError } from '@/types'
+
+interface CategorySpendRow {
+  categoryId: string
+  _sum: { amount: number | null }
+}
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json<ApiError>({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const userId = session.user.id
@@ -44,7 +48,10 @@ export async function POST(req: NextRequest) {
   })
 
   const spendMap = new Map(
-    (spending as any[]).map((s) => [s.categoryId, Number(s._sum.amount ?? 0)])
+    (spending as unknown as CategorySpendRow[]).map((s) => [
+      s.categoryId,
+      Number(s._sum.amount ?? 0),
+    ])
   )
 
   const triggeredAlerts: Array<{
@@ -67,7 +74,6 @@ export async function POST(req: NextRequest) {
       })
 
       if (!existing) {
-        // Create new alert
         await prisma.budgetAlert.create({
           data: {
             budgetId: budget.id,
@@ -95,16 +101,17 @@ export async function POST(req: NextRequest) {
 export async function GET(_req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json<ApiError>({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const userId = session.user.id
   const now = new Date()
   const month = now.getMonth() + 1
   const year = now.getFullYear()
 
   const alerts = await prisma.budgetAlert.findMany({
     where: {
-      budget: { userId: session.user.id },
+      budget: { userId },
       month,
       year,
     },
@@ -116,16 +123,15 @@ export async function GET(_req: NextRequest) {
     orderBy: { triggeredAt: 'desc' },
   })
 
-  const now2 = new Date()
-  const monthStart = startOfMonth(now2)
-  const monthEnd = endOfMonth(now2)
+  const monthStart = startOfMonth(now)
+  const monthEnd = endOfMonth(now)
 
   // Get current spending for each alerted budget
   const alertsWithSpending = await Promise.all(
     alerts.map(async (alert) => {
       const spending = await prisma.transaction.aggregate({
         where: {
-          userId: session.user.id,
+          userId,
           categoryId: alert.budget.categoryId,
           type: 'EXPENSE',
           date: { gte: monthStart, lte: monthEnd },

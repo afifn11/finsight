@@ -1,14 +1,14 @@
 // components/transactions/TransactionFormModal.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X, Loader2, ScanLine } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { transactionSchema, type TransactionInput } from '@/lib/validations'
-import { useCategories } from '@/hooks'
+import { useCategories, useBodyScrollLock, useFocusTrap } from '@/hooks'
 import { cn } from '@/lib/utils'
 import type { TransactionWithCategory } from '@/types'
 import { ReceiptUploader } from './ReceiptUploader'
@@ -23,6 +23,11 @@ interface Props {
 
 export function TransactionFormModal({ open, onClose, onSuccess, editData }: Props) {
   const isEdit = !!editData
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  // P1.2: lock body scroll & trap keyboard focus while modal is open
+  useBodyScrollLock(open)
+  useFocusTrap(dialogRef, open, onClose)
 
   const {
     register,
@@ -149,15 +154,20 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.5)' }}
+      role="presentation"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="transaction-modal-title"
         className="card w-full max-w-md max-h-[90vh] overflow-y-auto"
         style={{ background: 'var(--bg-card)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--border-default)' }}>
-          <h2 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+          <h2 id="transaction-modal-title" className="font-semibold" style={{ color: 'var(--text-primary)' }}>
             {isEdit ? 'Edit Transaksi' : 'Tambah Transaksi'}
           </h2>
           <div className="flex items-center gap-2">
@@ -169,12 +179,12 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
                 style={{ borderColor: 'var(--color-primary-600)', color: 'var(--color-primary-600)' }}
                 title="Scan struk otomatis"
               >
-                <ScanLine className="w-3.5 h-3.5" />
+                <ScanLine className="w-3.5 h-3.5" aria-hidden="true" />
                 Scan Struk
               </button>
             )}
-            <button onClick={onClose} style={{ color: 'var(--text-muted)' }}>
-              <X className="w-5 h-5" />
+            <button onClick={onClose} aria-label="Tutup dialog" style={{ color: 'var(--text-muted)' }}>
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -195,6 +205,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
                     <button
                       key={t}
                       type="button"
+                      aria-pressed={field.value === t}
                       onClick={() => { field.onChange(t); setValue('categoryId', '') }}
                       className="flex-1 py-2 text-sm font-medium transition-colors"
                       style={
@@ -216,14 +227,17 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
 
           {/* Amount */}
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            <label htmlFor="tx-amount" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               Nominal (Rp)
             </label>
             <input
+              id="tx-amount"
               {...register('amount', { valueAsNumber: true })}
               type="number"
               placeholder="0"
               min="1"
+              aria-invalid={!!errors.amount}
+              aria-describedby={errors.amount ? 'tx-amount-error' : undefined}
               className="mt-1 w-full px-3 py-2 rounded-lg border text-sm outline-none"
               style={{
                 background: 'var(--bg-card)',
@@ -232,7 +246,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
               }}
             />
             {errors.amount && (
-              <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+              <p id="tx-amount-error" role="alert" className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
                 {errors.amount.message}
               </p>
             )}
@@ -240,11 +254,14 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
 
           {/* Category */}
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            <label htmlFor="tx-category" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               Kategori
             </label>
             <select
+              id="tx-category"
               {...register('categoryId')}
+              aria-invalid={!!errors.categoryId}
+              aria-describedby={errors.categoryId ? 'tx-category-error' : undefined}
               className="mt-1 w-full px-3 py-2 rounded-lg border text-sm outline-none"
               style={{
                 background: 'var(--bg-card)',
@@ -258,7 +275,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
               ))}
             </select>
             {errors.categoryId && (
-              <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+              <p id="tx-category-error" role="alert" className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
                 {errors.categoryId.message}
               </p>
             )}
@@ -266,13 +283,16 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
 
           {/* Description */}
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            <label htmlFor="tx-description" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               Deskripsi
             </label>
             <input
+              id="tx-description"
               {...register('description')}
               type="text"
               placeholder="Contoh: Makan siang di warung"
+              aria-invalid={!!errors.description}
+              aria-describedby={errors.description ? 'tx-description-error' : undefined}
               className="mt-1 w-full px-3 py-2 rounded-lg border text-sm outline-none"
               style={{
                 background: 'var(--bg-card)',
@@ -281,7 +301,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
               }}
             />
             {errors.description && (
-              <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+              <p id="tx-description-error" role="alert" className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
                 {errors.description.message}
               </p>
             )}
@@ -289,7 +309,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
 
           {/* Date */}
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            <label htmlFor="tx-date" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               Tanggal
             </label>
             <Controller
@@ -297,6 +317,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
               control={control}
               render={({ field }) => (
                 <input
+                  id="tx-date"
                   type="date"
                   value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
                   onChange={(e) => field.onChange(new Date(e.target.value))}
@@ -314,7 +335,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
           {/* Recurring toggle */}
           <div className="flex items-center justify-between py-1">
             <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              <p id="tx-recurring-label" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 Transaksi berulang
               </p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -327,6 +348,9 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
               render={({ field }) => (
                 <button
                   type="button"
+                  role="switch"
+                  aria-checked={field.value}
+                  aria-labelledby="tx-recurring-label"
                   onClick={() => field.onChange(!field.value)}
                   className="relative w-10 h-5 rounded-full transition-colors"
                   style={{ background: field.value ? 'var(--color-primary-600)' : 'var(--border-default)' }}
@@ -343,10 +367,11 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
           {/* Recurring period (conditional) */}
           {isRecurring && (
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              <label htmlFor="tx-recurring-period" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 Periode pengulangan
               </label>
               <select
+                id="tx-recurring-period"
                 {...register('recurringPeriod')}
                 className="mt-1 w-full px-3 py-2 rounded-lg border text-sm outline-none"
                 style={{
@@ -365,10 +390,11 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
 
           {/* Notes */}
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            <label htmlFor="tx-notes" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               Catatan <span style={{ color: 'var(--text-muted)' }}>(opsional)</span>
             </label>
             <textarea
+              id="tx-notes"
               {...register('notes')}
               rows={2}
               placeholder="Catatan tambahan..."
@@ -437,7 +463,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
                   : undefined
               }
             >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
               {isEdit ? 'Simpan perubahan' : 'Tambah transaksi'}
             </button>
           </div>}

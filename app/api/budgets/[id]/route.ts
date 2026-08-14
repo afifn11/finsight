@@ -1,11 +1,11 @@
 // app/api/budgets/[id]/route.ts
-// @ts-nocheck -- Prisma types resolved at runtime, Zod validates inputs
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { budgetSchema } from '@/lib/validations'
 import type { ApiResponse, ApiError } from '@/types'
+import type { Prisma } from '@prisma/client'
 
 // Next.js 16: params must be awaited
 type RouteParams = { params: Promise<{ id: string }> }
@@ -31,9 +31,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     )
   }
 
+  const updateData: Prisma.BudgetUpdateInput = parsed.data
+
   const updated = await prisma.budget.update({
     where: { id },
-    data: parsed.data as Parameters<typeof prisma.budget.update>[0]['data'],
+    data: updateData,
     include: { category: true },
   })
 

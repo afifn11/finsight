@@ -1,5 +1,4 @@
 // app/api/user/delete/route.ts
-// @ts-nocheck -- Prisma types resolved at runtime, Zod validates inputs
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -15,7 +14,7 @@ export async function DELETE() {
   const userId = session.user.id
 
   try {
-    // Prisma cascade delete handles all related data:
+    // Prisma cascade delete menangani semua data terkait:
     // transactions, budgets, categories, accounts, sessions, ai_insights
     await prisma.user.delete({ where: { id: userId } })
 

@@ -15,11 +15,16 @@ export const registerSchema = z.object({
     .min(8, 'Password minimal 8 karakter')
     .regex(/[A-Z]/, 'Harus ada huruf kapital')
     .regex(/[0-9]/, 'Harus ada angka'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Password tidak cocok',
-  path: ['confirmPassword'],
 })
+
+export const registerFormSchema = registerSchema
+  .extend({
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Password tidak cocok',
+    path: ['confirmPassword'],
+  })
 
 // ── Transaction ────────────────────────────────────────────────
 export const transactionSchema = z.object({
@@ -83,7 +88,7 @@ export const transactionFiltersSchema = z.object({
 
 // ── Type exports ───────────────────────────────────────────────
 export type LoginInput = z.infer<typeof loginSchema>
-export type RegisterInput = z.infer<typeof registerSchema>
+export type RegisterInput = z.infer<typeof registerFormSchema>
 export type TransactionInput = z.infer<typeof transactionSchema>
 export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>
 export type BudgetInput = z.infer<typeof budgetSchema>

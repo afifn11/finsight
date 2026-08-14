@@ -1,11 +1,11 @@
 // app/api/transactions/[id]/route.ts
-// @ts-nocheck -- Prisma types resolved at runtime, Zod validates inputs
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { transactionSchema } from '@/lib/validations'
 import type { ApiResponse, ApiError } from '@/types'
+import type { Prisma } from '@prisma/client'
 
 // Next.js 16: params must be awaited (breaking change from v15)
 type RouteParams = { params: Promise<{ id: string }> }
@@ -59,9 +59,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     )
   }
 
+  const updateData: Prisma.TransactionUpdateInput = parsed.data
+
   const updated = await prisma.transaction.update({
     where: { id },
-    data: parsed.data as Parameters<typeof prisma.transaction.update>[0]['data'],
+    data: updateData,
     include: { category: true },
   })
 

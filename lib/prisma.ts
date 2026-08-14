@@ -16,7 +16,11 @@ function createPrismaClient() {
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
     // SSL wajib untuk koneksi ke Supabase dari production (Vercel)
-    ssl: isProduction ? { rejectUnauthorized: false } : false,
+    // P0.4: rejectUnauthorized: false sebelumnya mematikan verifikasi
+    // sertifikat SSL sepenuhnya — rentan MITM pada koneksi database.
+    // Supabase pooler pakai sertifikat CA publik yang valid, jadi
+    // verifikasi standar seharusnya lolos tanpa perlu CA custom.
+    ssl: isProduction ? { rejectUnauthorized: true } : false,
   })
 
   const adapter = new PrismaPg(pool as never)

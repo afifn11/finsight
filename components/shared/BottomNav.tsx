@@ -21,6 +21,7 @@ export function BottomNav() {
 
   return (
     <nav
+      aria-label="Navigasi utama"
       className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t"
       style={{
         background: 'var(--bg-card)',
@@ -37,6 +38,7 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
+            aria-current={isActive ? 'page' : undefined}
             className="flex flex-1 flex-col items-center justify-center py-2 gap-0.5 transition-colors"
             style={{
               color: isActive ? 'var(--color-primary-700)' : 'var(--text-muted)',
@@ -45,6 +47,7 @@ export function BottomNav() {
             <Icon
               className="w-5 h-5"
               strokeWidth={isActive ? 2.5 : 1.8}
+              aria-hidden="true"
             />
             <span
               className="text-[10px]"
