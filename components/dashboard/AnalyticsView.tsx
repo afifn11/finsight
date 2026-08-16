@@ -1,21 +1,10 @@
 // components/dashboard/AnalyticsView.tsx
 'use client'
 
-import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend,
-} from 'recharts'
 import { useDashboard } from '@/hooks'
 import { formatCurrencyShort, formatCurrency, formatPercentage } from '@/lib/utils'
-
-function BarChartSkeleton() {
-  return (
-    <div className="card p-5 animate-pulse">
-      <div className="h-5 w-44 rounded mb-4" style={{ background: 'var(--bg-muted)' }} />
-      <div className="h-64 rounded" style={{ background: 'var(--bg-muted)' }} />
-    </div>
-  )
-}
+import { MonthlyBarChart } from './MonthlyBarChart'
+import { ChartSkeleton } from './ChartSkeleton'
 
 export function AnalyticsView() {
   const { data, isLoading } = useDashboard()
@@ -23,8 +12,8 @@ export function AnalyticsView() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <BarChartSkeleton />
-        <BarChartSkeleton />
+        <ChartSkeleton height={260} titleWidth={176} />
+        <ChartSkeleton height={260} titleWidth={176} />
       </div>
     )
   }
@@ -44,48 +33,10 @@ export function AnalyticsView() {
             Income vs Pengeluaran 6 bulan terakhir
           </p>
         </div>
-        <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={trend} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} barGap={4}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="var(--border-default)"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: 12, fill: 'var(--text-muted)' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tickFormatter={(v: number) => formatCurrencyShort(v)}
-              tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
-              axisLine={false}
-              tickLine={false}
-              width={70}
-            />
-            <Tooltip
-              formatter={(v: unknown, name: unknown) => [formatCurrencyShort(v as number), String(name)]}
-              contentStyle={{
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-default)',
-                borderRadius: '8px',
-                fontSize: '12px',
-              }}
-            />
-            <Legend
-              wrapperStyle={{ fontSize: '12px', paddingTop: '12px' }}
-              formatter={(v: string) => (
-                <span style={{ color: 'var(--text-secondary)' }}>{v}</span>
-              )}
-            />
-            <Bar dataKey="income" name="Pemasukan" fill="var(--color-success-500)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expense" name="Pengeluaran" fill="var(--color-danger-500)" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <MonthlyBarChart trend={trend} />
       </div>
 
-      {/* Category breakdown table */}
+      {/* Category breakdown table — tidak pakai recharts, tetap SSR langsung */}
       <div className="card p-5">
         <div className="mb-5">
           <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -141,7 +92,6 @@ export function AnalyticsView() {
               </div>
             ))}
 
-            {/* Total row */}
             <div
               className="flex items-center justify-between pt-3 mt-1 border-t text-sm font-semibold"
               style={{ borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
