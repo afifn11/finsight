@@ -9,18 +9,24 @@ import { Pool } from 'pg'
 function createPrismaClient() {
   const isProduction = process.env.NODE_ENV === 'production'
 
+  // P0.4 (revisi): rejectUnauthorized: true tetap dipakai (verifikasi
+  // SSL aktif), tapi sekarang kita berikan CA certificate resmi Supabase
+  // secara eksplisit — supaya Node.js tahu certificate chain Supabase
+  // itu valid, tanpa perlu mematikan verifikasi sama sekali.
+  // Download CA cert dari: Supabase Dashboard → Settings → Database →
+  // SSL Configuration → Download CA certificate.
+  const sslConfig = isProduction
+    ? process.env.SUPABASE_CA_CERT
+      ? { rejectUnauthorized: true, ca: process.env.SUPABASE_CA_CERT }
+      : { rejectUnauthorized: true } // fallback — masih akan error kalau CA belum di-set
+    : false
+
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    // Connection pooling — cegah "too many clients" error di Supabase free tier
-    max: 3,              // max 3 connections (Supabase free tier limit: 60 total)
+    max: 3,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
-    // SSL wajib untuk koneksi ke Supabase dari production (Vercel)
-    // P0.4: rejectUnauthorized: false sebelumnya mematikan verifikasi
-    // sertifikat SSL sepenuhnya — rentan MITM pada koneksi database.
-    // Supabase pooler pakai sertifikat CA publik yang valid, jadi
-    // verifikasi standar seharusnya lolos tanpa perlu CA custom.
-    ssl: isProduction ? { rejectUnauthorized: true } : false,
+    ssl: sslConfig,
   })
 
   const adapter = new PrismaPg(pool as never)
