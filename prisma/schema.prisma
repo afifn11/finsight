@@ -83,6 +83,7 @@ model User {
   budgets      Budget[]
   aiInsights   AiInsight[]
   goals        FinancialGoal[]
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
 }
@@ -246,6 +247,25 @@ model FinancialGoal {
 
   @@index([userId])
   @@map("financial_goals")
+}
+
+// ─────────────────────────────────────────────────────────────
+// PUSH NOTIFICATION SUBSCRIPTION
+// ─────────────────────────────────────────────────────────────
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String   // Public key untuk enkripsi payload
+  auth      String   // Auth secret
+  userAgent String?  // Untuk debugging, tahu device mana yang subscribe
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 // ─────────────────────────────────────────────────────────────
