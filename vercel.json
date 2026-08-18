@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/check-budgets",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 8 * * *"
     }
   ]
 }
