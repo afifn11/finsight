@@ -1,11 +1,13 @@
 // components/onboarding/StepFirstBudget.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
 import type { OnboardingData } from './OnboardingFlow'
 import { formatCurrency } from '@/lib/utils'
 import type { Category } from '@/types'
+import { Button } from '@/components/ui/Button'
+import { DataError } from '@/components/ui/DataError'
 
 interface Props {
   data: OnboardingData
@@ -29,10 +31,12 @@ const SUGGESTIONS: Record<string, { icon: string; suggested: number }> = {
 export function StepFirstBudget({ data, onChange: _onChange, onFinish, onBack, isSubmitting }: Props) {
   const [categories, setCategories] = useState<Category[]>([])
   const [loadingCats, setLoadingCats] = useState(true)
+  const [catError, setCatError] = useState(false)
   const [selected, setSelected] = useState<Record<string, number>>({})
 
-  // Fetch EXPENSE system categories from API
-  useEffect(() => {
+  const loadCategories = useCallback(() => {
+    setLoadingCats(true)
+    setCatError(false)
     fetch('/api/categories?forType=EXPENSE')
       .then((r) => r.json())
       .then((json: { data: Category[] }) => {
@@ -40,9 +44,12 @@ export function StepFirstBudget({ data, onChange: _onChange, onFinish, onBack, i
         const filtered = json.data.filter((c) => SUGGESTIONS[c.name] !== undefined)
         setCategories(filtered)
       })
-      .catch(() => setCategories([]))
+      .catch(() => setCatError(true))
       .finally(() => setLoadingCats(false))
   }, [])
+
+  // Fetch EXPENSE system categories from API
+  useEffect(() => { loadCategories() }, [loadCategories])
 
   function toggleCategory(categoryId: string, suggested: number) {
     setSelected((prev) => {
@@ -91,6 +98,11 @@ export function StepFirstBudget({ data, onChange: _onChange, onFinish, onBack, i
       </p>
 
       {/* Category list */}
+      {catError ? (
+        <div className="mb-4">
+          <DataError message="Gagal memuat daftar kategori" onRetry={loadCategories} />
+        </div>
+      ) : (
       <div className="space-y-2 mb-4">
         {categories.map((cat) => {
           const meta = SUGGESTIONS[cat.name]
@@ -107,33 +119,41 @@ export function StepFirstBudget({ data, onChange: _onChange, onFinish, onBack, i
               }}
             >
               <div className="flex items-center gap-3 p-3">
-                {/* Checkbox */}
+                {/* Whole row (icon + label) is the toggle target — far bigger and more
+                    accessible than the checkbox glyph alone, which stays purely visual. */}
                 <button
                   type="button"
+                  role="checkbox"
+                  aria-checked={isSelected}
+                  aria-label={`Sertakan budget untuk ${cat.name}`}
                   onClick={() => toggleCategory(cat.id, meta.suggested)}
-                  className="flex items-center justify-center w-5 h-5 rounded border-2 shrink-0 transition-colors"
-                  style={{
-                    borderColor: isSelected ? 'var(--color-primary-600)' : 'var(--border-default)',
-                    background: isSelected ? 'var(--color-primary-600)' : 'transparent',
-                  }}
+                  className="flex items-center gap-3 flex-1 min-w-0 min-h-11 text-left"
                 >
-                  {isSelected && (
-                    <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
-                      <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </button>
+                  <span
+                    aria-hidden="true"
+                    className="flex items-center justify-center w-5 h-5 rounded border-2 shrink-0 transition-colors"
+                    style={{
+                      borderColor: isSelected ? 'var(--color-primary-600)' : 'var(--border-default)',
+                      background: isSelected ? 'var(--color-primary-600)' : 'transparent',
+                    }}
+                  >
+                    {isSelected && (
+                      <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </span>
 
-                {/* Icon + name */}
-                <span className="text-lg">{meta.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {cat.name}
-                  </p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Saran: {formatCurrency(meta.suggested)}
-                  </p>
-                </div>
+                  <span className="text-lg" aria-hidden="true">{meta.icon}</span>
+                  <span className="flex-1 min-w-0">
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                      {cat.name}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      Saran: {formatCurrency(meta.suggested)}
+                    </p>
+                  </span>
+                </button>
 
                 {/* Amount input when selected */}
                 {isSelected && (
@@ -143,6 +163,7 @@ export function StepFirstBudget({ data, onChange: _onChange, onFinish, onBack, i
                       type="number"
                       defaultValue={meta.suggested}
                       onChange={(e) => updateAmount(cat.id, e.target.value)}
+                      aria-label={`Jumlah budget untuk ${cat.name}`}
                       className="w-24 px-2 py-1 rounded-lg border text-xs text-right outline-none"
                       style={{
                         background: 'var(--bg-card)',
@@ -158,6 +179,7 @@ export function StepFirstBudget({ data, onChange: _onChange, onFinish, onBack, i
           )
         })}
       </div>
+      )}
 
       {/* Total */}
       {Object.keys(selected).length > 0 && (
@@ -180,26 +202,12 @@ export function StepFirstBudget({ data, onChange: _onChange, onFinish, onBack, i
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button
-          onClick={onBack}
-          disabled={isSubmitting}
-          className="flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors disabled:opacity-50"
-          style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
-        >
+        <Button variant="secondary" fullWidth disabled={isSubmitting} onClick={onBack}>
           Kembali
-        </button>
-        <button
-          onClick={handleFinish}
-          disabled={isSubmitting}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-60"
-          style={{ background: 'var(--color-primary-800)' }}
-        >
-          {isSubmitting ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Menyimpan...</>
-          ) : (
-            'Selesai & mulai →'
-          )}
-        </button>
+        </Button>
+        <Button fullWidth loading={isSubmitting} onClick={handleFinish}>
+          {isSubmitting ? 'Menyimpan...' : 'Selesai & mulai →'}
+        </Button>
       </div>
     </div>
   )

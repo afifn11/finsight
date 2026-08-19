@@ -4,6 +4,7 @@
 import { useState, useRef } from 'react'
 import { Camera, Upload, X, FileText, Eye, Download, Loader2, ImageIcon, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface Props {
   transactionId: string
@@ -17,6 +18,7 @@ export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpda
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
@@ -80,6 +82,7 @@ export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpda
       toast.error('Gagal menghapus bukti transaksi')
     } finally {
       setIsDeleting(false)
+      setConfirmDeleteOpen(false)
     }
   }
 
@@ -224,16 +227,13 @@ export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpda
 
             <button
               type="button"
-              onClick={handleDelete}
+              onClick={() => setConfirmDeleteOpen(true)}
               disabled={isDeleting}
               className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-xs transition-colors hover:opacity-80 disabled:opacity-50"
               style={{ background: 'var(--bg-card)', color: 'var(--color-danger-500)' }}
               title="Hapus bukti"
             >
-              {isDeleting
-                ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <X className="w-4 h-4" />
-              }
+              <X className="w-4 h-4" />
               <span>Hapus</span>
             </button>
           </div>
@@ -305,6 +305,16 @@ export function ReceiptUploader({ transactionId, receiptName, receiptUrl, onUpda
       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
         JPG, PNG, WEBP, atau PDF • Maks. 5MB
       </p>
+
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        title="Hapus bukti transaksi?"
+        description="Bukti transaksi ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Hapus bukti"
+        isLoading={isDeleting}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
     </div>
   )
 }

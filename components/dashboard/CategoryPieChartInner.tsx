@@ -5,11 +5,20 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recha
 import { useDashboard } from '@/hooks'
 import { formatCurrencyShort } from '@/lib/utils'
 import { ChartSkeleton } from './ChartSkeleton'
+import { DataError } from '@/components/ui/DataError'
 
 export default function CategoryPieChartInner() {
-  const { data, isLoading } = useDashboard()
+  const { data, isLoading, error, refresh } = useDashboard()
 
   if (isLoading) return <ChartSkeleton height={224} titleWidth={144} />
+
+  if (error) {
+    return (
+      <div className="card p-5">
+        <DataError message={error} onRetry={refresh} />
+      </div>
+    )
+  }
 
   const breakdown = data?.categoryBreakdown ?? []
 

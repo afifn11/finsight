@@ -4,6 +4,7 @@
 import { TrendingUp, TrendingDown, Wallet, PiggyBank } from 'lucide-react'
 import { useDashboard } from '@/hooks'
 import { formatCurrencyShort, formatPercentage, cn } from '@/lib/utils'
+import { DataError } from '@/components/ui/DataError'
 
 interface StatCardProps {
   label: string
@@ -75,12 +76,20 @@ function SkeletonCard() {
 }
 
 export function SummaryCards() {
-  const { data, isLoading } = useDashboard()
+  const { data, isLoading, error, refresh } = useDashboard()
 
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="card p-5">
+        <DataError message={error} onRetry={refresh} />
       </div>
     )
   }

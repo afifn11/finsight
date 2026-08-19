@@ -8,6 +8,7 @@ import {
 import { useDashboard } from '@/hooks'
 import { formatCurrencyShort } from '@/lib/utils'
 import { ChartSkeleton } from './ChartSkeleton'
+import { DataError } from '@/components/ui/DataError'
 
 interface TooltipProps {
   active?: boolean
@@ -37,9 +38,17 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
 }
 
 export default function TrendChartInner() {
-  const { data, isLoading } = useDashboard()
+  const { data, isLoading, error, refresh } = useDashboard()
 
   if (isLoading) return <ChartSkeleton height={224} titleWidth={160} />
+
+  if (error) {
+    return (
+      <div className="card p-5">
+        <DataError message={error} onRetry={refresh} />
+      </div>
+    )
+  }
 
   const chartData = data?.monthlyTrend ?? []
 

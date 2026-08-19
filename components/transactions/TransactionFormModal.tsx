@@ -1,19 +1,20 @@
 // components/transactions/TransactionFormModal.tsx
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X, ScanLine } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { transactionSchema, type TransactionInput } from '@/lib/validations'
-import { useCategories, useBodyScrollLock, useFocusTrap } from '@/hooks'
+import { useCategories } from '@/hooks'
 import type { TransactionWithCategory } from '@/types'
 import { ReceiptUploader } from './ReceiptUploader'
 import { OcrScanner } from './OcrScanner'
 import { IconButton } from '@/components/ui/IconButton'
 import { Button } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 
 interface Props {
   open: boolean
@@ -24,11 +25,6 @@ interface Props {
 
 export function TransactionFormModal({ open, onClose, onSuccess, editData }: Props) {
   const isEdit = !!editData
-  const dialogRef = useRef<HTMLDivElement>(null)
-
-  // P1.2: lock body scroll & trap keyboard focus while modal is open
-  useBodyScrollLock(open)
-  useFocusTrap(dialogRef, open, onClose)
 
   const {
     register,
@@ -149,23 +145,9 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
     if (data.type) setValue('type', data.type)
   }
 
-  if (!open) return null
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.5)' }}
-      role="presentation"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="transaction-modal-title"
-        className="card w-full max-w-md max-h-[90vh] overflow-y-auto"
-        style={{ background: 'var(--bg-card)' }}
-      >
+    <>
+    <Modal open={open} onClose={onClose} labelledBy="transaction-modal-title" maxWidth="md">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--border-default)' }}>
           <h2 id="transaction-modal-title" className="font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -247,7 +229,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
               }}
             />
             {errors.amount && (
-              <p id="tx-amount-error" role="alert" className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+              <p id="tx-amount-error" role="alert" className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                 {errors.amount.message}
               </p>
             )}
@@ -276,7 +258,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
               ))}
             </select>
             {errors.categoryId && (
-              <p id="tx-category-error" role="alert" className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+              <p id="tx-category-error" role="alert" className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                 {errors.categoryId.message}
               </p>
             )}
@@ -302,7 +284,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
               }}
             />
             {errors.description && (
-              <p id="tx-description-error" role="alert" className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+              <p id="tx-description-error" role="alert" className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                 {errors.description.message}
               </p>
             )}
@@ -450,13 +432,13 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
             </Button>
           </div>}
         </form>
-      </div>
+    </Modal>
       {showOcr && (
         <OcrScanner
           onResult={handleOcrResult}
           onClose={() => setShowOcr(false)}
         />
       )}
-    </div>
+    </>
   )
 }

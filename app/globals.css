@@ -71,14 +71,28 @@
 
   --text-primary:   #0c1a26;
   --text-secondary: #475569;
-  --text-muted:     #94a3b8;
+  /* Was #94a3b8 (2.4:1 on bg-page, 2.6:1 on bg-card) — failed WCAG AA (needs 4.5:1)
+     for a color used across the app for timestamps, helper text, and labels.
+     Darkened to the lightest shade that still clears 4.5:1 on both backgrounds. */
+  --text-muted:     #5c6f8f;
   --text-inverse:   #ffffff;
 
   --border-default: #bae6fd;
   --border-focus:   var(--color-primary-600);
 
-  --color-income:   var(--color-success-500);
-  --color-expense:  var(--color-danger-500);
+  /* Income/expense text colors are decoupled from --color-success-500/--color-danger-500
+     (which stay unchanged for icon backgrounds, chart bars, and badges — those pairings
+     are fine) because the raw -500 shades fail 4.5:1 as TEXT on a white/light card
+     (2.5:1 and 3.8:1 respectively). These are theme-aware, like text-muted above,
+     since no single hex clears 4.5:1 on both a light and a dark background. */
+  --color-income:   #087a54;
+  --color-expense:  var(--color-danger-600);
+  --color-warning-text: #b45309;
+  /* Same issue as above: raw --color-danger-500 (used correctly for icons, borders,
+     button fills, and chart colors — those pass or are exempt from text contrast
+     rules) fails 4.5:1 as small text on white (3.76:1). Every inline form-validation
+     error message in the app was affected. */
+  --color-danger-text: var(--color-danger-600);
 }
 
 /* Dark mode — deep ocean */
@@ -90,11 +104,19 @@
 
   --text-primary:   #e0f4ff;
   --text-secondary: #7db8d4;
-  --text-muted:     #3d6478;
+  /* Was #3d6478 (2.8:1 on bg-card) — also failed AA in dark mode. */
+  --text-muted:     #6094ab;
   --text-inverse:   var(--color-neutral-900);
 
   --border-default: #1e3a4a;
   --border-focus:   var(--color-primary-400);
+
+  /* The un-decoupled -500 shades already clear 4.5:1 against the dark backgrounds,
+     so dark mode can use them directly instead of needing its own override color. */
+  --color-income:   var(--color-success-500);
+  --color-expense:  var(--color-danger-500);
+  --color-warning-text: var(--color-warning-500);
+  --color-danger-text:  var(--color-danger-500);
 }
 
 * { box-sizing: border-box; border-color: var(--border-default); }

@@ -223,7 +223,7 @@ function BudgetFormModal({
               ))}
             </select>
             {errors.categoryId && (
-              <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+              <p className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                 {errors.categoryId.message}
               </p>
             )}
@@ -246,7 +246,7 @@ function BudgetFormModal({
               }}
             />
             {errors.amount && (
-              <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+              <p className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                 {errors.amount.message}
               </p>
             )}
@@ -330,10 +330,10 @@ export function BudgetManager() {
         const safeCount   = budgets.filter((b) => getBudgetStatus(b.percentage) === 'safe').length
         const overallPct  = totalBudget > 0 ? Math.min(Math.round((totalSpent / totalBudget) * 100), 100) : 0
         const overallColor = overallPct >= 90
-          ? 'var(--color-danger-500)'
+          ? 'var(--color-danger-text)'
           : overallPct >= 70
-          ? 'var(--color-warning-500)'
-          : 'var(--color-success-500)'
+          ? 'var(--color-warning-text)'
+          : 'var(--color-income)'
         return (
           <div
             className="rounded-2xl border p-4"
@@ -392,7 +392,7 @@ export function BudgetManager() {
                 style={{ background: 'var(--bg-muted)' }}
               >
                 <p className="text-xs mb-0.5" style={{ color: 'var(--text-muted)' }}>Terpakai</p>
-                <p className="text-sm font-bold" style={{ color: 'var(--color-danger-500)' }}>
+                <p className="text-sm font-bold" style={{ color: 'var(--color-danger-text)' }}>
                   {formatCurrencyShort(totalSpent)}
                 </p>
               </div>
@@ -401,7 +401,7 @@ export function BudgetManager() {
                 style={{ background: 'var(--bg-muted)' }}
               >
                 <p className="text-xs mb-0.5" style={{ color: 'var(--text-muted)' }}>Aman</p>
-                <p className="text-sm font-bold" style={{ color: 'var(--color-success-500)' }}>
+                <p className="text-sm font-bold" style={{ color: 'var(--color-income)' }}>
                   {safeCount}<span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>/{budgets.length}</span>
                 </p>
               </div>

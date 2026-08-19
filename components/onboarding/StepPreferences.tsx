@@ -2,6 +2,7 @@
 'use client'
 
 import type { OnboardingData } from './OnboardingFlow'
+import { Button } from '@/components/ui/Button'
 
 interface Props {
   data: OnboardingData
@@ -38,11 +39,13 @@ export function StepPreferences({ data, onChange, onNext, onBack }: Props) {
         <label className="text-sm font-medium block mb-2" style={{ color: 'var(--text-primary)' }}>
           Mata uang utama
         </label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Mata uang utama">
           {CURRENCIES.map((c) => (
             <button
               key={c.value}
               type="button"
+              role="radio"
+              aria-checked={data.currency === c.value}
               onClick={() => onChange({ currency: c.value })}
               className="flex items-center gap-2 p-3 rounded-xl border text-left transition-all"
               style={
@@ -84,11 +87,13 @@ export function StepPreferences({ data, onChange, onNext, onBack }: Props) {
         <label className="text-sm font-medium block mb-2" style={{ color: 'var(--text-primary)' }}>
           Zona waktu
         </label>
-        <div className="space-y-2">
+        <div className="space-y-2" role="radiogroup" aria-label="Zona waktu">
           {TIMEZONES.map((tz) => (
             <button
               key={tz.value}
               type="button"
+              role="radio"
+              aria-checked={data.timezone === tz.value}
               onClick={() => onChange({ timezone: tz.value })}
               className="w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all"
               style={
@@ -131,20 +136,12 @@ export function StepPreferences({ data, onChange, onNext, onBack }: Props) {
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button
-          onClick={onBack}
-          className="flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors"
-          style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
-        >
+        <Button variant="secondary" fullWidth onClick={onBack}>
           Kembali
-        </button>
-        <button
-          onClick={onNext}
-          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white transition-colors hover:opacity-90"
-          style={{ background: 'var(--color-primary-800)' }}
-        >
+        </Button>
+        <Button fullWidth onClick={onNext}>
           Lanjut →
-        </button>
+        </Button>
       </div>
     </div>
   )
