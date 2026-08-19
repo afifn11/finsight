@@ -4,6 +4,7 @@
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { Sun, Moon, Monitor } from 'lucide-react'
+import { IconButton } from '@/components/ui/IconButton'
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -14,7 +15,7 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <div
-        className="w-9 h-9 rounded-lg"
+        className="w-11 h-11 rounded-lg"
         style={{ background: 'var(--bg-muted)' }}
       />
     )
@@ -36,17 +37,18 @@ export function ThemeToggle() {
   }
 
   return (
-    <button
+    <IconButton
       onClick={cycle}
       title={`Tema: ${current.label} — klik untuk ganti`}
-      className="flex items-center justify-center w-9 h-9 rounded-lg border transition-colors hover:opacity-80"
+      aria-label={`Ganti tema, saat ini: ${current.label}`}
       style={{
+        borderWidth: 1,
         borderColor: 'var(--border-default)',
+        borderStyle: 'solid',
         background: 'var(--bg-card)',
-        color: 'var(--text-secondary)',
       }}
     >
-      <Icon className="w-4 h-4" />
-    </button>
+      <Icon className="w-4 h-4" aria-hidden="true" />
+    </IconButton>
   )
 }

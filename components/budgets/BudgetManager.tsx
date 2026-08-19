@@ -2,8 +2,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle } from 'lucide-react'
 import { ActionButton, ActionGroup } from '@/components/ui/ActionButton'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { Button } from '@/components/ui/Button'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -278,23 +280,12 @@ function BudgetFormModal({
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg text-sm font-medium border"
-              style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
-            >
+            <Button variant="secondary" fullWidth onClick={onClose}>
               Batal
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-white"
-              style={{ background: 'var(--color-primary-800)' }}
-            >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            </Button>
+            <Button type="submit" fullWidth loading={isSubmitting}>
               {editData ? 'Simpan' : 'Buat budget'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
@@ -307,15 +298,21 @@ export function BudgetManager() {
   const { data: budgets, isLoading, refresh } = useBudgets()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<BudgetWithCategory | null>(null)
+  const [pendingDeleteBudget, setPendingDeleteBudget] = useState<BudgetWithCategory | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  async function handleDelete(id: string) {
-    if (!confirm('Hapus budget ini?')) return
+  async function handleConfirmDelete() {
+    if (!pendingDeleteBudget) return
+    setIsDeleting(true)
     try {
-      await fetch(`/api/budgets/${id}`, { method: 'DELETE' })
+      await fetch(`/api/budgets/${pendingDeleteBudget.id}`, { method: 'DELETE' })
       toast.success('Budget dihapus')
       refresh()
+      setPendingDeleteBudget(null)
     } catch {
       toast.error('Gagal menghapus')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -440,7 +437,7 @@ export function BudgetManager() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {budgets.map((b) => (
-            <BudgetCard key={b.id} budget={b} onEdit={handleEdit} onDelete={handleDelete} />
+            <BudgetCard key={b.id} budget={b} onEdit={handleEdit} onDelete={() => setPendingDeleteBudget(b)} />
           ))}
         </div>
       )}
@@ -450,6 +447,20 @@ export function BudgetManager() {
         onClose={() => { setModalOpen(false); setEditingBudget(null) }}
         onSuccess={() => { setModalOpen(false); setEditingBudget(null); refresh() }}
         editData={editingBudget}
+      />
+
+      <ConfirmDialog
+        open={pendingDeleteBudget !== null}
+        title="Hapus budget?"
+        description={
+          pendingDeleteBudget
+            ? `Budget untuk kategori "${pendingDeleteBudget.category.name}" akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`
+            : ''
+        }
+        confirmLabel="Hapus budget"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setPendingDeleteBudget(null)}
       />
     </>
   )

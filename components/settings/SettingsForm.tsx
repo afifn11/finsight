@@ -2,13 +2,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Loader2, AlertTriangle, LogOut } from 'lucide-react'
+import { AlertTriangle, LogOut } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { signOut } from 'next-auth/react'
 import { userSettingsSchema, type UserSettingsInput } from '@/lib/validations'
 import { getInitials } from '@/lib/utils'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Modal, ModalHeader, useModalIds } from '@/components/ui/Modal'
 
 interface Props {
   user: { id: string; name?: string | null; email: string; image?: string | null }
@@ -16,6 +19,7 @@ interface Props {
 
 export function SettingsForm({ user }: Props) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const { titleId, descriptionId } = useModalIds()
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -150,15 +154,9 @@ export function SettingsForm({ user }: Props) {
             </select>
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting || !isDirty}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50 transition-colors"
-            style={{ background: 'var(--color-primary-800)' }}
-          >
-            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+          <Button type="submit" disabled={!isDirty} loading={isSubmitting}>
             Simpan perubahan
-          </button>
+          </Button>
         </form>
       </div>
 
@@ -202,70 +200,56 @@ export function SettingsForm({ user }: Props) {
       </div>
 
       {/* Delete confirmation modal */}
-      {showDeleteModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.5)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowDeleteModal(false) }}
-        >
-          <div className="card w-full max-w-sm" style={{ background: 'var(--bg-card)' }}>
-            <div className="p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="flex items-center justify-center w-10 h-10 rounded-full shrink-0"
-                  style={{ background: 'var(--color-danger-500)' + '22' }}
-                >
-                  <AlertTriangle className="w-5 h-5" style={{ color: 'var(--color-danger-500)' }} />
-                </div>
-                <div>
-                  <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    Hapus akun?
-                  </h3>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Semua data akan dihapus permanen
-                  </p>
-                </div>
-              </div>
+      <Modal
+        open={showDeleteModal}
+        onClose={() => { setShowDeleteModal(false); setDeleteConfirmText('') }}
+        labelledBy={titleId}
+        describedBy={descriptionId}
+        maxWidth="sm"
+        disableClose={isDeleting}
+      >
+        <ModalHeader
+          titleId={titleId}
+          title="Hapus akun?"
+          description="Semua data akan dihapus permanen"
+          icon={<AlertTriangle className="w-5 h-5" />}
+          iconColor="var(--color-danger-500)"
+          iconBg="var(--color-danger-50)"
+        />
+        <div className="px-5 pb-5 pt-4">
+          <p id={descriptionId} className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+            Ketik <span className="font-mono font-semibold" style={{ color: 'var(--color-danger-500)' }}>hapus akun saya</span> untuk mengkonfirmasi.
+          </p>
 
-              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-                Ketik <span className="font-mono font-semibold" style={{ color: 'var(--color-danger-500)' }}>hapus akun saya</span> untuk mengkonfirmasi.
-              </p>
+          <Input
+            type="text"
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            placeholder="hapus akun saya"
+            className="mb-4"
+            aria-label="Konfirmasi hapus akun"
+          />
 
-              <input
-                type="text"
-                value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder="hapus akun saya"
-                className="w-full px-3 py-2 rounded-lg border text-sm outline-none mb-4"
-                style={{
-                  background: 'var(--bg-card)',
-                  borderColor: 'var(--border-default)',
-                  color: 'var(--text-primary)',
-                }}
-              />
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => { setShowDeleteModal(false); setDeleteConfirmText('') }}
-                  className="flex-1 py-2 rounded-lg text-sm font-medium border"
-                  style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={deleteConfirmText !== 'hapus akun saya' || isDeleting}
-                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40"
-                  style={{ background: 'var(--color-danger-500)' }}
-                >
-                  {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Hapus permanen
-                </button>
-              </div>
-            </div>
+          <div className="flex gap-3">
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => { setShowDeleteModal(false); setDeleteConfirmText('') }}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="danger"
+              fullWidth
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirmText !== 'hapus akun saya'}
+              loading={isDeleting}
+            >
+              Hapus permanen
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   )
 }

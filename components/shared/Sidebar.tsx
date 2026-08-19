@@ -9,16 +9,7 @@ import {
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { cn, getInitials } from '@/lib/utils'
-import type { NavItem } from '@/types'
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', href: '/', icon: 'LayoutDashboard' },
-  { label: 'Transaksi', href: '/transactions', icon: 'ArrowLeftRight' },
-  { label: 'Budget', href: '/budgets', icon: 'PiggyBank' },
-  { label: 'Goals', href: '/goals', icon: 'Target' },
-  { label: 'Analitik', href: '/analytics', icon: 'BarChart3' },
-  { label: 'Pengaturan', href: '/settings', icon: 'Settings' },
-]
+import { NAV_ITEMS } from '@/lib/nav-items'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   LayoutDashboard, ArrowLeftRight, PiggyBank, BarChart3, Settings, Target,

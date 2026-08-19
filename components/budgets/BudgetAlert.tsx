@@ -45,7 +45,7 @@ export function BudgetAlertBell() {
       <button
         onClick={() => { setOpen((o) => !o); if (!open) fetchAlerts() }}
         className="relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:opacity-70"
-        style={{ color: hasAlerts ? 'var(--color-warning-500, #f59e0b)' : 'var(--text-muted)' }}
+        style={{ color: hasAlerts ? 'var(--color-warning-500)' : 'var(--text-muted)' }}
         title="Budget alerts"
       >
         {hasAlerts ? (
@@ -67,8 +67,12 @@ export function BudgetAlertBell() {
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           <div
-            className="absolute right-0 top-full mt-2 z-40 w-80 rounded-2xl border shadow-lg overflow-hidden"
-            style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
+            className="absolute right-0 top-full mt-2 z-40 w-80 rounded-2xl border overflow-hidden"
+            style={{
+              background: 'var(--bg-card)',
+              borderColor: 'var(--border-default)',
+              boxShadow: 'var(--shadow-dropdown)',
+            }}
           >
             {/* Header */}
             <div
@@ -76,7 +80,7 @@ export function BudgetAlertBell() {
               style={{ borderColor: 'var(--border-default)' }}
             >
               <div className="flex items-center gap-2">
-                <BellRing className="w-4 h-4" style={{ color: 'var(--color-warning-500, #f59e0b)' }} />
+                <BellRing className="w-4 h-4" style={{ color: 'var(--color-warning-500)' }} />
                 <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                   Budget Alert
                 </span>
@@ -123,8 +127,8 @@ export function BudgetAlertBell() {
 
 function AlertCard({ alert }: { alert: BudgetAlert }) {
   const isOver = alert.percentage >= 100
-  const statusColor = isOver ? 'var(--color-danger-500)' : '#f59e0b'
-  const bgColor = isOver ? 'var(--color-danger-500)' + '15' : '#f59e0b15'
+  const statusColor = isOver ? 'var(--color-danger-500)' : 'var(--color-warning-500)'
+  const bgColor = isOver ? 'var(--color-danger-50)' : 'var(--color-warning-50)'
 
   return (
     <div

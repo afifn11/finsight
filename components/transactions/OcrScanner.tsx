@@ -4,6 +4,7 @@
 import { useState, useRef } from 'react'
 import { Camera, ScanLine, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { IconButton } from '@/components/ui/IconButton'
 
 interface OcrResult {
   amount: number | null
@@ -67,7 +68,7 @@ export function OcrScanner({ onResult, onClose }: Props) {
   const confidenceColor =
     !result ? 'var(--text-muted)' :
     result.confidence >= 0.7 ? 'var(--color-success-500)' :
-    result.confidence >= 0.4 ? '#f59e0b' :
+    result.confidence >= 0.4 ? 'var(--color-warning-500)' :
     'var(--color-danger-500)'
 
   const confidenceLabel =
@@ -91,9 +92,9 @@ export function OcrScanner({ onResult, onClose }: Props) {
               Scan Struk
             </h2>
           </div>
-          <button onClick={onClose} style={{ color: 'var(--text-muted)' }}>
-            <X className="w-5 h-5" />
-          </button>
+          <IconButton aria-label="Tutup" onClick={onClose}>
+            <X className="w-5 h-5" aria-hidden="true" />
+          </IconButton>
         </div>
 
         <div className="p-4 space-y-4">

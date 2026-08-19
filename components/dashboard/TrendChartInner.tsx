@@ -19,8 +19,8 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (!active || !payload?.length) return null
   return (
     <div
-      className="rounded-lg border p-3 shadow-lg text-sm space-y-1"
-      style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
+      className="rounded-lg border p-3 text-sm space-y-1"
+      style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)', boxShadow: 'var(--shadow-dropdown)' }}
     >
       <p className="font-medium mb-2" style={{ color: 'var(--text-primary)' }}>{label}</p>
       {payload.map((entry) => (
