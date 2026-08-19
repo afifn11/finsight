@@ -27,9 +27,9 @@ export default function GlobalError({
             <div className="flex justify-center">
               <div
                 className="flex items-center justify-center w-16 h-16 rounded-2xl"
-                style={{ background: '#ef444422' }}
+                style={{ background: 'var(--color-danger-50)' }}
               >
-                <AlertTriangle className="w-8 h-8" style={{ color: '#ef4444' }} />
+                <AlertTriangle className="w-8 h-8" style={{ color: 'var(--color-danger-500)' }} />
               </div>
             </div>
 
@@ -54,7 +54,7 @@ export default function GlobalError({
               <button
                 onClick={reset}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
-                style={{ background: '#0F4C75' }}
+                style={{ background: 'var(--color-primary-800)' }}
               >
                 <RefreshCw className="w-4 h-4" />
                 Coba lagi
@@ -62,7 +62,7 @@ export default function GlobalError({
               <Link
                 href="/"
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border"
-                style={{ borderColor: '#e2e8f0', color: '#64748b' }}
+                style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
               >
                 <Home className="w-4 h-4" />
                 Ke dashboard

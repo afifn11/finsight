@@ -3,13 +3,14 @@
 
 import { Sparkles, Info, AlertTriangle, Lightbulb, Trophy, RefreshCw } from 'lucide-react'
 import { useAiInsight } from '@/hooks'
+import { IconButton } from '@/components/ui/IconButton'
 import type { InsightType } from '@/types'
 
 const INSIGHT_STYLES: Record<InsightType, { icon: React.ElementType; color: string; bg: string }> = {
   info:        { icon: Info,          color: 'var(--color-primary-600)',  bg: 'var(--color-primary-50)' },
   warning:     { icon: AlertTriangle, color: 'var(--color-warning-600)',  bg: 'var(--color-warning-50)' },
   tip:         { icon: Lightbulb,     color: 'var(--color-success-600)',  bg: 'var(--color-success-50)' },
-  achievement: { icon: Trophy,        color: '#7c3aed',                   bg: '#f5f3ff' },
+  achievement: { icon: Trophy,        color: 'var(--color-ai-accent-600)', bg: 'var(--color-ai-accent-50)' },
 }
 
 export function AiInsightCard() {
@@ -22,7 +23,7 @@ export function AiInsightCard() {
         <div className="flex items-center gap-2">
           <div
             className="flex items-center justify-center w-7 h-7 rounded-lg"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+            style={{ background: 'linear-gradient(135deg, var(--color-ai-accent-start), var(--color-ai-accent-end))' }}
           >
             <Sparkles className="w-3.5 h-3.5 text-white" />
           </div>
@@ -30,15 +31,14 @@ export function AiInsightCard() {
             AI Insight
           </h3>
         </div>
-        <button
+        <IconButton
           onClick={refresh}
           disabled={isLoading}
-          className="p-1.5 rounded-md transition-colors hover:opacity-70 disabled:opacity-40"
-          style={{ color: 'var(--text-muted)' }}
+          aria-label="Refresh insight"
           title="Refresh insight"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-        </button>
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+        </IconButton>
       </div>
 
       {/* Content */}

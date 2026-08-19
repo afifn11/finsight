@@ -68,7 +68,8 @@ export function ActionButton({
         onBlur={() => setShowTooltip(false)}
         title={title ?? label}
         className={`
-          flex items-center gap-1.5 rounded-lg font-medium
+          flex items-center justify-center gap-1.5 rounded-lg font-medium
+          min-h-11 min-w-11
           transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed
           ${padding} ${textSize}
         `}

@@ -23,18 +23,24 @@ export function formatCurrency(
   }).format(amount)
 }
 
-// Short format: Rp 1,5 jt / Rp 2,3 M
+// Short format: Rp 1.5 jt / Rp 2.3 M — handles negative values by formatting
+// the absolute amount and prepending the sign, so a negative net balance still
+// gets the same jt/rb/M abbreviation as a positive one instead of falling
+// through every threshold unformatted (e.g. "Rp -223000").
 export function formatCurrencyShort(amount: number): string {
-  if (amount >= 1_000_000_000) {
-    return `Rp ${(amount / 1_000_000_000).toFixed(1)} M`
+  const sign = amount < 0 ? '-' : ''
+  const abs = Math.abs(amount)
+
+  if (abs >= 1_000_000_000) {
+    return `${sign}Rp ${(abs / 1_000_000_000).toFixed(1)} M`
   }
-  if (amount >= 1_000_000) {
-    return `Rp ${(amount / 1_000_000).toFixed(1)} jt`
+  if (abs >= 1_000_000) {
+    return `${sign}Rp ${(abs / 1_000_000).toFixed(1)} jt`
   }
-  if (amount >= 1_000) {
-    return `Rp ${(amount / 1_000).toFixed(0)} rb`
+  if (abs >= 1_000) {
+    return `${sign}Rp ${(abs / 1_000).toFixed(0)} rb`
   }
-  return `Rp ${amount}`
+  return `${sign}Rp ${abs}`
 }
 
 // ── Date helpers ───────────────────────────────────────────────

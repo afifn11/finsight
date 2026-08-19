@@ -32,6 +32,15 @@ describe('formatCurrencyShort', () => {
   it('formats small amounts as-is', () => {
     expect(formatCurrencyShort(500)).toBe('Rp 500')
   })
+  it('formats negative millions with sign and abbreviation, not raw digits', () => {
+    expect(formatCurrencyShort(-1500000)).toBe('-Rp 1.5 jt')
+  })
+  it('formats negative thousands with sign and abbreviation', () => {
+    expect(formatCurrencyShort(-500000)).toBe('-Rp 500 rb')
+  })
+  it('formats small negative amounts with sign', () => {
+    expect(formatCurrencyShort(-500)).toBe('-Rp 500')
+  })
 })
 
 describe('calculatePercentage', () => {

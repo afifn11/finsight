@@ -2,17 +2,18 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { X, Loader2, ScanLine } from 'lucide-react'
+import { X, ScanLine } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { transactionSchema, type TransactionInput } from '@/lib/validations'
 import { useCategories, useBodyScrollLock, useFocusTrap } from '@/hooks'
-import { cn } from '@/lib/utils'
 import type { TransactionWithCategory } from '@/types'
 import { ReceiptUploader } from './ReceiptUploader'
 import { OcrScanner } from './OcrScanner'
+import { IconButton } from '@/components/ui/IconButton'
+import { Button } from '@/components/ui/Button'
 
 interface Props {
   open: boolean
@@ -183,9 +184,9 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
                 Scan Struk
               </button>
             )}
-            <button onClick={onClose} aria-label="Tutup dialog" style={{ color: 'var(--text-muted)' }}>
+            <IconButton aria-label="Tutup dialog" onClick={onClose}>
               <X className="w-5 h-5" aria-hidden="true" />
-            </button>
+            </IconButton>
           </div>
         </div>
 
@@ -436,36 +437,17 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
 
           {/* Actions — hide after new transaction saved (showing receipt uploader) */}
           {!newTransactionId && <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors"
-              style={{
-                borderColor: 'var(--border-default)',
-                color: 'var(--text-secondary)',
-                background: 'var(--bg-card)',
-              }}
-            >
+            <Button type="button" variant="secondary" fullWidth onClick={onClose}>
               Batal
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-60',
-                selectedType === 'INCOME'
-                  ? 'bg-[var(--color-success-500)]'
-                  : 'hover:opacity-90'
-              )}
-              style={
-                selectedType !== 'INCOME'
-                  ? { background: 'var(--color-primary-800)' }
-                  : undefined
-              }
+              fullWidth
+              loading={isSubmitting}
+              style={selectedType === 'INCOME' ? { background: 'var(--color-success-500)' } : undefined}
             >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
               {isEdit ? 'Simpan perubahan' : 'Tambah transaksi'}
-            </button>
+            </Button>
           </div>}
         </form>
       </div>

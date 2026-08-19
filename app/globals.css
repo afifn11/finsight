@@ -27,6 +27,14 @@
   --color-danger-500:  #ef4444;
   --color-danger-600:  #dc2626;
 
+  /* AI Insight accent — intentionally off-palette (indigo/violet) so AI-generated
+     content reads as visually distinct from the rest of the app, per design review.
+     Tokenized rather than hardcoded so it has one source of truth. */
+  --color-ai-accent-50:    #f5f3ff;
+  --color-ai-accent-start: #6366f1;
+  --color-ai-accent-end:   #8b5cf6;
+  --color-ai-accent-600:   #7c3aed;
+
   /* Neutral — cool blue-gray */
   --color-neutral-50:  #f0f9ff;
   --color-neutral-100: #e0f2fe;
@@ -115,3 +123,22 @@ body {
 .text-expense { color: var(--color-expense); }
 .bg-income    { background-color: var(--color-success-50); }
 .bg-expense   { background-color: var(--color-danger-50); }
+
+/* ── Global keyboard focus visibility ─────────────────────────────
+   Element + pseudo-class selectors (e.g. `button:focus-visible`) are
+   used rather than a class so this reliably wins over any `outline-none`
+   utility already applied in markup, regardless of stylesheet order.
+   Uses :focus-visible (not :focus) so mouse/touch interaction stays
+   visually unchanged — only keyboard/AT users see the ring. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

@@ -13,17 +13,30 @@ interface StatCardProps {
   iconBg: string
   iconColor: string
   trend?: 'positive' | 'negative' | 'neutral'
+  /** Gives the single most important KPI (Net Balance) slightly more visual
+   *  weight than the other three — larger value type + a subtle accent border.
+   *  Not a restructure of the grid, just a hierarchy nudge per the audit. */
+  featured?: boolean
 }
 
-function StatCard({ label, value, subtext, icon: Icon, iconBg, iconColor, trend }: StatCardProps) {
+function StatCard({ label, value, subtext, icon: Icon, iconBg, iconColor, trend, featured }: StatCardProps) {
   return (
-    <div className="card p-5">
+    <div
+      className="card p-5"
+      style={featured ? { borderColor: 'var(--color-primary-600)', borderWidth: 1.5 } : undefined}
+    >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{label}</p>
+          <p
+            className="text-sm"
+            style={{ color: 'var(--text-secondary)', fontWeight: featured ? 600 : 400 }}
+          >
+            {label}
+          </p>
           <p
             className={cn(
-              'text-2xl font-semibold',
+              featured ? 'text-3xl' : 'text-2xl',
+              'font-semibold tabular-nums',
               trend === 'positive' && 'text-income',
               trend === 'negative' && 'text-expense',
             )}
@@ -101,6 +114,7 @@ export function SummaryCards() {
       iconBg: 'var(--color-primary-50)',
       iconColor: 'var(--color-primary-600)',
       trend: (s?.netBalance ?? 0) >= 0 ? 'positive' : 'negative',
+      featured: true,
     },
     {
       label: 'Tingkat Tabungan',

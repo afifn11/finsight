@@ -4,6 +4,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Plus, Search, Filter, ArrowUpRight, ArrowDownLeft, Pencil, Trash2, ChevronLeft, ChevronRight, Paperclip } from 'lucide-react'
 import { ActionButton, ActionGroup } from '@/components/ui/ActionButton'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useTransactions, useDeleteTransaction, useDebounce } from '@/hooks'
 import { formatCurrency, formatDateShort, cn } from '@/lib/utils'
 import { TransactionFormModal } from './TransactionFormModal'
@@ -121,6 +122,7 @@ export function TransactionsList() {
   const debouncedSearch = useDebounce(searchInput, 300)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingTx, setEditingTx] = useState<TransactionWithCategory | null>(null)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     setFilters((prev) => {
@@ -150,6 +152,16 @@ export function TransactionsList() {
   function handleModalClose() {
     setModalOpen(false)
     setEditingTx(null)
+  }
+
+  function handleRequestDelete(id: string) {
+    setPendingDeleteId(id)
+  }
+
+  async function handleConfirmDelete() {
+    if (!pendingDeleteId) return
+    await deleteTransaction(pendingDeleteId)
+    setPendingDeleteId(null)
   }
 
   return (
@@ -243,8 +255,8 @@ export function TransactionsList() {
                 key={tx.id}
                 tx={tx}
                 onEdit={handleEdit}
-                onDelete={deleteTransaction}
-                isDeleting={isDeleting}
+                onDelete={handleRequestDelete}
+                isDeleting={isDeleting && pendingDeleteId === tx.id}
               />
             ))}
           </div>
@@ -285,6 +297,16 @@ export function TransactionsList() {
           if (closeModal !== false) handleModalClose()
         }}
         editData={editingTx}
+      />
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        title="Hapus transaksi?"
+        description="Transaksi ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Hapus transaksi"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setPendingDeleteId(null)}
       />
     </>
   )

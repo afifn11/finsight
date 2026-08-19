@@ -6,6 +6,7 @@ import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { Bell, LogOut } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
+import { IconButton } from '@/components/ui/IconButton'
 import { getInitials, getBudgetStatus, formatCurrencyShort } from '@/lib/utils'
 import type { BudgetWithCategory } from '@/types'
 
@@ -125,34 +126,43 @@ export function Header({ user }: HeaderProps) {
 
         {/* Notification bell */}
         <div className="relative">
-          <button
+          <IconButton
             onClick={() => setShowDropdown((o) => !o)}
-            className="relative flex items-center justify-center w-9 h-9 rounded-lg border transition-colors hover:opacity-80"
-            style={{
-              borderColor: 'var(--border-default)',
-              background: 'var(--bg-card)',
-              color: 'var(--text-secondary)',
-            }}
+            className="relative"
+            aria-label={alertCount > 0 ? `${alertCount} budget mendekati limit` : 'Tidak ada notifikasi'}
+            aria-haspopup="dialog"
+            aria-expanded={showDropdown}
             title={alertCount > 0 ? `${alertCount} budget mendekati limit` : 'Tidak ada notifikasi'}
+            style={{
+              borderWidth: 1,
+              borderColor: 'var(--border-default)',
+              borderStyle: 'solid',
+              background: 'var(--bg-card)',
+            }}
           >
-            <Bell className="w-4 h-4" />
+            <Bell className="w-4 h-4" aria-hidden="true" />
             {alertCount > 0 && (
               <span
                 className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 rounded-full text-white"
                 style={{ background: 'var(--color-danger-500)', fontSize: '10px', fontWeight: 600 }}
+                aria-hidden="true"
               >
                 {alertCount}
               </span>
             )}
-          </button>
+          </IconButton>
 
           {/* Dropdown notifikasi */}
           {showDropdown && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
               <div
-                className="absolute right-0 top-full mt-1 z-20 w-72 rounded-xl border shadow-lg overflow-hidden"
-                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
+                className="absolute right-0 top-full mt-1 z-20 w-72 rounded-xl border overflow-hidden"
+                style={{
+                  background: 'var(--bg-card)',
+                  borderColor: 'var(--border-default)',
+                  boxShadow: 'var(--shadow-dropdown)',
+                }}
               >
                 <div
                   className="px-4 py-3 border-b"
@@ -228,14 +238,14 @@ export function Header({ user }: HeaderProps) {
         </div>
 
         {/* Logout button — mobile only */}
-        <button
+        <IconButton
           onClick={() => signOut({ callbackUrl: '/login' })}
-          className="flex md:hidden items-center justify-center w-8 h-8 rounded-lg transition-colors hover:opacity-70"
-          style={{ color: 'var(--text-muted)' }}
+          className="flex md:hidden"
+          aria-label="Keluar"
           title="Keluar"
         >
-          <LogOut className="w-4 h-4" />
-        </button>
+          <LogOut className="w-4 h-4" aria-hidden="true" />
+        </IconButton>
 
         {/* Avatar */}
         {user.image ? (

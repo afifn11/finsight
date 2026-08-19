@@ -315,8 +315,12 @@ export function ExportButton() {
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
-            className="absolute right-0 top-full mt-1 z-20 w-56 rounded-xl border shadow-lg overflow-hidden"
-            style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
+            className="absolute right-0 top-full mt-1 z-20 w-56 rounded-xl border overflow-hidden"
+            style={{
+              background: 'var(--bg-card)',
+              borderColor: 'var(--border-default)',
+              boxShadow: 'var(--shadow-dropdown)',
+            }}
           >
             <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--border-default)' }}>
               <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>CSV</p>

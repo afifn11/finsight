@@ -4,6 +4,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, Target, Trophy, Pencil, Trash2, Loader2, X, CheckCircle } from 'lucide-react'
 import { ActionButton, ActionGroup } from '@/components/ui/ActionButton'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils'
 import { GoalCardSkeleton } from '@/components/ui/Skeleton'
@@ -55,6 +58,7 @@ export function GoalsManager() {
   const [form, setForm] = useState(DEFAULT_FORM)
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [pendingDeleteGoal, setPendingDeleteGoal] = useState<Goal | null>(null)
 
   const fetchGoals = useCallback(async () => {
     try {
@@ -154,6 +158,13 @@ export function GoalsManager() {
     } finally {
       setDeletingId(null)
     }
+  }
+
+  async function handleConfirmDelete() {
+    if (!pendingDeleteGoal) return
+    const id = pendingDeleteGoal.id
+    setPendingDeleteGoal(null)
+    await handleDelete(id)
   }
 
   async function updateAmount(goal: Goal, addedAmount: number) {
@@ -256,7 +267,7 @@ export function GoalsManager() {
               key={goal.id}
               goal={goal}
               onEdit={() => openEdit(goal)}
-              onDelete={() => handleDelete(goal.id)}
+              onDelete={() => setPendingDeleteGoal(goal)}
               onComplete={() => handleComplete(goal)}
               onUpdateAmount={(addedAmount) => updateAmount(goal, addedAmount)}
               isDeleting={deletingId === goal.id}
@@ -277,9 +288,9 @@ export function GoalsManager() {
               <h2 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {editingGoal ? 'Edit Goal' : 'Buat Goal Baru'}
               </h2>
-              <button onClick={() => setShowModal(false)} style={{ color: 'var(--text-muted)' }}>
+              <IconButton aria-label="Tutup" onClick={() => setShowModal(false)}>
                 <X className="w-5 h-5" />
-              </button>
+              </IconButton>
             </div>
 
             <div className="p-5 space-y-4">
@@ -402,27 +413,31 @@ export function GoalsManager() {
 
               {/* Actions */}
               <div className="flex gap-3 pt-1">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-medium border"
-                  style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
-                >
+                <Button variant="secondary" fullWidth onClick={() => setShowModal(false)}>
                   Batal
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-white disabled:opacity-60"
-                  style={{ background: 'var(--color-primary-800)' }}
-                >
-                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                </Button>
+                <Button fullWidth loading={saving} onClick={handleSave}>
                   {editingGoal ? 'Simpan' : 'Buat Goal'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteGoal !== null}
+        title="Hapus goal?"
+        description={
+          pendingDeleteGoal
+            ? `Goal "${pendingDeleteGoal.name}" akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`
+            : ''
+        }
+        confirmLabel="Hapus goal"
+        isLoading={deletingId === pendingDeleteGoal?.id}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setPendingDeleteGoal(null)}
+      />
     </div>
   )
 }

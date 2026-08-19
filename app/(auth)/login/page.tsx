@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { loginSchema, type LoginInput } from '@/lib/validations'
+import { Button } from '@/components/ui/Button'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -159,15 +160,9 @@ export default function LoginPage() {
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex w-full items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-60 hover:opacity-90"
-              style={{ background: 'var(--color-primary-800)' }}
-            >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            <Button type="submit" loading={isSubmitting} fullWidth size="lg">
               Masuk
-            </button>
+            </Button>
           </form>
 
           {/* Demo account hint */}

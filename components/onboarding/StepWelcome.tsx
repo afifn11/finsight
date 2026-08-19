@@ -25,8 +25,8 @@ const FEATURES = [
   },
   {
     icon: Brain,
-    color: '#7c3aed',
-    bg: '#f5f3ff',
+    color: 'var(--color-ai-accent-600)',
+    bg: 'var(--color-ai-accent-50)',
     title: 'AI Spending Insight',
     desc: 'Insight personal dari Google Gemini berdasarkan data kamu',
   },
