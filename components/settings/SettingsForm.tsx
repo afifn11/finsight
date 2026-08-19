@@ -109,7 +109,7 @@ export function SettingsForm({ user }: Props) {
               }}
             />
             {errors.name && (
-              <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+              <p className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                 {errors.name.message}
               </p>
             )}
@@ -183,7 +183,7 @@ export function SettingsForm({ user }: Props) {
         className="card p-6 border"
         style={{ borderColor: 'var(--color-danger-500)' }}
       >
-        <h2 className="font-semibold mb-1" style={{ color: 'var(--color-danger-500)' }}>
+        <h2 className="font-semibold mb-1" style={{ color: 'var(--color-danger-text)' }}>
           Danger Zone
         </h2>
         <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
@@ -218,7 +218,7 @@ export function SettingsForm({ user }: Props) {
         />
         <div className="px-5 pb-5 pt-4">
           <p id={descriptionId} className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-            Ketik <span className="font-mono font-semibold" style={{ color: 'var(--color-danger-500)' }}>hapus akun saya</span> untuk mengkonfirmasi.
+            Ketik <span className="font-mono font-semibold" style={{ color: 'var(--color-danger-text)' }}>hapus akun saya</span> untuk mengkonfirmasi.
           </p>
 
           <Input

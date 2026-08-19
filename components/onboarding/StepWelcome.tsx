@@ -2,6 +2,7 @@
 'use client'
 
 import { Sparkles, BarChart3, PiggyBank, Brain } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 
 interface Props {
   user: { name?: string | null; email: string }
@@ -82,13 +83,9 @@ export function StepWelcome({ user, onNext }: Props) {
         })}
       </div>
 
-      <button
-        onClick={onNext}
-        className="w-full py-2.5 rounded-lg text-sm font-medium text-white transition-colors hover:opacity-90"
-        style={{ background: 'var(--color-primary-800)' }}
-      >
+      <Button fullWidth size="lg" onClick={onNext}>
         Mulai setup →
-      </button>
+      </Button>
     </div>
   )
 }

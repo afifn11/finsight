@@ -29,7 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             style={{ color: 'var(--text-primary)' }}
           >
             {label}
-            {required && <span style={{ color: 'var(--color-danger-500)' }}> *</span>}
+            {required && <span style={{ color: 'var(--color-danger-text)' }}> *</span>}
           </label>
         )}
         <input
@@ -47,7 +47,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p id={errorId} className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+          <p id={errorId} className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
             {error}
           </p>
         )}

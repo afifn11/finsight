@@ -67,9 +67,9 @@ export function OcrScanner({ onResult, onClose }: Props) {
 
   const confidenceColor =
     !result ? 'var(--text-muted)' :
-    result.confidence >= 0.7 ? 'var(--color-success-500)' :
-    result.confidence >= 0.4 ? 'var(--color-warning-500)' :
-    'var(--color-danger-500)'
+    result.confidence >= 0.7 ? 'var(--color-income)' :
+    result.confidence >= 0.4 ? 'var(--color-warning-text)' :
+    'var(--color-danger-text)'
 
   const confidenceLabel =
     !result ? '' :

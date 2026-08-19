@@ -187,8 +187,8 @@ export function Header({ user }: HeaderProps) {
                     {alerts.map((alert) => {
                       const status = getBudgetStatus(alert.percentage)
                       const color = status === 'exceeded'
-                        ? 'var(--color-danger-500)'
-                        : 'var(--color-warning-500)'
+                        ? 'var(--color-danger-text)'
+                        : 'var(--color-warning-text)'
 
                       return (
                         <div key={alert.id} className="px-4 py-3">

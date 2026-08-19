@@ -505,7 +505,7 @@ function GoalCard({
             {deadlineLabel && (
               <p
                 className="text-xs mt-1"
-                style={{ color: deadlineLabel.warn ? 'var(--color-danger-500)' : 'var(--text-muted)' }}
+                style={{ color: deadlineLabel.warn ? 'var(--color-danger-text)' : 'var(--text-muted)' }}
               >
                 ⏰ {deadlineLabel.text}
               </p>
@@ -517,7 +517,7 @@ function GoalCard({
       <div>
         <div className="flex items-end justify-between mb-1.5">
           <div>
-            <span className="text-lg font-bold" style={{ color: isComplete ? 'var(--color-success-500)' : 'var(--text-primary)' }}>
+            <span className="text-lg font-bold" style={{ color: isComplete ? 'var(--color-income)' : 'var(--text-primary)' }}>
               {pct}%
             </span>
             {isComplete && <Trophy className="inline w-4 h-4 ml-1 text-yellow-500" />}

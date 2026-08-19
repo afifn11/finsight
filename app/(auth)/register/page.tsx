@@ -132,7 +132,7 @@ export default function RegisterPage() {
                 }}
               />
               {errors.name && (
-                <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+                <p className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                   {errors.name.message}
                 </p>
               )}
@@ -155,7 +155,7 @@ export default function RegisterPage() {
                 }}
               />
               {errors.email && (
-                <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+                <p className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                   {errors.email.message}
                 </p>
               )}
@@ -188,7 +188,7 @@ export default function RegisterPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+                <p className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                   {errors.password.message}
                 </p>
               )}
@@ -211,7 +211,7 @@ export default function RegisterPage() {
                 }}
               />
               {errors.confirmPassword && (
-                <p className="text-xs mt-1" style={{ color: 'var(--color-danger-500)' }}>
+                <p className="text-xs mt-1" style={{ color: 'var(--color-danger-text)' }}>
                   {errors.confirmPassword.message}
                 </p>
               )}

@@ -5,15 +5,24 @@ import { useDashboard } from '@/hooks'
 import { formatCurrencyShort, formatCurrency, formatPercentage } from '@/lib/utils'
 import { MonthlyBarChart } from './MonthlyBarChart'
 import { ChartSkeleton } from './ChartSkeleton'
+import { DataError } from '@/components/ui/DataError'
 
 export function AnalyticsView() {
-  const { data, isLoading } = useDashboard()
+  const { data, isLoading, error, refresh } = useDashboard()
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <ChartSkeleton height={260} titleWidth={176} />
         <ChartSkeleton height={260} titleWidth={176} />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="card p-5">
+        <DataError message={error} onRetry={refresh} />
       </div>
     )
   }
@@ -74,7 +83,7 @@ export function AnalyticsView() {
                     </span>
                     <span
                       className="text-xs font-medium w-10 text-right"
-                      style={{ color: cat.categoryColor }}
+                      style={{ color: 'var(--text-secondary)' }}
                     >
                       {formatPercentage(cat.percentage)}
                     </span>
@@ -97,7 +106,7 @@ export function AnalyticsView() {
               style={{ borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
             >
               <span>Total Pengeluaran</span>
-              <span style={{ color: 'var(--color-danger-500)' }}>
+              <span style={{ color: 'var(--color-danger-text)' }}>
                 {formatCurrency(breakdown.reduce((s, c) => s + c.total, 0))}
               </span>
             </div>
