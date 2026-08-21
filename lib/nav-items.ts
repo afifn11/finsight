@@ -14,17 +14,21 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Pengaturan', href: '/settings', icon: 'Settings' },
 ]
 
-// Mobile bottom nav has room for 5 comfortable touch targets. The 4 items used
-// daily get a direct slot; the rest live behind "Lainnya" (More) so every page
-// stays reachable without cramming 6 items into one bar.
-export const BOTTOM_NAV_PRIMARY_ITEMS: NavItem[] = [
+// Mobile bottom nav layout: 2 items — [Scan FAB] — 2 items, where the FAB is
+// the elevated, star "Scan Struk" action (not a navigation link). Fewer direct
+// slots than before because the FAB takes the visual center; the item bumped
+// out (Goals) moves into "Lainnya" alongside Analytics/Settings.
+export const BOTTOM_NAV_LEFT_ITEMS: NavItem[] = [
   NAV_ITEMS[0]!, // Dashboard
   NAV_ITEMS[1]!, // Transaksi
+]
+
+export const BOTTOM_NAV_RIGHT_ITEMS: NavItem[] = [
   NAV_ITEMS[2]!, // Budget
-  NAV_ITEMS[3]!, // Goals
 ]
 
 export const BOTTOM_NAV_MORE_ITEMS: NavItem[] = [
+  NAV_ITEMS[3]!, // Goals
   NAV_ITEMS[4]!, // Analitik
   NAV_ITEMS[5]!, // Pengaturan
 ]
