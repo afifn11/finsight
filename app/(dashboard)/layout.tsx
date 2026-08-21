@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/shared/Sidebar'
 import { Header } from '@/components/shared/Header'
 import { BottomNav } from '@/components/shared/BottomNav'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
+import { QuickAddProvider } from '@/components/transactions/QuickAddProvider'
 
 export default async function DashboardLayout({
   children,
@@ -16,23 +17,25 @@ export default async function DashboardLayout({
   if (!session) redirect('/login')
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-page)' }}>
-      {/* Sidebar — desktop only */}
-      <Sidebar user={session.user} />
+    <QuickAddProvider>
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-page)' }}>
+        {/* Sidebar — desktop only */}
+        <Sidebar user={session.user} />
 
-      {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header user={session.user} />
-        <main
-          className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8 pt-[calc(4rem+1.5rem)] md:pt-6"
-          style={{ paddingBottom: 'calc(1.5rem + 64px)' }}
-        >
-          <ErrorBoundary>{children}</ErrorBoundary>
-        </main>
+        {/* Main content */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Header user={session.user} />
+          <main
+            className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8 pt-[calc(4rem+1.5rem)] md:pt-6"
+            style={{ paddingBottom: 'calc(1.5rem + 64px)' }}
+          >
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </main>
+        </div>
+
+        {/* Bottom navigation — mobile only */}
+        <BottomNav />
       </div>
-
-      {/* Bottom navigation — mobile only */}
-      <BottomNav />
-    </div>
+    </QuickAddProvider>
   )
 }

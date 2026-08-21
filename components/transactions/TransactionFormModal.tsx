@@ -15,15 +15,20 @@ import { OcrScanner } from './OcrScanner'
 import { IconButton } from '@/components/ui/IconButton'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
+import type { OcrResult } from './OcrScanner'
 
 interface Props {
   open: boolean
   onClose: () => void
   onSuccess: (closeModal?: boolean) => void
   editData?: TransactionWithCategory | null
+  /** Pre-fill a NEW transaction from an OCR scan performed before this modal
+   *  opened (e.g. the "Scan Struk" flow from the bottom-nav FAB). Ignored when
+   *  editData is present — editing an existing transaction always wins. */
+  initialOcrData?: OcrResult | null
 }
 
-export function TransactionFormModal({ open, onClose, onSuccess, editData }: Props) {
+export function TransactionFormModal({ open, onClose, onSuccess, editData, initialOcrData }: Props) {
   const isEdit = !!editData
 
   const {
@@ -72,8 +77,14 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData }: Pro
       })
     } else {
       reset({ type: 'EXPENSE', date: new Date(), isRecurring: false })
+      if (initialOcrData) {
+        if (initialOcrData.amount) setValue('amount', initialOcrData.amount)
+        if (initialOcrData.description) setValue('description', initialOcrData.description)
+        if (initialOcrData.date) setValue('date', new Date(initialOcrData.date))
+        if (initialOcrData.type) setValue('type', initialOcrData.type)
+      }
     }
-  }, [editData, reset, open])
+  }, [editData, reset, open, initialOcrData, setValue])
 
   // Reset newTransactionId ONLY when modal fully closes
   useEffect(() => {

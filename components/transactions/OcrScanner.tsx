@@ -2,11 +2,12 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Camera, ScanLine, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { IconButton } from '@/components/ui/IconButton'
 
-interface OcrResult {
+export interface OcrResult {
   amount: number | null
   date: string | null
   description: string | null
@@ -77,9 +78,9 @@ export function OcrScanner({ onResult, onClose }: Props) {
     result.confidence >= 0.4 ? 'Akurasi sedang' :
     'Akurasi rendah'
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.6)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
@@ -216,7 +217,8 @@ export function OcrScanner({ onResult, onClose }: Props) {
         className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) processImage(f); e.target.value = '' }}
       />
-    </div>
+    </div>,
+    document.body
   )
 }
 

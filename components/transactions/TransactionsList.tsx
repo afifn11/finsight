@@ -7,7 +7,7 @@ import { ActionButton, ActionGroup } from '@/components/ui/ActionButton'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useTransactions, useDeleteTransaction, useDebounce } from '@/hooks'
 import { formatCurrency, formatDateShort, cn } from '@/lib/utils'
-import { TransactionFormModal } from './TransactionFormModal'
+import { useQuickAdd, useTransactionsChanged } from './QuickAddProvider'
 import { TransactionRowSkeleton } from '@/components/ui/Skeleton'
 import type { TransactionWithCategory, TransactionFilters } from '@/types'
 
@@ -120,9 +120,8 @@ export function TransactionsList() {
   })
   const [searchInput, setSearchInput] = useState('')
   const debouncedSearch = useDebounce(searchInput, 300)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editingTx, setEditingTx] = useState<TransactionWithCategory | null>(null)
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const { openAdd, openEdit } = useQuickAdd()
 
   useEffect(() => {
     setFilters((prev) => {
@@ -134,25 +133,11 @@ export function TransactionsList() {
   }, [debouncedSearch])
 
   const { data, isLoading, refresh } = useTransactions(filters)
+  useTransactionsChanged(refresh)
   const handleFiltersChange = useCallback((partial: Partial<TransactionFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }))
   }, [])
   const { deleteTransaction, isDeleting } = useDeleteTransaction(refresh)
-
-  function handleEdit(tx: TransactionWithCategory) {
-    setEditingTx(tx)
-    setModalOpen(true)
-  }
-
-  function handleAdd() {
-    setEditingTx(null)
-    setModalOpen(true)
-  }
-
-  function handleModalClose() {
-    setModalOpen(false)
-    setEditingTx(null)
-  }
 
   function handleRequestDelete(id: string) {
     setPendingDeleteId(id)
@@ -189,7 +174,7 @@ export function TransactionsList() {
               />
             </div>
             <button
-              onClick={handleAdd}
+              onClick={openAdd}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white shrink-0 transition-colors hover:opacity-90"
               style={{ background: 'var(--color-primary-800)' }}
             >
@@ -241,7 +226,7 @@ export function TransactionsList() {
               Coba ubah filter atau tambah transaksi baru
             </p>
             <button
-              onClick={handleAdd}
+              onClick={openAdd}
               className="mt-4 px-4 py-2 rounded-lg text-sm font-medium text-white"
               style={{ background: 'var(--color-primary-800)' }}
             >
@@ -254,7 +239,7 @@ export function TransactionsList() {
               <TransactionRow
                 key={tx.id}
                 tx={tx}
-                onEdit={handleEdit}
+                onEdit={openEdit}
                 onDelete={handleRequestDelete}
                 isDeleting={isDeleting && pendingDeleteId === tx.id}
               />
@@ -288,16 +273,6 @@ export function TransactionsList() {
           </div>
         )}
       </div>
-
-      <TransactionFormModal
-        open={modalOpen}
-        onClose={handleModalClose}
-        onSuccess={(closeModal?: boolean) => {
-          refresh()
-          if (closeModal !== false) handleModalClose()
-        }}
-        editData={editingTx}
-      />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}
