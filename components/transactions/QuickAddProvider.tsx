@@ -80,6 +80,16 @@ export function QuickAddProvider({ children }: { children: React.ReactNode }) {
     setMode('add')
   }
 
+  // Passed as OcrScanner's onClose. Guarded so it only closes the SCANNER
+  // (returning to 'closed') when the scanner is still the active mode — if
+  // handleOcrResult already moved mode to 'add' (user picked "Gunakan data
+  // ini", which calls onResult then onClose back-to-back), this must NOT
+  // clobber that transition back to 'closed', or the just-opened form (with
+  // the scanned data) would immediately disappear.
+  function handleScanClose() {
+    setMode((current) => (current === 'scan' ? 'closed' : current))
+  }
+
   function handleSuccess(closeModal?: boolean) {
     notifyTransactionsChanged()
     if (closeModal !== false) handleClose()
@@ -98,7 +108,7 @@ export function QuickAddProvider({ children }: { children: React.ReactNode }) {
       />
 
       {mode === 'scan' && (
-        <OcrScanner onResult={handleOcrResult} onClose={handleClose} />
+        <OcrScanner onResult={handleOcrResult} onClose={handleScanClose} />
       )}
     </QuickAddContext.Provider>
   )

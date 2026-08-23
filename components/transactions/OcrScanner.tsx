@@ -29,25 +29,83 @@ export function OcrScanner({ onResult, onClose }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
-  async function processImage(file: File) {
-    if (!file) return
+  // Full-resolution phone camera photos are commonly 3–8MB+, which can exceed
+  // Vercel Serverless Functions' platform-level request body limit (~4.5MB) —
+  // a limit enforced BEFORE the request even reaches app/api/ocr/route.ts's
+  // own (larger) 10MB check. That produces a non-JSON platform error page
+  // rather than our API's own JSON error, which is what caused the
+  // "Unexpected token" parse errors. Resizing/compressing client-side keeps
+  // uploads well under that limit and fixes the failure at the source,
+  // rather than just handling it more gracefully after the fact.
+  function compressImage(file: File, maxDimension = 1600, quality = 0.75): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      const objectUrl = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl)
+        let { width, height } = img
+        if (width > maxDimension || height > maxDimension) {
+          const scale = maxDimension / Math.max(width, height)
+          width = Math.round(width * scale)
+          height = Math.round(height * scale)
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) { resolve(file); return }
+        ctx.drawImage(img, 0, 0, width, height)
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { resolve(file); return }
+            resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }))
+          },
+          'image/jpeg',
+          quality
+        )
+      }
+      img.onerror = () => reject(new Error('Gagal memproses gambar'))
+      img.src = objectUrl
+    })
+  }
 
-    // Show preview
+  async function processImage(rawFile: File) {
+    if (!rawFile) return
+
+    // Show preview (of the original file — no need to wait on compression for this)
     const reader = new FileReader()
     reader.onload = (e) => setPreview(e.target?.result as string)
-    reader.readAsDataURL(file)
+    reader.readAsDataURL(rawFile)
 
     setIsProcessing(true)
     setResult(null)
 
     try {
+      // PDFs can't be canvas-compressed — send as-is; images get resized/compressed.
+      const file = rawFile.type === 'application/pdf' ? rawFile : await compressImage(rawFile)
+
       const formData = new FormData()
       formData.append('image', file)
 
       const res = await fetch('/api/ocr', { method: 'POST', body: formData })
-      const json = await res.json()
 
-      if (!res.ok) throw new Error(json.error ?? 'Gagal membaca struk')
+      // Don't assume the response is JSON — a platform-level failure (e.g.
+      // request too large, gateway timeout) returns a plain-text/HTML error
+      // page, and calling res.json() directly on that throws a cryptic
+      // "Unexpected token" SyntaxError instead of a useful message.
+      const rawText = await res.text()
+      let json: { data?: OcrResult; error?: string }
+      try {
+        json = JSON.parse(rawText)
+      } catch {
+        throw new Error(
+          res.status === 413
+            ? 'Ukuran gambar terlalu besar. Coba foto ulang atau gunakan gambar lain.'
+            : `Gagal memproses gambar (${res.status}). Coba lagi.`
+        )
+      }
+
+      if (!res.ok || !json.data) throw new Error(json.error ?? 'Gagal membaca struk')
 
       setResult(json.data)
       if (json.data.confidence < 0.4) {
