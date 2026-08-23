@@ -37,36 +37,39 @@ export function OcrScanner({ onResult, onClose }: Props) {
   // "Unexpected token" parse errors. Resizing/compressing client-side keeps
   // uploads well under that limit and fixes the failure at the source,
   // rather than just handling it more gracefully after the fact.
-  function compressImage(file: File, maxDimension = 1600, quality = 0.75): Promise<File> {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      const objectUrl = URL.createObjectURL(file)
-      img.onload = () => {
-        URL.revokeObjectURL(objectUrl)
-        let { width, height } = img
-        if (width > maxDimension || height > maxDimension) {
-          const scale = maxDimension / Math.max(width, height)
-          width = Math.round(width * scale)
-          height = Math.round(height * scale)
-        }
-        const canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')
-        if (!ctx) { resolve(file); return }
-        ctx.drawImage(img, 0, 0, width, height)
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) { resolve(file); return }
-            resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }))
-          },
-          'image/jpeg',
-          quality
-        )
+  //
+  // Uses createImageBitmap (decodes the File/Blob directly) rather than
+  // loading into an <img src="blob:..."> — the latter requires `blob:` in
+  // the site's img-src CSP directive, which this app deliberately doesn't
+  // grant. createImageBitmap never touches img-src at all.
+  async function compressImage(file: File, maxDimension = 1600, quality = 0.75): Promise<File> {
+    try {
+      const bitmap = await createImageBitmap(file)
+      let { width, height } = bitmap
+      if (width > maxDimension || height > maxDimension) {
+        const scale = maxDimension / Math.max(width, height)
+        width = Math.round(width * scale)
+        height = Math.round(height * scale)
       }
-      img.onerror = () => reject(new Error('Gagal memproses gambar'))
-      img.src = objectUrl
-    })
+
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return file
+      ctx.drawImage(bitmap, 0, 0, width, height)
+      bitmap.close()
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, 'image/jpeg', quality)
+      )
+      if (!blob) return file
+      return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' })
+    } catch {
+      // Decode failed (e.g. unsupported format) — fall back to the original file
+      // rather than blocking the scan entirely.
+      return file
+    }
   }
 
   async function processImage(rawFile: File) {
