@@ -3,9 +3,31 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { registerSchema } from '@/lib/validations'
 import { hashPassword } from '@/lib/password'
+import { authRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 import type { ApiResponse, ApiError } from '@/types'
 
 export async function POST(req: NextRequest) {
+  // Ekstraksi Client IP untuk rate limiting (mendukung header reverse proxy / Cloudflare / Vercel)
+  const clientIp =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    req.headers.get('x-real-ip') ??
+    '127.0.0.1'
+
+  // Batasi rate register per IP untuk mencegah bot spam & resource exhaustion
+  const { success, remaining, reset } = await checkRateLimit(authRateLimiter, clientIp)
+  if (!success) {
+    return NextResponse.json<ApiError>(
+      { error: 'Terlalu banyak permintaan pendaftaran. Silakan coba beberapa saat lagi.' },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Remaining': String(remaining),
+          'X-RateLimit-Reset': String(reset),
+        },
+      }
+    )
+  }
+
   const body: unknown = await req.json()
   const parsed = registerSchema.safeParse(body)
 
@@ -27,10 +49,8 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // P0.1: passwordHash sekarang disimpan di kolom Prisma-nya sendiri,
-  // bukan di-overload lewat field `image`. Hash yang sama juga dipakai
-  // oleh lib/auth.ts (satu sumber kebenaran: lib/password.ts).
-  const passwordHash = hashPassword(password)
+  // Hash password secara asynchronous (non-blocking)
+  const passwordHash = await hashPassword(password)
 
   const user = await prisma.user.create({
     data: {

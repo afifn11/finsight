@@ -7,6 +7,10 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { verifyPassword } from '@/lib/password'
 
+// Precomputed dummy hash untuk constant-time password check saat user tidak ada (mitigasi timing attack)
+const DUMMY_HASH =
+  'a1b2c3d4e5f60718293a4b5c6d7e8f90:00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+
 // ── Zod validation ─────────────────────────────────────────────
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -50,13 +54,15 @@ export const authOptions: NextAuthOptions = {
           where: { email },
         })
 
-        // User tidak ada, atau daftar via Google (tidak punya passwordHash)
-        if (!user?.passwordHash) return null
+        // Mitigasi timing attack (user enumeration):
+        // Selalu jalankan verifikasi password dengan dummy hash jika user/passwordHash tidak ditemukan,
+        // sehingga response latency identik antara user yang terdaftar vs tidak terdaftar.
+        const hashToVerify = user?.passwordHash ?? DUMMY_HASH
+        const isValid = await verifyPassword(password, hashToVerify)
 
-        // P0.1: dulu baris ini tidak pernah dipanggil — authorize() selalu
-        // return null untuk user non-demo. Sekarang benar-benar diverifikasi.
-        const isValid = verifyPassword(password, user.passwordHash)
-        if (!isValid) return null
+        if (!user || !user.passwordHash || !isValid) {
+          return null
+        }
 
         return { id: user.id, email: user.email, name: user.name, image: user.image }
       },
@@ -104,15 +110,7 @@ export const authOptions: NextAuthOptions = {
       return session
     },
 
-    async signIn({ user, account }) {
-      if (account?.provider === 'google' && user.id) {
-        // Redirect ke onboarding kalau belum selesai ditangani middleware
-        void prisma.user.findUnique({
-          where: { id: user.id },
-          select: { onboardingDone: true },
-        })
-        return true
-      }
+    async signIn() {
       return true
     },
   },

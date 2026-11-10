@@ -15,6 +15,7 @@ export default async function DashboardLayout({
 }) {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
+  if (session.user.onboardingDone === false) redirect('/onboarding')
 
   return (
     <QuickAddProvider>

@@ -29,7 +29,8 @@ export default withAuth(
     callbacks: {
       authorized({ token, req }) {
         const pathname = req.nextUrl.pathname
-        const publicPaths = ['/login', '/register', '/api/auth']
+        // Public paths and webhook/cron endpoints authenticated via Bearer headers
+        const publicPaths = ['/login', '/register', '/api/auth', '/api/cron']
         const isPublic = publicPaths.some((p) => pathname.startsWith(p))
         if (isPublic) return true
         return !!token
@@ -40,6 +41,6 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|site.webmanifest|manifest.webmanifest|manifest.json|sw.js|icon-192.png|icon-512.png|apple-touch-icon.png|offline|.*\.png$|.*\.ico$|.*\.svg$|.*\.webmanifest$).*)' 
+    '/((?!_next/static|_next/image|favicon\\.ico|site\\.webmanifest|manifest\\.webmanifest|manifest\\.json|sw\\.js|offline|.*\\.(?:png|jpg|jpeg|svg|webp|ico|woff2?)$).*)',
   ],
 }

@@ -18,7 +18,28 @@ export async function DELETE() {
     // transactions, budgets, categories, accounts, sessions, ai_insights
     await prisma.user.delete({ where: { id: userId } })
 
-    return NextResponse.json({ success: true })
+    const res = NextResponse.json({ success: true, message: 'Akun berhasil dihapus' })
+
+    // Invalidate NextAuth session & CSRF cookies dengan menyetel maxAge ke 0
+    const isProduction = process.env.NODE_ENV === 'production'
+    const cookieNames = [
+      'next-auth.session-token',
+      '__Secure-next-auth.session-token',
+      'next-auth.csrf-token',
+      '__Host-next-auth.csrf-token',
+    ]
+
+    for (const cookieName of cookieNames) {
+      res.cookies.set(cookieName, '', {
+        maxAge: 0,
+        path: '/',
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+      })
+    }
+
+    return res
   } catch (err) {
     console.error('[DELETE /api/user/delete]', err)
     return NextResponse.json<ApiError>(
