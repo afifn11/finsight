@@ -23,7 +23,7 @@ interface StatCardProps {
 function StatCard({ label, value, subtext, icon: Icon, iconBg, iconColor, trend, featured }: StatCardProps) {
   return (
     <div
-      className="card p-5"
+      className="card p-5 min-h-[120px]"
       style={featured ? { borderColor: 'var(--color-primary-600)', borderWidth: 1.5 } : undefined}
     >
       <div className="flex items-start justify-between">
@@ -62,7 +62,7 @@ function StatCard({ label, value, subtext, icon: Icon, iconBg, iconColor, trend,
 
 function SkeletonCard() {
   return (
-    <div className="card p-5 animate-pulse">
+    <div className="card p-5 min-h-[120px] animate-pulse">
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <div className="h-4 w-24 rounded" style={{ background: 'var(--bg-muted)' }} />

@@ -3,11 +3,15 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
+    id: '/',
+    scope: '/',
     name: 'FinSight - Personal Finance',
     short_name: 'FinSight',
     description: 'Kelola keuangan pribadi dengan AI-powered insights',
     start_url: '/',
     display: 'standalone',
+    orientation: 'portrait-primary',
+    categories: ['finance', 'productivity'],
     background_color: '#0F4C75',
     theme_color: '#0F4C75',
     icons: [

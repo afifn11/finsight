@@ -163,6 +163,7 @@ export function TransactionsList() {
               <input
                 type="text"
                 placeholder="Cari transaksi..."
+                aria-label="Cari transaksi"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm outline-none"
@@ -182,10 +183,17 @@ export function TransactionsList() {
             </button>
           </div>
 
-          <div className="flex rounded-lg border overflow-hidden" style={{ borderColor: 'var(--border-default)' }}>
+          <div
+            role="group"
+            aria-label="Filter jenis transaksi"
+            className="flex rounded-lg border overflow-hidden"
+            style={{ borderColor: 'var(--border-default)' }}
+          >
             {(['ALL', 'INCOME', 'EXPENSE'] as const).map((type) => (
               <button
                 key={type}
+                type="button"
+                aria-pressed={filters.type === type}
                 onClick={() => handleFiltersChange({ type, page: 1 })}
                 className="flex-1 py-2 text-sm font-medium transition-colors"
                 style={
@@ -201,7 +209,7 @@ export function TransactionsList() {
         </div>
 
         {data && (
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p aria-live="polite" className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Menampilkan{' '}
             <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{data.data.length}</span>{' '}
             dari{' '}
@@ -211,7 +219,7 @@ export function TransactionsList() {
         )}
 
         {isLoading ? (
-          <div className="space-y-2">
+          <div aria-busy="true" aria-label="Memuat transaksi" className="space-y-2">
             {Array.from({ length: 8 }).map((_, i) => (
               <TransactionRowSkeleton key={i} />
             ))}

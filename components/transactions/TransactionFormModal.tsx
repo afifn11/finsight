@@ -94,7 +94,11 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData, initi
     }
   }, [open])
 
+  const isFormDisabled = isSubmitting || (!isEdit && !!newTransactionId)
+
   async function onSubmit(data: TransactionInput) {
+    if (isSubmitting || (!isEdit && newTransactionId)) return
+
     try {
       const url = isEdit ? `/api/transactions/${editData.id}` : '/api/transactions'
       const method = isEdit ? 'PATCH' : 'POST'
@@ -185,6 +189,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData, initi
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit as unknown as Parameters<typeof handleSubmit>[0])} className="p-5 space-y-4">
+          <fieldset disabled={isFormDisabled} className="space-y-4 border-0 p-0 m-0">
           {/* Type toggle */}
           <div>
             <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -400,6 +405,7 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData, initi
               }}
             />
           </div>
+          </fieldset>
 
           {/* Receipt uploader — show when editing OR after creating new transaction */}
           {(isEdit && editData) ? (
@@ -430,13 +436,14 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData, initi
 
           {/* Actions — hide after new transaction saved (showing receipt uploader) */}
           {!newTransactionId && <div className="flex gap-3 pt-2">
-            <Button type="button" variant="secondary" fullWidth onClick={onClose}>
+            <Button type="button" variant="secondary" fullWidth onClick={onClose} disabled={isSubmitting}>
               Batal
             </Button>
             <Button
               type="submit"
               fullWidth
               loading={isSubmitting}
+              disabled={isFormDisabled}
               style={selectedType === 'INCOME' ? { background: 'var(--color-success-500)' } : undefined}
             >
               {isEdit ? 'Simpan perubahan' : 'Tambah transaksi'}

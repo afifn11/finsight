@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest'
 import {
   loginSchema,
   registerSchema,
+  registerFormSchema,
   transactionSchema,
   budgetSchema,
   categorySchema,
@@ -60,7 +61,7 @@ describe('registerSchema', () => {
   })
 
   it('rejects mismatched passwords', () => {
-    const r = registerSchema.safeParse({ ...valid, confirmPassword: 'Different1' })
+    const r = registerFormSchema.safeParse({ ...valid, confirmPassword: 'Different1' })
     expect(r.success).toBe(false)
     expect(r.error?.issues[0]?.path).toContain('confirmPassword')
   })

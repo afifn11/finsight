@@ -8,6 +8,7 @@ import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart'
 import { BudgetOverview } from '@/components/dashboard/BudgetOverview'
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions'
 import { AiInsightCard } from '@/components/dashboard/AiInsightCard'
+import { UserGreeting } from '@/components/dashboard/UserGreeting'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -16,25 +17,15 @@ export const metadata: Metadata = {
 // Force dynamic to always get fresh data
 export const dynamic = 'force-dynamic'
 
-function greeting(hour: number) {
-  if (hour < 11) return 'Selamat pagi'
-  if (hour < 15) return 'Selamat siang'
-  if (hour < 19) return 'Selamat sore'
-  return 'Selamat malam'
-}
-
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
   const firstName = session?.user?.name?.split(' ')[0]
-  const hour = new Date().getHours()
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page title */}
       <div>
-        <h1 className="text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-          {firstName ? `${greeting(hour)}, ${firstName}` : 'Dashboard'}
-        </h1>
+        <UserGreeting name={firstName} />
         <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
           Ringkasan keuangan kamu bulan ini
         </p>

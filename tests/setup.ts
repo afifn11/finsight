@@ -29,6 +29,14 @@ vi.mock('@/lib/auth', () => ({
   authOptions: {},
 }))
 
+// ── Mock Rate Limiting ─────────────────────────────────────────
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue({ success: true, remaining: 10, reset: Date.now() + 60000 }),
+  authRateLimiter: { limit: vi.fn().mockResolvedValue({ success: true, remaining: 10, reset: Date.now() + 60000 }) },
+  ocrRateLimiter: { limit: vi.fn().mockResolvedValue({ success: true, remaining: 10, reset: Date.now() + 60000 }) },
+  aiInsightRateLimiter: { limit: vi.fn().mockResolvedValue({ success: true, remaining: 10, reset: Date.now() + 60000 }) },
+}))
+
 // ── Mock Prisma client ─────────────────────────────────────────
 vi.mock('@/lib/prisma', () => {
   const mockPrisma = {
