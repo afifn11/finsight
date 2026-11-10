@@ -117,20 +117,58 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Verifikasi kepemilikan wallet jika disertakan
+  if (parsed.data.walletId) {
+    const wallet = await prisma.wallet.findFirst({
+      where: {
+        id: parsed.data.walletId,
+        userId: session.user.id,
+      },
+      select: { id: true },
+    })
+
+    if (!wallet) {
+      return NextResponse.json<ApiError>(
+        { error: 'Dompet tidak valid atau tidak ditemukan' },
+        { status: 400 }
+      )
+    }
+  }
+
   // Strip undefined fields — exactOptionalPropertyTypes butuh null, bukan undefined, untuk Prisma
-  const { notes, recurringPeriod, recurringEndDate, ...requiredData } = parsed.data
+  const { notes, recurringPeriod, recurringEndDate, walletId, ...requiredData } = parsed.data
 
   const createData: Prisma.TransactionUncheckedCreateInput = {
     ...requiredData,
     userId: session.user.id,
+    walletId: walletId ?? null,
     ...(notes !== undefined ? { notes } : {}),
     ...(recurringPeriod !== undefined ? { recurringPeriod } : {}),
     ...(recurringEndDate !== undefined ? { recurringEndDate } : {}),
   }
 
-  const transaction = await prisma.transaction.create({
-    data: createData,
-    include: { category: true },
+  const transaction = await prisma.$transaction(async (tx) => {
+    const created = await tx.transaction.create({
+      data: createData,
+      include: { category: true, wallet: true },
+    })
+
+    // Update wallet balance automatically
+    if (created.walletId) {
+      if (created.type === 'INCOME') {
+        await tx.wallet.update({
+          where: { id: created.walletId },
+          data: { balance: { increment: created.amount } },
+        })
+      } else {
+        await tx.wallet.update({
+          where: { id: created.walletId },
+          data: { balance: { decrement: created.amount } },
+        })
+      }
+    }
+
+    return created
   })
 
   return NextResponse.json<ApiResponse<typeof transaction>>(

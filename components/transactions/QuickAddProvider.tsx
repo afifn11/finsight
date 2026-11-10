@@ -8,7 +8,7 @@
 // buttons) goes through this shared context.
 'use client'
 
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react'
 import { TransactionFormModal } from './TransactionFormModal'
 import { OcrScanner, type OcrResult } from './OcrScanner'
 import type { TransactionWithCategory } from '@/types'
@@ -59,7 +59,7 @@ export function QuickAddProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const openEdit = useCallback((tx: TransactionWithCategory) => {
-    setEditData(tx)
+    setEditData((prev) => (prev?.id === tx.id ? prev : tx))
     setOcrPrefill(null)
     setMode('edit')
   }, [])
@@ -69,34 +69,36 @@ export function QuickAddProvider({ children }: { children: React.ReactNode }) {
     setMode('scan')
   }, [])
 
-  function handleClose() {
+  const handleClose = useCallback(() => {
     setMode('closed')
     setEditData(null)
     setOcrPrefill(null)
-  }
+  }, [])
 
-  function handleOcrResult(result: OcrResult) {
+  const handleOcrResult = useCallback((result: OcrResult) => {
     setOcrPrefill(result)
     setMode('add')
-  }
+  }, [])
 
-  // Passed as OcrScanner's onClose. Guarded so it only closes the SCANNER
-  // (returning to 'closed') when the scanner is still the active mode — if
-  // handleOcrResult already moved mode to 'add' (user picked "Gunakan data
-  // ini", which calls onResult then onClose back-to-back), this must NOT
-  // clobber that transition back to 'closed', or the just-opened form (with
-  // the scanned data) would immediately disappear.
-  function handleScanClose() {
+  const handleScanClose = useCallback(() => {
     setMode((current) => (current === 'scan' ? 'closed' : current))
-  }
+  }, [])
 
-  function handleSuccess(closeModal?: boolean) {
-    notifyTransactionsChanged()
-    if (closeModal !== false) handleClose()
-  }
+  const handleSuccess = useCallback(
+    (closeModal?: boolean) => {
+      notifyTransactionsChanged()
+      if (closeModal !== false) handleClose()
+    },
+    [handleClose]
+  )
+
+  const contextValue = useMemo(
+    () => ({ openAdd, openEdit, openScan }),
+    [openAdd, openEdit, openScan]
+  )
 
   return (
-    <QuickAddContext.Provider value={{ openAdd, openEdit, openScan }}>
+    <QuickAddContext.Provider value={contextValue}>
       {children}
 
       <TransactionFormModal

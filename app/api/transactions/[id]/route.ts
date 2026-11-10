@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   // Verify ownership
   const existing = await prisma.transaction.findUnique({
     where: { id },
-    select: { userId: true },
+    select: { userId: true, walletId: true, amount: true, type: true },
   })
 
   if (!existing || existing.userId !== session.user.id) {
@@ -60,8 +60,19 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     )
   }
 
+  // Verifikasi kepemilikan dompet jika diubah
+  if (parsed.data.walletId) {
+    const wallet = await prisma.wallet.findFirst({
+      where: { id: parsed.data.walletId, userId: session.user.id },
+      select: { id: true },
+    })
+    if (!wallet) {
+      return NextResponse.json<ApiError>({ error: 'Dompet tidak valid' }, { status: 400 })
+    }
+  }
+
   const {
-    amount, type, categoryId, description, date,
+    amount, type, categoryId, walletId, description, date,
     notes, isRecurring, recurringPeriod, recurringEndDate,
   } = parsed.data
 
@@ -69,6 +80,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     ...(amount !== undefined ? { amount } : {}),
     ...(type !== undefined ? { type } : {}),
     ...(categoryId !== undefined ? { categoryId } : {}),
+    ...(walletId !== undefined ? { walletId } : {}),
     ...(description !== undefined ? { description } : {}),
     ...(date !== undefined ? { date } : {}),
     ...(notes !== undefined ? { notes } : {}),
@@ -77,10 +89,45 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     ...(recurringEndDate !== undefined ? { recurringEndDate } : {}),
   }
 
-  const updated = await prisma.transaction.update({
-    where: { id },
-    data: updateData,
-    include: { category: true },
+  const updated = await prisma.$transaction(async (tx) => {
+    // 1. Revert previous wallet balance if walletId existed
+    if (existing.walletId) {
+      if (existing.type === 'INCOME') {
+        await tx.wallet.update({
+          where: { id: existing.walletId },
+          data: { balance: { decrement: existing.amount } },
+        })
+      } else {
+        await tx.wallet.update({
+          where: { id: existing.walletId },
+          data: { balance: { increment: existing.amount } },
+        })
+      }
+    }
+
+    // 2. Perform transaction update
+    const txUpdated = await tx.transaction.update({
+      where: { id },
+      data: updateData,
+      include: { category: true, wallet: true },
+    })
+
+    // 3. Apply new wallet balance
+    if (txUpdated.walletId) {
+      if (txUpdated.type === 'INCOME') {
+        await tx.wallet.update({
+          where: { id: txUpdated.walletId },
+          data: { balance: { increment: txUpdated.amount } },
+        })
+      } else {
+        await tx.wallet.update({
+          where: { id: txUpdated.walletId },
+          data: { balance: { decrement: txUpdated.amount } },
+        })
+      }
+    }
+
+    return txUpdated
   })
 
   return NextResponse.json<ApiResponse<typeof updated>>({
@@ -100,7 +147,7 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
 
   const existing = await prisma.transaction.findUnique({
     where: { id },
-    select: { userId: true, receiptPath: true },
+    select: { userId: true, receiptPath: true, walletId: true, amount: true, type: true },
   })
 
   if (!existing || existing.userId !== session.user.id) {
@@ -117,7 +164,24 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
     }
   }
 
-  await prisma.transaction.delete({ where: { id } })
+  // Reverse wallet balance atomically upon transaction deletion
+  await prisma.$transaction(async (tx) => {
+    if (existing.walletId) {
+      if (existing.type === 'INCOME') {
+        await tx.wallet.update({
+          where: { id: existing.walletId },
+          data: { balance: { decrement: existing.amount } },
+        })
+      } else {
+        await tx.wallet.update({
+          where: { id: existing.walletId },
+          data: { balance: { increment: existing.amount } },
+        })
+      }
+    }
+
+    await tx.transaction.delete({ where: { id } })
+  })
 
   return NextResponse.json<ApiResponse<{ id: string }>>({
     data: { id },

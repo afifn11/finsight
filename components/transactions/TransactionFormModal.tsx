@@ -8,7 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { transactionSchema, type TransactionInput } from '@/lib/validations'
-import { useCategories } from '@/hooks'
+import { useCategories, useWallets } from '@/hooks'
+import { formatCurrency } from '@/lib/utils'
 import type { TransactionWithCategory } from '@/types'
 import { ReceiptUploader } from './ReceiptUploader'
 import { OcrScanner } from './OcrScanner'
@@ -52,47 +53,73 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData, initi
   const selectedType = watch('type')
   const isRecurring = watch('isRecurring')
   const { data: categories } = useCategories(selectedType)
+  const { wallets } = useWallets()
 
   // Receipt state
-  const [receiptData, setReceiptData] = useState<{ receiptName: string; receiptUrl: string } | null>(
-    editData?.receiptName ? { receiptName: editData.receiptName, receiptUrl: editData.receiptUrl ?? '' } : null
-  )
+  const [receiptData, setReceiptData] = useState<{ receiptName: string; receiptUrl: string } | null>(null)
   // After creating new transaction, store its ID so user can upload receipt immediately
   const [newTransactionId, setNewTransactionId] = useState<string | null>(null)
   const [showOcr, setShowOcr] = useState(false)
 
-  // Populate form when editing
+  const editId = editData?.id
+  const ocrKey = initialOcrData
+    ? `${initialOcrData.amount}_${initialOcrData.description}_${initialOcrData.date}`
+    : null
+
+  // Stable populate & reset effect — depends strictly on primitive keys (editId, open, ocrKey)
   useEffect(() => {
-    setReceiptData(editData?.receiptName ? { receiptName: editData.receiptName, receiptUrl: editData.receiptUrl ?? '' } : null)
+    if (!open) {
+      setReceiptData(null)
+      setNewTransactionId(null)
+      setShowOcr(false)
+      reset({
+        amount: 0,
+        type: 'EXPENSE',
+        categoryId: '',
+        walletId: undefined,
+        description: '',
+        date: new Date(),
+        notes: '',
+        isRecurring: false,
+      })
+      return
+    }
+
     if (editData) {
+      setReceiptData(
+        editData.receiptName
+          ? { receiptName: editData.receiptName, receiptUrl: editData.receiptUrl ?? '' }
+          : null
+      )
       reset({
         amount: Number(editData.amount),
         type: editData.type,
         categoryId: editData.categoryId,
+        walletId: editData.walletId ?? undefined,
         description: editData.description ?? '',
-        date: new Date(editData.date),
+        date: editData.date ? new Date(editData.date) : new Date(),
         notes: editData.notes ?? '',
-        isRecurring: editData.isRecurring,
+        isRecurring: editData.isRecurring ?? false,
         recurringPeriod: editData.recurringPeriod ?? undefined,
+        recurringEndDate: editData.recurringEndDate
+          ? new Date(editData.recurringEndDate)
+          : undefined,
       })
     } else {
-      reset({ type: 'EXPENSE', date: new Date(), isRecurring: false })
-      if (initialOcrData) {
-        if (initialOcrData.amount) setValue('amount', initialOcrData.amount)
-        if (initialOcrData.description) setValue('description', initialOcrData.description)
-        if (initialOcrData.date) setValue('date', new Date(initialOcrData.date))
-        if (initialOcrData.type) setValue('type', initialOcrData.type)
-      }
-    }
-  }, [editData, reset, open, initialOcrData, setValue])
-
-  // Reset newTransactionId ONLY when modal fully closes
-  useEffect(() => {
-    if (!open) {
+      setReceiptData(null)
       setNewTransactionId(null)
-      setShowOcr(false)
+      reset({
+        amount: initialOcrData?.amount ? Number(initialOcrData.amount) : 0,
+        type: initialOcrData?.type ?? 'EXPENSE',
+        categoryId: '',
+        walletId: wallets[0]?.id ?? undefined,
+        description: initialOcrData?.description ?? '',
+        date: initialOcrData?.date ? new Date(initialOcrData.date) : new Date(),
+        notes: '',
+        isRecurring: false,
+      })
     }
-  }, [open])
+  }, [editId, open, ocrKey, reset]) // Only depend on primitive editId, open, ocrKey, reset
 
   const isFormDisabled = isSubmitting || (!isEdit && !!newTransactionId)
 
@@ -278,6 +305,30 @@ export function TransactionFormModal({ open, onClose, onSuccess, editData, initi
                 {errors.categoryId.message}
               </p>
             )}
+          </div>
+
+          {/* Wallet / Sumber Dana */}
+          <div>
+            <label htmlFor="tx-wallet" className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              Dompet / Sumber Dana
+            </label>
+            <select
+              id="tx-wallet"
+              {...register('walletId')}
+              className="mt-1 w-full px-3 py-2 rounded-lg border text-sm outline-none"
+              style={{
+                background: 'var(--bg-card)',
+                borderColor: 'var(--border-default)',
+                color: 'var(--text-primary)',
+              }}
+            >
+              <option value="">Tanpa Dompet Khusus</option>
+              {wallets.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name} ({formatCurrency(Number(w.balance))})
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Description */}

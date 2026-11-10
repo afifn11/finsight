@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { BentoGrid, BentoCard } from '@/components/dashboard/BentoGrid'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
+import { NetWorthCard } from '@/components/dashboard/NetWorthCard'
 import { SummaryCards } from '@/components/dashboard/SummaryCards'
 import { TrendChart } from '@/components/dashboard/TrendChart'
 import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart'
@@ -30,7 +31,12 @@ export default async function DashboardPage() {
           <DashboardHeader name={firstName} />
         </BentoCard>
 
-        {/* Tile 2: Summary KPI Cards with AnimatedNumber (Span 4) */}
+        {/* Tile 2: Multi-Wallet Net Worth Tracker (Span 4) */}
+        <BentoCard colSpan={4} className="p-0 border-0 bg-transparent shadow-none">
+          <NetWorthCard />
+        </BentoCard>
+
+        {/* Tile 3: Summary KPI Cards with AnimatedNumber (Span 4) */}
         <BentoCard colSpan={4} className="p-0 border-0 bg-transparent shadow-none">
           <SummaryCards />
         </BentoCard>

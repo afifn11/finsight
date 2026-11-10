@@ -1,14 +1,15 @@
 // types/index.ts
 // FinSight — Global TypeScript Types
 
-import type { Transaction, Category, Budget, User } from '@prisma/client'
+import type { Transaction, Category, Budget, User, Wallet, WalletType, WalletTransfer } from '@prisma/client'
 
 // ── Re-export Prisma types ─────────────────────────────────────
-export type { Transaction, Category, Budget, User }
+export type { Transaction, Category, Budget, User, Wallet, WalletType, WalletTransfer }
 
 // ── Extended types with relations ─────────────────────────────
 export type TransactionWithCategory = Transaction & {
   category: Category
+  wallet?: Wallet | null
   receiptUrl?: string | null
   receiptPath?: string | null
   receiptName?: string | null
@@ -101,6 +102,7 @@ export interface TransactionFormData {
   amount: number
   type: 'INCOME' | 'EXPENSE'
   categoryId: string
+  walletId?: string | null
   description: string
   date: Date
   notes?: string
@@ -113,6 +115,26 @@ export interface BudgetFormData {
   amount: number
   period: 'MONTHLY' | 'YEARLY'
   alertThreshold: number
+}
+
+// ── Multi-wallet types ─────────────────────────────────────────
+export interface WalletWithBalance extends Wallet {
+  balanceNumber: number
+}
+
+export interface WalletTransferInput {
+  fromWalletId: string
+  toWalletId: string
+  amount: number
+  fee?: number
+  notes?: string | null
+  date?: Date | string
+}
+
+export interface WalletsResponse {
+  wallets: Wallet[]
+  netWorth: number
+  breakdownByType: Record<string, number>
 }
 
 // ── Navigation ─────────────────────────────────────────────────

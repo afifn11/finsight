@@ -198,3 +198,44 @@ export function useCategories(forType?: 'INCOME' | 'EXPENSE') {
 
   return { data, isLoading }
 }
+
+// ── useWallets ─────────────────────────────────────────────────
+export function useWallets() {
+  const [data, setData] = useState<import('@/types').WalletsResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await fetcher<import('@/types').WalletsResponse>('/api/wallets')
+      setData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal memuat data dompet')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  // Listen to transaction changes to auto-update wallet balances
+  useEffect(() => {
+    const handleTxChanged = () => { void load() }
+    window.addEventListener('finsight:transactions-changed', handleTxChanged)
+    return () => window.removeEventListener('finsight:transactions-changed', handleTxChanged)
+  }, [load])
+
+  return {
+    data,
+    wallets: data?.wallets ?? [],
+    netWorth: data?.netWorth ?? 0,
+    breakdownByType: data?.breakdownByType ?? {},
+    isLoading,
+    error,
+    refresh: load,
+  }
+}

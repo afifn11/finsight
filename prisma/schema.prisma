@@ -84,6 +84,8 @@ model User {
   aiInsights   AiInsight[]
   goals        FinancialGoal[]
   pushSubscriptions PushSubscription[]
+  wallets      Wallet[]
+  walletTransfers WalletTransfer[]
 
   @@map("users")
 }
@@ -156,12 +158,16 @@ model Transaction {
   recurringEndDate DateTime?
   parentId         String?          // For recurring children, reference to parent
 
+  // Multi-wallet support
+  walletId    String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   category Category @relation(fields: [categoryId], references: [id])
+  wallet   Wallet?  @relation(fields: [walletId], references: [id], onDelete: SetNull)
   parent   Transaction?  @relation("RecurringChildren", fields: [parentId], references: [id])
   children Transaction[] @relation("RecurringChildren")
 
@@ -170,6 +176,7 @@ model Transaction {
   @@index([userId, type])
   @@index([userId, type, date])
   @@index([categoryId])
+  @@index([walletId])
   @@index([parentId])
   @@map("transactions")
 }
@@ -289,4 +296,57 @@ model AiInsight {
   @@unique([userId, month, year]) // One insight per user per month
   @@index([userId])
   @@map("ai_insights")
+}
+
+// ─────────────────────────────────────────────────────────────
+// MULTI-WALLET & TRANSFERS
+// ─────────────────────────────────────────────────────────────
+
+enum WalletType {
+  BANK
+  E_WALLET
+  CASH
+  INVESTMENT
+  OTHER
+}
+
+model Wallet {
+  id                  String      @id @default(cuid())
+  userId              String
+  name                String
+  type                WalletType
+  balance             Decimal     @default(0) @db.Decimal(15, 2)
+  color               String      @default("#0891b2")
+  icon                String      @default("wallet")
+  accountNumber       String?
+  isIncludedInNetWorth Boolean    @default(true)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  transfersFrom WalletTransfer[] @relation("TransfersFrom")
+  transfersTo   WalletTransfer[] @relation("TransfersTo")
+
+  @@index([userId])
+  @@map("wallets")
+}
+
+model WalletTransfer {
+  id           String   @id @default(cuid())
+  userId       String
+  fromWalletId String
+  toWalletId   String
+  amount       Decimal  @db.Decimal(15, 2)
+  fee          Decimal  @default(0) @db.Decimal(15, 2)
+  notes        String?  @db.Text
+  date         DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromWallet Wallet @relation("TransfersFrom", fields: [fromWalletId], references: [id], onDelete: Cascade)
+  toWallet   Wallet @relation("TransfersTo", fields: [toWalletId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("wallet_transfers")
 }

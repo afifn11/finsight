@@ -79,6 +79,21 @@ vi.mock('@/lib/prisma', () => {
       findUnique: vi.fn(),
       upsert: vi.fn(),
     },
+    wallet: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      findFirst: vi.fn().mockResolvedValue({ id: 'wallet-001', name: 'BCA', balance: 5000000 }),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      count: vi.fn().mockResolvedValue(2),
+    },
+    walletTransfer: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+    },
   }
   return { prisma: mockPrisma }
 })
