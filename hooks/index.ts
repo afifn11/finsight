@@ -274,3 +274,73 @@ export function useSubscriptions() {
     refresh: load,
   }
 }
+
+// ── useAchievements ────────────────────────────────────────────
+export function useAchievements() {
+  const [data, setData] = useState<import('@/types').AchievementsResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await fetcher<import('@/types').AchievementsResponse>('/api/achievements')
+      setData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal memuat achievements')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  // Refresh achievements when transactions change
+  useEffect(() => {
+    const handleTxChanged = () => { void load() }
+    window.addEventListener('finsight:transactions-changed', handleTxChanged)
+    return () => window.removeEventListener('finsight:transactions-changed', handleTxChanged)
+  }, [load])
+
+  return {
+    data,
+    badges: data?.badges ?? [],
+    unlockedCount: data?.unlockedCount ?? 0,
+    totalCount: data?.totalCount ?? 0,
+    totalPoints: data?.totalPoints ?? 0,
+    isLoading,
+    error,
+    refresh: load,
+  }
+}
+
+// ── useGoals ───────────────────────────────────────────────────
+export function useGoals() {
+  const [goals, setGoals] = useState<import('@prisma/client').FinancialGoal[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/goals')
+      if (!res.ok) throw new Error('Gagal memuat target finansial')
+      const json = (await res.json()) as { data: import('@prisma/client').FinancialGoal[] }
+      setGoals(json.data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal memuat target')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  return { goals, isLoading, error, refresh: load }
+}

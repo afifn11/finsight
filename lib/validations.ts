@@ -155,3 +155,22 @@ export const updateSubscriptionSchema = subscriptionSchema.partial().extend({
 
 export type SubscriptionInput = z.infer<typeof subscriptionSchema>
 export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionSchema>
+
+// ── Bank Statement Import ──────────────────────────────────────
+export const bankStatementImportSchema = z.object({
+  walletId: z.string().optional().nullable(),
+  transactions: z
+    .array(
+      z.object({
+        date: z.coerce.date(),
+        description: z.string().min(1, 'Deskripsi wajib diisi').max(255),
+        amount: z.number().positive('Nominal harus lebih dari 0'),
+        type: z.enum(['INCOME', 'EXPENSE']),
+        categoryId: z.string().optional().nullable(),
+        categoryName: z.string().optional().nullable(),
+      })
+    )
+    .min(1, 'Pilih minimal satu transaksi untuk diimpor'),
+})
+
+export type BankStatementImportInput = z.infer<typeof bankStatementImportSchema>

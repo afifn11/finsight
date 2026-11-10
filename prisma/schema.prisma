@@ -87,6 +87,7 @@ model User {
   wallets      Wallet[]
   walletTransfers WalletTransfer[]
   subscriptions Subscription[]
+  achievements UserAchievement[]
 
   @@map("users")
 }
@@ -389,3 +390,21 @@ model Subscription {
   @@index([userId, status, nextBillingDate])
   @@map("subscriptions")
 }
+
+// ─────────────────────────────────────────────────────────────
+// GAMIFICATION & ACHIEVEMENTS
+// ─────────────────────────────────────────────────────────────
+
+model UserAchievement {
+  id         String   @id @default(cuid())
+  userId     String
+  badgeKey   String   // e.g., "SAVER_STARTER", "SAVING_CHAMP", "BUDGET_MASTER", "NET_WORTH_10M", "WALLET_KING", "DISCIPLINE_ROUTINE"
+  unlockedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeKey])
+  @@index([userId])
+  @@map("user_achievements")
+}
+

@@ -12,6 +12,7 @@ import type {
   Subscription,
   SubscriptionCycle,
   SubscriptionStatus,
+  UserAchievement,
 } from '@prisma/client'
 
 // ── Re-export Prisma types ─────────────────────────────────────
@@ -26,6 +27,7 @@ export type {
   Subscription,
   SubscriptionCycle,
   SubscriptionStatus,
+  UserAchievement,
 }
 
 // ── Extended types with relations ─────────────────────────────
@@ -177,6 +179,57 @@ export interface SubscriptionsResponse {
   monthlyCommitment: number
   activeCount: number
   upcomingThisMonthCount: number
+}
+
+// ── Bank Statement Parser types ────────────────────────────────
+export interface ParsedStatementTransaction {
+  id: string
+  date: string
+  description: string
+  amount: number
+  type: 'INCOME' | 'EXPENSE'
+  categoryName: string
+  categoryId?: string | undefined
+  selected?: boolean | undefined
+}
+
+export interface BankStatementParseResponse {
+  transactions: ParsedStatementTransaction[]
+  count: number
+  detectedBank?: string | undefined
+}
+
+export interface BankStatementImportPayload {
+  walletId?: string | null | undefined
+  transactions: Array<{
+    date: string
+    description: string
+    amount: number
+    type: 'INCOME' | 'EXPENSE'
+    categoryId?: string | undefined
+    categoryName?: string | undefined
+  }>
+}
+
+// ── Gamification & Achievements types ──────────────────────────
+export interface AchievementBadge {
+  key: string
+  title: string
+  description: string
+  icon: string
+  unlocked: boolean
+  unlockedAt: string | null
+  progress: number // 0 - 100
+  currentVal: number
+  targetVal: number
+  unit?: string | undefined
+}
+
+export interface AchievementsResponse {
+  badges: AchievementBadge[]
+  unlockedCount: number
+  totalCount: number
+  totalPoints: number
 }
 
 // ── Navigation ─────────────────────────────────────────────────

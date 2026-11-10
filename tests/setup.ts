@@ -49,6 +49,7 @@ vi.mock('@/lib/prisma', () => {
       findMany: vi.fn(),
       findUnique: vi.fn(),
       create: vi.fn(),
+      createMany: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
       count: vi.fn(),
@@ -100,6 +101,12 @@ vi.mock('@/lib/prisma', () => {
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
+      count: vi.fn().mockResolvedValue(1),
+    },
+    userAchievement: {
+      findMany: vi.fn().mockResolvedValue([]),
+      create: vi.fn(),
+      createMany: vi.fn(),
     },
   }
   return { prisma: mockPrisma }
