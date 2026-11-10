@@ -19,16 +19,17 @@ interface TooltipProps {
 function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (!active || !payload?.length) return null
   return (
-    <div
-      className="rounded-lg border p-3 text-sm space-y-1"
-      style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)', boxShadow: 'var(--shadow-dropdown)' }}
-    >
-      <p className="font-medium mb-2" style={{ color: 'var(--text-primary)' }}>{label}</p>
+    <div className="glass-card px-3.5 py-2.5 text-xs shadow-xl space-y-1.5 border border-cyan-500/20">
+      <p className="font-semibold text-xs border-b pb-1" style={{ color: 'var(--text-primary)', borderColor: 'var(--border-default)' }}>
+        {label}
+      </p>
       {payload.map((entry) => (
-        <div key={entry.name} className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: entry.color }} />
-          <span style={{ color: 'var(--text-secondary)' }}>{entry.name}:</span>
-          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+        <div key={entry.name} className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full shrink-0 shadow-sm" style={{ background: entry.color }} />
+            <span style={{ color: 'var(--text-secondary)' }}>{entry.name}</span>
+          </div>
+          <span className="font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>
             {formatCurrencyShort(entry.value)}
           </span>
         </div>
@@ -44,7 +45,7 @@ export default function TrendChartInner() {
 
   if (error) {
     return (
-      <div className="card p-5">
+      <div className="glass-card p-5 rounded-2xl">
         <DataError message={error} onRetry={refresh} />
       </div>
     )
@@ -53,19 +54,19 @@ export default function TrendChartInner() {
   const chartData = data?.monthlyTrend ?? []
 
   return (
-    <div className="card p-5">
-      <div className="mb-5">
+    <div className="glass-card interactive-card p-5 rounded-2xl h-full flex flex-col justify-between">
+      <div className="mb-4">
         <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
           Tren Keuangan
         </h3>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-xs sm:text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
           Pemasukan vs pengeluaran 6 bulan terakhir
         </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={224}>
-        <LineChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-default)" vertical={false} />
+      <ResponsiveContainer width="100%" height={230}>
+        <LineChart data={chartData} margin={{ top: 6, right: 8, left: -10, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-default)" strokeOpacity={0.6} vertical={false} />
           <XAxis
             dataKey="month"
             tick={{ fontSize: 12, fill: 'var(--text-muted)' }}
@@ -81,9 +82,9 @@ export default function TrendChartInner() {
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend
-            wrapperStyle={{ fontSize: '12px', paddingTop: '12px' }}
+            wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
             formatter={(value: string) => (
-              <span style={{ color: 'var(--text-secondary)' }}>{value}</span>
+              <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{value}</span>
             )}
           />
           <Line
@@ -91,18 +92,18 @@ export default function TrendChartInner() {
             dataKey="income"
             name="Pemasukan"
             stroke="var(--color-success-500)"
-            strokeWidth={2}
-            dot={{ fill: 'var(--color-success-500)', r: 3 }}
-            activeDot={{ r: 5 }}
+            strokeWidth={2.5}
+            dot={{ fill: 'var(--color-success-500)', r: 3.5, strokeWidth: 0 }}
+            activeDot={{ r: 6, stroke: 'var(--bg-card)', strokeWidth: 2 }}
           />
           <Line
             type="monotone"
             dataKey="expense"
             name="Pengeluaran"
             stroke="var(--color-danger-500)"
-            strokeWidth={2}
-            dot={{ fill: 'var(--color-danger-500)', r: 3 }}
-            activeDot={{ r: 5 }}
+            strokeWidth={2.5}
+            dot={{ fill: 'var(--color-danger-500)', r: 3.5, strokeWidth: 0 }}
+            activeDot={{ r: 6, stroke: 'var(--bg-card)', strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

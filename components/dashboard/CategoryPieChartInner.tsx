@@ -14,7 +14,7 @@ export default function CategoryPieChartInner() {
 
   if (error) {
     return (
-      <div className="card p-5">
+      <div className="glass-card p-5 rounded-2xl">
         <DataError message={error} onRetry={refresh} />
       </div>
     )
@@ -24,8 +24,8 @@ export default function CategoryPieChartInner() {
 
   if (breakdown.length === 0) {
     return (
-      <div className="card p-5 flex flex-col items-center justify-center h-64">
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+      <div className="glass-card p-5 rounded-2xl flex flex-col items-center justify-center h-64 text-center">
+        <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
           Belum ada data pengeluaran bulan ini
         </p>
       </div>
@@ -33,44 +33,54 @@ export default function CategoryPieChartInner() {
   }
 
   return (
-    <div className="card p-5">
-      <div className="mb-5">
+    <div className="glass-card interactive-card p-5 rounded-2xl h-full flex flex-col justify-between">
+      <div className="mb-4">
         <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
           Pengeluaran per Kategori
         </h3>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-          Distribusi bulan ini
+        <p className="text-xs sm:text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+          Distribusi alokasi dana bulan ini
         </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={224}>
+      <ResponsiveContainer width="100%" height={230}>
         <PieChart>
           <Pie
             data={breakdown}
             cx="50%"
             cy="50%"
-            innerRadius={56}
-            outerRadius={88}
-            paddingAngle={3}
+            innerRadius={58}
+            outerRadius={90}
+            paddingAngle={4}
             dataKey="total"
             nameKey="categoryName"
           >
             {breakdown.map((entry) => (
-              <Cell key={entry.categoryId} fill={entry.categoryColor} />
+              <Cell
+                key={entry.categoryId}
+                fill={entry.categoryColor}
+                stroke="var(--bg-card)"
+                strokeWidth={2}
+                className="transition-transform duration-200 hover:opacity-90"
+              />
             ))}
           </Pie>
           <Tooltip
             formatter={(value: unknown) => [formatCurrencyShort(value as number), '']}
             contentStyle={{
-              background: 'var(--bg-card)',
+              background: 'color-mix(in srgb, var(--bg-card) 85%, transparent)',
+              backdropFilter: 'blur(10px)',
               border: '1px solid var(--border-default)',
-              borderRadius: '8px',
+              borderRadius: '12px',
               fontSize: '12px',
+              boxShadow: '0 8px 20px -4px rgb(0 0 0 / 0.15)',
+              color: 'var(--text-primary)',
             }}
           />
           <Legend
+            wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }}
             formatter={(value: string) => (
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{value}</span>
+              <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{value}</span>
             )}
           />
         </PieChart>

@@ -2,13 +2,14 @@
 import type { Metadata } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { BentoGrid, BentoCard } from '@/components/dashboard/BentoGrid'
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 import { SummaryCards } from '@/components/dashboard/SummaryCards'
 import { TrendChart } from '@/components/dashboard/TrendChart'
 import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart'
 import { BudgetOverview } from '@/components/dashboard/BudgetOverview'
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions'
 import { AiInsightCard } from '@/components/dashboard/AiInsightCard'
-import { UserGreeting } from '@/components/dashboard/UserGreeting'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -22,36 +23,43 @@ export default async function DashboardPage() {
   const firstName = session?.user?.name?.split(' ')[0]
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Page title */}
-      <div>
-        <UserGreeting name={firstName} />
-        <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-          Ringkasan keuangan kamu bulan ini
-        </p>
-      </div>
+    <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
+      <BentoGrid>
+        {/* Tile 1: Top Hero Greeting & Quick Action CTA Banner (Span 4) */}
+        <BentoCard colSpan={4} className="p-0 border-0 bg-transparent shadow-none">
+          <DashboardHeader name={firstName} />
+        </BentoCard>
 
-      {/* Row 1: Summary cards */}
-      <SummaryCards />
+        {/* Tile 2: Summary KPI Cards with AnimatedNumber (Span 4) */}
+        <BentoCard colSpan={4} className="p-0 border-0 bg-transparent shadow-none">
+          <SummaryCards />
+        </BentoCard>
 
-      {/* Row 2: Trend chart + AI Insight */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        {/* Tile 3: Trend Chart (Span 2x2) */}
+        <BentoCard colSpan={2} rowSpan={2} className="p-0 border-0 bg-transparent shadow-none">
           <TrendChart />
-        </div>
-        <div className="lg:col-span-1">
+        </BentoCard>
+
+        {/* Tile 4: AI Financial Insight (Span 2x2) */}
+        <BentoCard colSpan={2} rowSpan={2} className="p-0 border-0 bg-transparent shadow-none">
           <AiInsightCard />
-        </div>
-      </div>
+        </BentoCard>
 
-      {/* Row 3: Category pie + Budget overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <CategoryPieChart />
-        <BudgetOverview />
-      </div>
+        {/* Tile 5: Category Breakdown Pie Chart (Span 2x2) */}
+        <BentoCard colSpan={2} rowSpan={2} className="p-0 border-0 bg-transparent shadow-none">
+          <CategoryPieChart />
+        </BentoCard>
 
-      {/* Row 4: Recent transactions */}
-      <RecentTransactions />
+        {/* Tile 6: Budget Status Overview (Span 2x2) */}
+        <BentoCard colSpan={2} rowSpan={2} className="p-0 border-0 bg-transparent shadow-none">
+          <BudgetOverview />
+        </BentoCard>
+
+        {/* Tile 7: Recent Transactions Stream (Span 4) */}
+        <BentoCard colSpan={4} className="p-0 border-0 bg-transparent shadow-none">
+          <RecentTransactions />
+        </BentoCard>
+      </BentoGrid>
     </div>
   )
 }

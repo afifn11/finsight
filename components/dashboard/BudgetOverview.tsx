@@ -11,7 +11,7 @@ export function BudgetOverview() {
 
   if (isLoading) {
     return (
-      <div className="card p-5 animate-pulse space-y-3">
+      <div className="glass-card p-5 rounded-2xl animate-pulse space-y-3">
         <div className="h-5 w-32 rounded" style={{ background: 'var(--bg-muted)' }} />
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="space-y-2">
@@ -24,19 +24,19 @@ export function BudgetOverview() {
   }
 
   return (
-    <div className="card p-5">
-      <div className="flex items-center justify-between mb-5">
+    <div className="glass-card interactive-card p-5 rounded-2xl h-full flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
             Status Budget
           </h3>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xs sm:text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
             Bulan ini
           </p>
         </div>
         <Link
           href="/budgets"
-          className="flex items-center gap-1 text-sm"
+          className="flex items-center gap-1 text-xs sm:text-sm font-medium transition-colors hover:opacity-80"
           style={{ color: 'var(--color-primary-600)' }}
         >
           Lihat semua <ChevronRight className="w-3.5 h-3.5" />
