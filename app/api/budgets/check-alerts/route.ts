@@ -44,41 +44,64 @@ export async function GET(_req: NextRequest) {
   const month = now.getMonth() + 1
   const year = now.getFullYear()
 
+  // 1. Fetch active alerts with lean projections
   const alerts = await prisma.budgetAlert.findMany({
     where: { budget: { userId }, month, year },
-    include: { budget: { include: { category: true } } },
+    include: {
+      budget: {
+        select: {
+          id: true,
+          categoryId: true,
+          amount: true,
+          alertThreshold: true,
+          category: {
+            select: { name: true, color: true },
+          },
+        },
+      },
+    },
     orderBy: { triggeredAt: 'desc' },
   })
 
+  if (alerts.length === 0) {
+    return NextResponse.json({ data: [] })
+  }
+
   const monthStart = startOfMonth(now)
   const monthEnd = endOfMonth(now)
+  const categoryIds = Array.from(new Set(alerts.map((a) => a.budget.categoryId)))
 
-  const alertsWithSpending = await Promise.all(
-    alerts.map(async (alert) => {
-      const spending = await prisma.transaction.aggregate({
-        where: {
-          userId,
-          categoryId: alert.budget.categoryId,
-          type: 'EXPENSE',
-          date: { gte: monthStart, lte: monthEnd },
-        },
-        _sum: { amount: true },
-      })
-      const spent = Number(spending._sum.amount ?? 0)
-      const percentage = Math.round((spent / Number(alert.budget.amount)) * 100)
+  // 2. Single grouped aggregation across all alert categories to eliminate N+1 queries
+  const spendingAgg = await prisma.transaction.groupBy({
+    by: ['categoryId'],
+    where: {
+      userId,
+      categoryId: { in: categoryIds },
+      type: 'EXPENSE',
+      date: { gte: monthStart, lte: monthEnd },
+    },
+    _sum: { amount: true },
+  })
 
-      return {
-        id: alert.id,
-        categoryName: alert.budget.category.name,
-        categoryColor: alert.budget.category.color,
-        budgetAmount: Number(alert.budget.amount),
-        spent,
-        percentage,
-        threshold: alert.budget.alertThreshold,
-        triggeredAt: alert.triggeredAt,
-      }
-    })
+  const spendMap = new Map(
+    spendingAgg.map((s) => [s.categoryId, Number(s._sum.amount ?? 0)])
   )
+
+  const alertsWithSpending = alerts.map((alert) => {
+    const spent = spendMap.get(alert.budget.categoryId) ?? 0
+    const percentage = Math.round((spent / Number(alert.budget.amount)) * 100)
+
+    return {
+      id: alert.id,
+      categoryName: alert.budget.category.name,
+      categoryColor: alert.budget.category.color,
+      budgetAmount: Number(alert.budget.amount),
+      spent,
+      percentage,
+      threshold: alert.budget.alertThreshold,
+      triggeredAt: alert.triggeredAt,
+    }
+  })
 
   return NextResponse.json({ data: alertsWithSpending })
 }

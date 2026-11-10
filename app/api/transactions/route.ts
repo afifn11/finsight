@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { transactionSchema, transactionFiltersSchema } from '@/lib/validations'
-import type { ApiResponse, ApiError, PaginatedTransactions } from '@/types'
+import type { ApiResponse, ApiError, PaginatedTransactions, TransactionWithCategory } from '@/types'
 import type { Prisma } from '@prisma/client'
 
 // ── GET /api/transactions ──────────────────────────────────────
@@ -55,7 +55,11 @@ export async function GET(req: NextRequest) {
   const [data, total] = await Promise.all([
     prisma.transaction.findMany({
       where,
-      include: { category: true },
+      include: {
+        category: {
+          select: { id: true, name: true, icon: true, color: true },
+        },
+      },
       orderBy: { date: 'desc' },
       skip,
       take: filters.limit,
@@ -65,7 +69,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json<ApiResponse<PaginatedTransactions>>({
     data: {
-      data,
+      data: data as unknown as TransactionWithCategory[],
       total,
       page: filters.page,
       limit: filters.limit,

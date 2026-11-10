@@ -62,21 +62,38 @@ export async function GET() {
     orderBy: { _sum: { amount: 'desc' } },
   })
 
-  // ── 3. Last 6 months data for trend chart ──────────────────
-  const last6MonthsData = await Promise.all(
-    Array.from({ length: 6 }, (_, i) => {
-      const monthDate = subMonths(now, 5 - i)
-      const start = startOfMonth(monthDate)
-      const end = endOfMonth(monthDate)
-      return prisma.transaction
-        .groupBy({
-          by: ['type'],
-          where: { userId, date: { gte: start, lte: end } },
-          _sum: { amount: true },
-        })
-        .then((rows) => ({ monthDate, rows: rows as unknown as TypeAggRow[] }))
-    })
-  )
+  // ── 3. Single query for 6-month trend window (reduces pool usage from 6 queries to 1) ──
+  const sixMonthsAgo = startOfMonth(subMonths(now, 5))
+  const sixMonthsTransactions =
+    (await prisma.transaction.findMany({
+      where: {
+        userId,
+        date: { gte: sixMonthsAgo, lte: monthEnd },
+      },
+      select: {
+        type: true,
+        amount: true,
+        date: true,
+      },
+    })) ?? []
+
+  // In-memory bucket by 'YYYY-MM'
+  const monthlyTotals = new Map<string, { income: number; expense: number }>()
+
+  for (const tx of sixMonthsTransactions) {
+    const d = new Date(tx.date)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    if (!monthlyTotals.has(key)) {
+      monthlyTotals.set(key, { income: 0, expense: 0 })
+    }
+    const bucket = monthlyTotals.get(key)!
+    const amount = Number(tx.amount)
+    if (tx.type === 'INCOME') {
+      bucket.income += amount
+    } else if (tx.type === 'EXPENSE') {
+      bucket.expense += amount
+    }
+  }
 
   // ── Compute summary ────────────────────────────────────────
   const monthAgg = currentMonthAgg as unknown as TypeAggRow[]
@@ -95,15 +112,16 @@ export async function GET() {
   }
 
   // ── Compute monthly trend ──────────────────────────────────
-  const monthlyTrend: MonthlySummary[] = last6MonthsData.map(({ monthDate, rows }) => {
-    const income = Number(rows.find((r) => r.type === 'INCOME')?._sum.amount ?? 0)
-    const expense = Number(rows.find((r) => r.type === 'EXPENSE')?._sum.amount ?? 0)
+  const monthlyTrend: MonthlySummary[] = Array.from({ length: 6 }, (_, i) => {
+    const monthDate = subMonths(now, 5 - i)
+    const key = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`
+    const bucket = monthlyTotals.get(key) ?? { income: 0, expense: 0 }
     return {
       month: monthDate.toLocaleDateString('id-ID', { month: 'short' }),
       year: monthDate.getFullYear(),
-      income,
-      expense,
-      balance: income - expense,
+      income: bucket.income,
+      expense: bucket.expense,
+      balance: bucket.income - bucket.expense,
     }
   })
 

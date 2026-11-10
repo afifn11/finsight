@@ -30,8 +30,13 @@ vi.mock('@/lib/auth', () => ({
 }))
 
 // ── Mock Prisma client ─────────────────────────────────────────
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
+vi.mock('@/lib/prisma', () => {
+  const mockPrisma = {
+    $transaction: vi.fn((input: unknown) => {
+      if (Array.isArray(input)) return Promise.all(input)
+      if (typeof input === 'function') return input(mockPrisma)
+      return Promise.resolve(input)
+    }),
     transaction: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
@@ -65,8 +70,9 @@ vi.mock('@/lib/prisma', () => ({
       findUnique: vi.fn(),
       upsert: vi.fn(),
     },
-  },
-}))
+  }
+  return { prisma: mockPrisma }
+})
 
 // ── Mock Google AI SDK — pakai function biasa agar bisa di-new ─
 vi.mock('@google/genai', () => {

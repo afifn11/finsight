@@ -43,4 +43,6 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// Cache di globalThis di semua environment (termasuk serverless container reuse)
+// untuk mencegah multiple connection pool leakage pada module re-evaluations
+globalForPrisma.prisma = prisma

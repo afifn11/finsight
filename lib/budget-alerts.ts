@@ -25,13 +25,23 @@ export async function checkBudgetAlertsForUser(userId: string): Promise<Triggere
   const monthStart = startOfMonth(now)
   const monthEnd = endOfMonth(now)
 
+  // 1. Fetch active budgets with lean projections
   const budgets = await prisma.budget.findMany({
     where: { userId, isActive: true },
-    include: { category: true },
+    select: {
+      id: true,
+      categoryId: true,
+      amount: true,
+      alertThreshold: true,
+      category: {
+        select: { name: true },
+      },
+    },
   })
 
   if (budgets.length === 0) return []
 
+  // 2. Aggregate monthly expense spending per category
   const spending = await prisma.transaction.groupBy({
     by: ['categoryId'],
     where: { userId, type: 'EXPENSE', date: { gte: monthStart, lte: monthEnd } },
@@ -42,32 +52,46 @@ export async function checkBudgetAlertsForUser(userId: string): Promise<Triggere
     (spending as unknown as CategorySpendRow[]).map((s) => [s.categoryId, Number(s._sum.amount ?? 0)])
   )
 
+  // 3. Batch fetch existing alerts this month to eliminate serial findUnique in loop
+  const budgetIds = budgets.map((b) => b.id)
+  const existingAlerts = await prisma.budgetAlert.findMany({
+    where: { budgetId: { in: budgetIds }, month, year },
+    select: { budgetId: true },
+  })
+  const existingAlertSet = new Set(existingAlerts.map((a) => a.budgetId))
+
   const triggered: TriggeredBudgetAlert[] = []
+  const alertsToCreate: { budgetId: string; percentage: number; month: number; year: number }[] = []
 
   for (const budget of budgets) {
     const spent = spendMap.get(budget.categoryId) ?? 0
     const percentage = Math.round((spent / Number(budget.amount)) * 100)
     const threshold = budget.alertThreshold ?? 80
 
-    if (percentage >= threshold) {
-      const existing = await prisma.budgetAlert.findUnique({
-        where: { budgetId_month_year: { budgetId: budget.id, month, year } },
+    if (percentage >= threshold && !existingAlertSet.has(budget.id)) {
+      alertsToCreate.push({
+        budgetId: budget.id,
+        percentage,
+        month,
+        year,
       })
 
-      if (!existing) {
-        await prisma.budgetAlert.create({
-          data: { budgetId: budget.id, percentage, month, year },
-        })
-
-        triggered.push({
-          budgetId: budget.id,
-          categoryName: budget.category.name,
-          percentage,
-          spent,
-          budgetAmount: Number(budget.amount),
-        })
-      }
+      triggered.push({
+        budgetId: budget.id,
+        categoryName: budget.category.name,
+        percentage,
+        spent,
+        budgetAmount: Number(budget.amount),
+      })
     }
+  }
+
+  // 4. Batch insert alerts with skipDuplicates to prevent P2002 race-condition crashes
+  if (alertsToCreate.length > 0) {
+    await prisma.budgetAlert.createMany({
+      data: alertsToCreate,
+      skipDuplicates: true,
+    })
   }
 
   return triggered

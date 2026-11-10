@@ -168,7 +168,9 @@ model Transaction {
   @@index([userId])
   @@index([userId, date])
   @@index([userId, type])
+  @@index([userId, type, date])
   @@index([categoryId])
+  @@index([parentId])
   @@map("transactions")
 }
 
@@ -200,6 +202,7 @@ model Budget {
 
   @@unique([userId, categoryId, period]) // One budget per category per period
   @@index([userId])
+  @@index([userId, isActive])
   @@map("budgets")
 }
 
@@ -246,6 +249,7 @@ model FinancialGoal {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, status, createdAt])
   @@map("financial_goals")
 }
 

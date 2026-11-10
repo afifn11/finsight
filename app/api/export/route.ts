@@ -28,7 +28,11 @@ export async function GET(req: NextRequest) {
       userId: session.user.id,
       date: { gte: dateRange.start, lte: dateRange.end },
     },
-    include: { category: true },
+    include: {
+      category: {
+        select: { id: true, name: true, icon: true, color: true },
+      },
+    },
     orderBy: { date: 'desc' },
   })
 

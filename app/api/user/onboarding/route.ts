@@ -37,15 +37,16 @@ export async function POST(req: NextRequest) {
   const { currency, timezone, budgets } = parsed.data
   const userId = session.user.id
 
-  // Run all operations in parallel
-  await Promise.all([
-    // 1. Update user preferences + mark onboarding done
+  // Jalankan mutasi user dan pembuatan budget dalam $transaction ACID
+  // agar konsistensi data terjamin dan tidak terjadi partial onboarding
+  await prisma.$transaction([
+    // 1. Update preferensi user & tandai onboarding selesai
     prisma.user.update({
       where: { id: userId },
       data: { currency, timezone, onboardingDone: true },
     }),
 
-    // 2. Create initial budgets (if any selected)
+    // 2. Buat budget awal secara atomik
     ...budgets.map((b) =>
       prisma.budget.upsert({
         where: {
