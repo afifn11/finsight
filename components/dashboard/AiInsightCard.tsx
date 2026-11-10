@@ -17,16 +17,13 @@ export function AiInsightCard() {
   const { data, isLoading, error, refresh } = useAiInsight()
 
   return (
-    <div className="glass-card interactive-card glow-accent p-5 rounded-2xl h-full flex flex-col justify-between">
+    <div className="glass-card interactive-card p-5 rounded-2xl h-full flex flex-col justify-between">
       {/* Header */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div
-              className="flex items-center justify-center w-7 h-7 rounded-xl shadow-sm"
-              style={{ background: 'linear-gradient(135deg, var(--color-ai-accent-start), var(--color-ai-accent-end))' }}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+              <Sparkles className="w-3.5 h-3.5" />
             </div>
             <div>
               <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>

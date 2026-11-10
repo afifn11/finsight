@@ -23,7 +23,7 @@ export function NetWorthCard() {
 
   return (
     <>
-      <div className="glass-card interactive-card glow-accent p-5 md:p-6 rounded-2xl h-full flex flex-col justify-between">
+      <div className="glass-card interactive-card p-5 md:p-6 rounded-2xl h-full flex flex-col justify-between">
         {/* Header & Net Worth Value */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -51,7 +51,7 @@ export function NetWorthCard() {
                 }}
                 title="Transfer Antar Dompet"
               >
-                <ArrowRightLeft className="w-3.5 h-3.5 text-cyan-600" />
+                <ArrowRightLeft className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span className="hidden sm:inline">Transfer</span>
               </button>
 

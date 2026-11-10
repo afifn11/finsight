@@ -159,7 +159,7 @@ export function SubscriptionWidget() {
 
     return {
       label: `${diff} hari lagi`,
-      className: 'bg-violet-500/10 text-violet-600 dark:text-violet-300 border-violet-500/20',
+      className: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700',
     }
   }
 
@@ -181,15 +181,12 @@ export function SubscriptionWidget() {
   })
 
   return (
-    <div className="glass-card interactive-card glow-accent p-5 rounded-2xl h-full flex flex-col justify-between">
+    <div className="glass-card interactive-card p-5 rounded-2xl h-full flex flex-col justify-between">
       {/* Header */}
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2.5">
-            <div
-              className="flex items-center justify-center w-8 h-8 rounded-xl shadow-sm text-white"
-              style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}
-            >
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
               <Repeat className="w-4 h-4" />
             </div>
             <div>
@@ -198,7 +195,7 @@ export function SubscriptionWidget() {
               </h3>
               <p className="text-xs text-[var(--text-secondary)]">
                 Komitmen:{' '}
-                <span className="font-bold text-violet-600 dark:text-violet-400">
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                   {formatRupiah(monthlyCommitment)}
                 </span>
                 /bln
@@ -213,7 +210,7 @@ export function SubscriptionWidget() {
                 onClick={() => setActiveTab('list')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                   activeTab === 'list'
-                    ? 'bg-violet-600 text-white shadow-xs'
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
@@ -224,7 +221,7 @@ export function SubscriptionWidget() {
                 onClick={() => setActiveTab('calendar')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                   activeTab === 'calendar'
-                    ? 'bg-violet-600 text-white shadow-xs'
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
@@ -235,7 +232,7 @@ export function SubscriptionWidget() {
             <button
               type="button"
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium transition-colors shadow-xs"
+              className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Tambah</span>

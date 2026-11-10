@@ -82,23 +82,20 @@ export function GoalSimulatorWidget() {
   )
 
   return (
-    <div className="glass-card interactive-card glow-accent p-5 rounded-2xl h-full flex flex-col justify-between">
+    <div className="glass-card interactive-card p-5 rounded-2xl h-full flex flex-col justify-between">
       {/* Widget Header with Gamification Level */}
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)' }}
-            >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
               <Trophy className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                  Gamifikasi & Simulator Target
+                  Simulator Target & Lencana
                 </h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                   <Zap className="w-3 h-3 fill-current" />
                   Level {userLevel} • {totalPoints} EXP
                 </span>
@@ -116,7 +113,7 @@ export function GoalSimulatorWidget() {
               onClick={() => setActiveTab('simulator')}
               className={`px-3 py-1 rounded-lg font-medium transition-colors ${
                 activeTab === 'simulator'
-                  ? 'bg-amber-500 text-white shadow-xs'
+                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -127,7 +124,7 @@ export function GoalSimulatorWidget() {
               onClick={() => setActiveTab('badges')}
               className={`px-3 py-1 rounded-lg font-medium transition-colors ${
                 activeTab === 'badges'
-                  ? 'bg-amber-500 text-white shadow-xs'
+                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >

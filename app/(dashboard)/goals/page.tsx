@@ -1,21 +1,35 @@
 // app/(dashboard)/goals/page.tsx
 import type { Metadata } from 'next'
 import { GoalsManager } from '@/components/goals/GoalsManager'
+import { GoalSimulatorWidget } from '@/components/goals/GoalSimulatorWidget'
 
-export const metadata: Metadata = { title: 'Financial Goals' }
+export const metadata: Metadata = { title: 'Target Finansial & Gamifikasi' }
 
 export default function GoalsPage() {
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-          Financial Goals
+    <div className="space-y-6 max-w-6xl mx-auto">
+      {/* Page Header */}
+      <div className="p-5 md:p-6 rounded-2xl glass-card">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">
+          Target Finansial & Gamifikasi
         </h1>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-          Tetapkan target keuangan dan pantau progress tabunganmu
+        <p className="text-xs sm:text-sm mt-0.5 text-slate-500 dark:text-slate-400">
+          Rencanakan impian masa depan, simulasikan kecepatan tabungan, dan buka lencana pencapaian
         </p>
       </div>
-      <GoalsManager />
+
+      {/* 2-Column Layout: Goals List & Gamification Simulator */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left: Active Financial Goals (Col Span 7) */}
+        <div className="lg:col-span-7">
+          <GoalsManager />
+        </div>
+
+        {/* Right: Goal Simulator & Achievement Badges (Col Span 5) */}
+        <div className="lg:col-span-5">
+          <GoalSimulatorWidget />
+        </div>
+      </div>
     </div>
   )
 }

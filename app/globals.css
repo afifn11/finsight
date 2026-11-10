@@ -4,15 +4,16 @@
   --font-sans: 'Geist', 'Inter', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Fira Code', monospace;
 
-  /* Primary — Teal Cyan */
-  --color-primary-50:  #ecfeff;
-  --color-primary-100: #cffafe;
-  --color-primary-200: #a5f3fc;
-  --color-primary-400: #22d3ee;
-  --color-primary-600: #0891b2;
-  --color-primary-700: #0e7490;
-  --color-primary-800: #155e75;
-  --color-primary-900: #164e63;
+  /* Primary — Deep Emerald / Mint */
+  --color-primary-50:  #ecfdf5;
+  --color-primary-100: #d1fae5;
+  --color-primary-200: #a7f3d0;
+  --color-primary-400: #34d399;
+  --color-primary-500: #10b981;
+  --color-primary-600: #059669;
+  --color-primary-700: #047857;
+  --color-primary-800: #065f46;
+  --color-primary-900: #064e3b;
 
   --color-success-50:  #ecfdf5;
   --color-success-500: #10b981;
@@ -23,40 +24,40 @@
   --color-warning-500: #f59e0b;
   --color-warning-600: #d97706;
 
-  --color-danger-50:   #fef2f2;
-  --color-danger-500:  #ef4444;
-  --color-danger-600:  #dc2626;
+  /* Expense / Danger — Muted Rose */
+  --color-danger-50:   #fff1f2;
+  --color-danger-500:  #f43f5e;
+  --color-danger-600:  #e11d48;
+  --color-danger-700:  #be123c;
 
-  /* AI Insight accent — intentionally off-palette (indigo/violet) so AI-generated
-     content reads as visually distinct from the rest of the app, per design review.
-     Tokenized rather than hardcoded so it has one source of truth. */
-  --color-ai-accent-50:    #f5f3ff;
-  --color-ai-accent-start: #6366f1;
-  --color-ai-accent-end:   #8b5cf6;
-  --color-ai-accent-600:   #7c3aed;
+  /* AI Accent — Clean Emerald Slate */
+  --color-ai-accent-50:    #ecfdf5;
+  --color-ai-accent-start: #059669;
+  --color-ai-accent-end:   #10b981;
+  --color-ai-accent-600:   #047857;
 
-  /* Neutral — cool blue-gray */
-  --color-neutral-50:  #f0f9ff;
-  --color-neutral-100: #e0f2fe;
-  --color-neutral-200: #bae6fd;
-  --color-neutral-300: #7dd3fc;
+  /* Neutral Slate */
+  --color-neutral-50:  #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
   --color-neutral-400: #94a3b8;
   --color-neutral-500: #64748b;
   --color-neutral-600: #475569;
   --color-neutral-700: #334155;
   --color-neutral-800: #1e293b;
-  --color-neutral-900: #0c1a26;
-  --color-neutral-950: #071018;
+  --color-neutral-900: #0f172a;
+  --color-neutral-950: #020617;
 
   --radius-sm:   4px;
   --radius-md:   8px;
   --radius-lg:  12px;
   --radius-xl:  16px;
-  --radius-2xl: 24px;
+  --radius-2xl: 20px;
   --radius-full: 9999px;
 
-  --shadow-card:     0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
-  --shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-card:     0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  --shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
   --shadow-modal:    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
   --spacing-sidebar: 260px;
@@ -64,59 +65,49 @@
 }
 
 :root {
-  --bg-page:        #f0f9ff;
+  /* Light Mode (Stripe/Ramp inspired) */
+  --bg-page:        #f8fafc;
   --bg-card:        #ffffff;
-  --bg-muted:       #e0f2fe;
-  --bg-hover:       #d4ecf8;
+  --bg-muted:       #f1f5f9;
+  --bg-hover:       #f8fafc;
+  --bg-elevated:    #ffffff;
 
-  --text-primary:   #0c1a26;
+  --text-primary:   #0f172a;
   --text-secondary: #475569;
-  /* Was #94a3b8 (2.4:1 on bg-page, 2.6:1 on bg-card) — failed WCAG AA (needs 4.5:1)
-     for a color used across the app for timestamps, helper text, and labels.
-     Darkened to the lightest shade that still clears 4.5:1 on both backgrounds. */
-  --text-muted:     #5c6f8f;
+  --text-muted:     #64748b;
   --text-inverse:   #ffffff;
 
-  --border-default: #bae6fd;
-  --border-focus:   var(--color-primary-600);
+  --border-default: #e2e8f0;
+  --border-subtle:  #f1f5f9;
+  --border-focus:   #059669;
 
-  /* Income/expense text colors are decoupled from --color-success-500/--color-danger-500
-     (which stay unchanged for icon backgrounds, chart bars, and badges — those pairings
-     are fine) because the raw -500 shades fail 4.5:1 as TEXT on a white/light card
-     (2.5:1 and 3.8:1 respectively). These are theme-aware, like text-muted above,
-     since no single hex clears 4.5:1 on both a light and a dark background. */
-  --color-income:   #087a54;
-  --color-expense:  var(--color-danger-600);
-  --color-warning-text: #b45309;
-  /* Same issue as above: raw --color-danger-500 (used correctly for icons, borders,
-     button fills, and chart colors — those pass or are exempt from text contrast
-     rules) fails 4.5:1 as small text on white (3.76:1). Every inline form-validation
-     error message in the app was affected. */
-  --color-danger-text: var(--color-danger-600);
+  --color-income:       #059669;
+  --color-expense:      #e11d48;
+  --color-warning-text: #d97706;
+  --color-danger-text:  #e11d48;
 }
 
-/* Dark mode — deep ocean */
+/* Dark Mode (Linear/Wise inspired) */
 .dark {
-  --bg-page:        #071018;
-  --bg-card:        #0c1a24;
-  --bg-muted:       #122330;
-  --bg-hover:       #1a2f3e;
+  --bg-page:        #0b0f19;
+  --bg-card:        #111827;
+  --bg-muted:       #1f2937;
+  --bg-hover:       #1e293b;
+  --bg-elevated:    #161f30;
 
-  --text-primary:   #e0f4ff;
-  --text-secondary: #7db8d4;
-  /* Was #3d6478 (2.8:1 on bg-card) — also failed AA in dark mode. */
-  --text-muted:     #6094ab;
-  --text-inverse:   var(--color-neutral-900);
+  --text-primary:   #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted:     #6b7280;
+  --text-inverse:   #0f172a;
 
-  --border-default: #1e3a4a;
-  --border-focus:   var(--color-primary-400);
+  --border-default: #1f2937;
+  --border-subtle:  #283548;
+  --border-focus:   #10b981;
 
-  /* The un-decoupled -500 shades already clear 4.5:1 against the dark backgrounds,
-     so dark mode can use them directly instead of needing its own override color. */
-  --color-income:   var(--color-success-500);
-  --color-expense:  var(--color-danger-500);
-  --color-warning-text: var(--color-warning-500);
-  --color-danger-text:  var(--color-danger-500);
+  --color-income:       #10b981;
+  --color-expense:      #f43f5e;
+  --color-warning-text: #f59e0b;
+  --color-danger-text:  #f43f5e;
 }
 
 * { box-sizing: border-box; border-color: var(--border-default); }
@@ -129,63 +120,84 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #7dd3fc; border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.dark ::-webkit-scrollbar-thumb { background: #334155; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-}
-
-/* ── Glassmorphism & Modern Bento UI utilities ─────────────────── */
-.glass-card {
-  background: color-mix(in srgb, var(--bg-card) 82%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid color-mix(in srgb, var(--border-default) 75%, transparent);
   border-radius: var(--radius-xl);
-  box-shadow: 0 4px 20px -2px rgb(0 0 0 / 0.04), 0 2px 6px -1px rgb(0 0 0 / 0.02);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04);
 }
 
-.dark .glass-card {
-  background: color-mix(in srgb, var(--bg-card) 75%, transparent);
-  border-color: color-mix(in srgb, var(--border-default) 80%, transparent);
-  box-shadow: 0 6px 24px -4px rgb(0 0 0 / 0.35);
+/* ── Minimalist Clean Card & Bento Grid UI utilities ─────────────────── */
+.glass-card,
+.clean-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Interactive widget hover dynamics */
+.dark .glass-card,
+.dark .clean-card {
+  background: var(--bg-card);
+  border-color: var(--border-default);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.2);
+}
+
+/* Clean interactive widget hover without neon glow */
 .interactive-card {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .interactive-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--color-primary-600) 40%, var(--border-default));
-  box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--color-primary-600) 10%, transparent), 0 8px 10px -6px color-mix(in srgb, var(--color-primary-600) 6%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary-500) 50%, var(--border-default));
+  box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.06);
 }
 
-/* Subtle glow accent */
-.glow-accent {
-  position: relative;
+.dark .interactive-card:hover {
+  border-color: color-mix(in srgb, var(--color-primary-500) 40%, var(--border-default));
+  box-shadow: 0 4px 14px -2px rgb(0 0 0 / 0.35);
 }
-.glow-accent::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(135deg, var(--color-primary-600), var(--color-ai-accent-end));
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0.12;
-  filter: blur(8px);
-  transition: opacity 0.3s ease;
+
+/* Clean badge utilities */
+.badge-clean {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
 }
-.glow-accent:hover::before {
-  opacity: 0.28;
+
+.badge-clean-success {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+  border: 1px solid color-mix(in srgb, var(--color-primary-500) 25%, transparent);
+}
+.dark .badge-clean-success {
+  background-color: color-mix(in srgb, var(--color-primary-900) 40%, transparent);
+  color: var(--color-primary-400);
+  border-color: color-mix(in srgb, var(--color-primary-500) 25%, transparent);
+}
+
+.badge-clean-danger {
+  background-color: var(--color-danger-50);
+  color: var(--color-danger-700);
+  border: 1px solid color-mix(in srgb, var(--color-danger-500) 25%, transparent);
+}
+.dark .badge-clean-danger {
+  background-color: color-mix(in srgb, var(--color-danger-900) 40%, transparent);
+  color: var(--color-danger-500);
+  border-color: color-mix(in srgb, var(--color-danger-500) 25%, transparent);
 }
 
 /* Custom smooth scrollbar */
@@ -197,11 +209,17 @@ body {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--text-muted) 35%, transparent);
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--text-muted) 60%, transparent);
+  background: #94a3b8;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
 .text-income  { color: var(--color-income); }
@@ -209,12 +227,7 @@ body {
 .bg-income    { background-color: var(--color-success-50); }
 .bg-expense   { background-color: var(--color-danger-50); }
 
-/* ── Global keyboard focus visibility ─────────────────────────────
-   Element + pseudo-class selectors (e.g. `button:focus-visible`) are
-   used rather than a class so this reliably wins over any `outline-none`
-   utility already applied in markup, regardless of stylesheet order.
-   Uses :focus-visible (not :focus) so mouse/touch interaction stays
-   visually unchanged — only keyboard/AT users see the ring. */
+/* Global keyboard focus visibility */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,

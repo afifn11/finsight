@@ -17,7 +17,7 @@ export function DashboardHeader({ name }: DashboardHeaderProps) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 md:p-6 rounded-2xl glass-card interactive-card glow-accent">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 md:p-6 rounded-2xl glass-card interactive-card">
         <div>
           <UserGreeting name={name} />
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
@@ -29,36 +29,25 @@ export function DashboardHeader({ name }: DashboardHeaderProps) {
           <button
             type="button"
             onClick={() => setIsStatementModalOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium border transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-            style={{
-              background: 'var(--bg-card)',
-              borderColor: 'var(--border-default)',
-              color: 'var(--text-primary)',
-            }}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-all duration-150 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] shadow-xs"
           >
-            <FileSpreadsheet className="w-4 h-4 text-sky-500" />
-            <span>Import Mutasi Bank</span>
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Import Mutasi</span>
           </button>
 
           <button
             type="button"
             onClick={openScan}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium border transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-            style={{
-              background: 'var(--bg-card)',
-              borderColor: 'var(--border-default)',
-              color: 'var(--text-primary)',
-            }}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-all duration-150 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] shadow-xs"
           >
-            <Camera className="w-4 h-4 text-cyan-500" />
+            <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>Scan Struk</span>
           </button>
 
           <button
             type="button"
             onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:opacity-95"
-            style={{ background: 'var(--color-primary-800)' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-white transition-all duration-150 shadow-xs hover:bg-emerald-700 active:scale-[0.98] bg-emerald-600"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah</span>

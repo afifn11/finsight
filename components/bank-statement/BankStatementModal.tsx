@@ -194,18 +194,15 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
           style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-elevated)' }}
         >
           <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #0ea5e9, #6366f1)' }}
-            >
-              <FileSpreadsheet className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+              <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
+                <h3 className="font-bold text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
                   Auto-Parser Mutasi Rekening Bank
                 </h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                   <Sparkles className="w-3 h-3" />
                   Gemini AI Vision
                 </span>
@@ -318,8 +315,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                   type="button"
                   disabled={!file || isParsing}
                   onClick={handleParse}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white shadow-md transition-all duration-200 disabled:opacity-50"
-                  style={{ background: 'linear-gradient(135deg, #0ea5e9, #4f46e5)' }}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white shadow-xs transition-all duration-150 disabled:opacity-50 bg-emerald-600 hover:bg-emerald-700"
                 >
                   {isParsing ? (
                     <>
@@ -485,8 +481,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                     type="button"
                     disabled={selectedCount === 0 || isImporting}
                     onClick={handleImportApproved}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white shadow-md disabled:opacity-50 transition-all"
-                    style={{ background: 'linear-gradient(135deg, #0ea5e9, #4f46e5)' }}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white shadow-xs disabled:opacity-50 transition-all bg-emerald-600 hover:bg-emerald-700"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>

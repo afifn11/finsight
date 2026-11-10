@@ -11,8 +11,6 @@ import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart'
 import { BudgetOverview } from '@/components/dashboard/BudgetOverview'
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions'
 import { AiInsightCard } from '@/components/dashboard/AiInsightCard'
-import { SubscriptionWidget } from '@/components/subscriptions/SubscriptionWidget'
-import { GoalSimulatorWidget } from '@/components/goals/GoalSimulatorWidget'
 import { AiCopilotDrawer } from '@/components/ai/AiCopilotDrawer'
 
 export const metadata: Metadata = {
@@ -64,17 +62,7 @@ export default async function DashboardPage() {
           <BudgetOverview />
         </BentoCard>
 
-        {/* Tile 7: Smart Subscription & Recurring Bills Tracker (Span 2x2) */}
-        <BentoCard colSpan={2} rowSpan={2} className="p-0 border-0 bg-transparent shadow-none">
-          <SubscriptionWidget />
-        </BentoCard>
-
-        {/* Tile 8: Gamification & Goal Completion Simulator (Span 2x2) */}
-        <BentoCard colSpan={2} rowSpan={2} className="p-0 border-0 bg-transparent shadow-none">
-          <GoalSimulatorWidget />
-        </BentoCard>
-
-        {/* Tile 9: Recent Transactions Stream (Span 4) */}
+        {/* Tile 7: Recent Transactions Stream (Span 4) */}
         <BentoCard colSpan={4} className="p-0 border-0 bg-transparent shadow-none">
           <RecentTransactions />
         </BentoCard>
