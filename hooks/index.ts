@@ -239,3 +239,38 @@ export function useWallets() {
     refresh: load,
   }
 }
+
+// ── useSubscriptions ───────────────────────────────────────────
+export function useSubscriptions() {
+  const [data, setData] = useState<import('@/types').SubscriptionsResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await fetcher<import('@/types').SubscriptionsResponse>('/api/subscriptions')
+      setData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal memuat langganan')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  return {
+    data,
+    subscriptions: data?.subscriptions ?? [],
+    monthlyCommitment: data?.monthlyCommitment ?? 0,
+    activeCount: data?.activeCount ?? 0,
+    upcomingThisMonthCount: data?.upcomingThisMonthCount ?? 0,
+    isLoading,
+    error,
+    refresh: load,
+  }
+}

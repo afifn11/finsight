@@ -86,6 +86,7 @@ model User {
   pushSubscriptions PushSubscription[]
   wallets      Wallet[]
   walletTransfers WalletTransfer[]
+  subscriptions Subscription[]
 
   @@map("users")
 }
@@ -349,4 +350,42 @@ model WalletTransfer {
 
   @@index([userId])
   @@map("wallet_transfers")
+}
+
+// ─────────────────────────────────────────────────────────────
+// SUBSCRIPTIONS & RECURRING BILLS
+// ─────────────────────────────────────────────────────────────
+
+enum SubscriptionCycle {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+model Subscription {
+  id              String             @id @default(cuid())
+  userId          String
+  name            String             // e.g., "Netflix Premium", "Indihome 50Mbps"
+  amount          Decimal            @db.Decimal(15, 2)
+  billingCycle    SubscriptionCycle  @default(MONTHLY)
+  nextBillingDate DateTime
+  category        String             @default("Langganan")
+  color           String             @default("#8b5cf6")
+  icon            String             @default("credit-card")
+  status          SubscriptionStatus @default(ACTIVE)
+  notes           String?            @db.Text
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, status, nextBillingDate])
+  @@map("subscriptions")
 }

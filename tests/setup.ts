@@ -94,6 +94,13 @@ vi.mock('@/lib/prisma', () => {
       create: vi.fn(),
       delete: vi.fn(),
     },
+    subscription: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
   }
   return { prisma: mockPrisma }
 })

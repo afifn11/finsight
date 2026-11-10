@@ -1,10 +1,32 @@
 // types/index.ts
 // FinSight — Global TypeScript Types
 
-import type { Transaction, Category, Budget, User, Wallet, WalletType, WalletTransfer } from '@prisma/client'
+import type {
+  Transaction,
+  Category,
+  Budget,
+  User,
+  Wallet,
+  WalletType,
+  WalletTransfer,
+  Subscription,
+  SubscriptionCycle,
+  SubscriptionStatus,
+} from '@prisma/client'
 
 // ── Re-export Prisma types ─────────────────────────────────────
-export type { Transaction, Category, Budget, User, Wallet, WalletType, WalletTransfer }
+export type {
+  Transaction,
+  Category,
+  Budget,
+  User,
+  Wallet,
+  WalletType,
+  WalletTransfer,
+  Subscription,
+  SubscriptionCycle,
+  SubscriptionStatus,
+}
 
 // ── Extended types with relations ─────────────────────────────
 export type TransactionWithCategory = Transaction & {
@@ -135,6 +157,26 @@ export interface WalletsResponse {
   wallets: Wallet[]
   netWorth: number
   breakdownByType: Record<string, number>
+}
+
+// ── Subscription types ─────────────────────────────────────────
+export interface SubscriptionFormData {
+  name: string
+  amount: number
+  billingCycle: SubscriptionCycle
+  nextBillingDate: Date | string
+  category?: string
+  color?: string
+  icon?: string
+  status?: SubscriptionStatus
+  notes?: string | null
+}
+
+export interface SubscriptionsResponse {
+  subscriptions: Subscription[]
+  monthlyCommitment: number
+  activeCount: number
+  upcomingThisMonthCount: number
 }
 
 // ── Navigation ─────────────────────────────────────────────────

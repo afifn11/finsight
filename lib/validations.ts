@@ -129,3 +129,29 @@ export type TransactionFiltersInput = z.infer<typeof transactionFiltersSchema>
 export type WalletInput = z.infer<typeof walletSchema>
 export type UpdateWalletInput = z.infer<typeof updateWalletSchema>
 export type WalletTransferInputType = z.infer<typeof walletTransferSchema>
+
+// ── Subscription ───────────────────────────────────────────────
+export const subscriptionSchema = z.object({
+  name: z.string().min(1, 'Nama langganan wajib diisi').max(80),
+  amount: z
+    .number({ error: 'Nominal harus angka' })
+    .positive('Nominal harus lebih dari 0')
+    .max(999_999_999_999, 'Nominal terlalu besar'),
+  billingCycle: z.enum(['WEEKLY', 'MONTHLY', 'YEARLY']).default('MONTHLY'),
+  nextBillingDate: z.coerce.date(),
+  category: z.string().max(50).default('Langganan'),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Format warna tidak valid')
+    .default('#8b5cf6'),
+  icon: z.string().default('credit-card'),
+  status: z.enum(['ACTIVE', 'PAUSED', 'CANCELLED']).default('ACTIVE'),
+  notes: z.string().max(500).optional().nullable(),
+})
+
+export const updateSubscriptionSchema = subscriptionSchema.partial().extend({
+  advanceCycle: z.boolean().optional(),
+})
+
+export type SubscriptionInput = z.infer<typeof subscriptionSchema>
+export type UpdateSubscriptionInput = z.infer<typeof updateSubscriptionSchema>
