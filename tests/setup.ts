@@ -57,6 +57,7 @@ vi.mock('@/lib/prisma', () => {
     category: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn().mockResolvedValue({ id: 'cat-001' }),
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
@@ -91,6 +92,25 @@ vi.mock('@google/genai', () => {
 
   return { GoogleGenAI: MockGoogleGenAI }
 })
+
+// ── Mock Supabase Storage ──────────────────────────────────────
+vi.mock('@/lib/supabase', () => ({
+  RECEIPTS_BUCKET: 'receipts',
+  supabaseAdmin: {
+    storage: {
+      from: vi.fn(() => ({
+        upload: vi.fn().mockResolvedValue({ error: null }),
+        createSignedUrl: vi.fn().mockResolvedValue({
+          data: { signedUrl: 'https://supabase.example.com/signed' },
+          error: null,
+        }),
+        remove: vi.fn().mockResolvedValue({ error: null }),
+      })),
+    },
+  },
+  getSignedReceiptUrl: vi.fn().mockResolvedValue('https://supabase.example.com/signed'),
+  deleteReceiptFile: vi.fn().mockResolvedValue(true),
+}))
 
 // ── Reset semua mock setelah tiap test ────────────────────────
 afterEach(() => {

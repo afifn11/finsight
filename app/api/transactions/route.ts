@@ -101,6 +101,22 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Verifikasi kepemilikan kategori (sistem atau milik user sendiri)
+  const category = await prisma.category.findFirst({
+    where: {
+      id: parsed.data.categoryId,
+      OR: [{ userId: null }, { userId: session.user.id }],
+    },
+    select: { id: true },
+  })
+
+  if (!category) {
+    return NextResponse.json<ApiError>(
+      { error: 'Kategori tidak valid atau tidak ditemukan' },
+      { status: 400 }
+    )
+  }
+
   // Strip undefined fields — exactOptionalPropertyTypes butuh null, bukan undefined, untuk Prisma
   const { notes, recurringPeriod, recurringEndDate, ...requiredData } = parsed.data
 

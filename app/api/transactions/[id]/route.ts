@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { transactionSchema } from '@/lib/validations'
+import { deleteReceiptFile } from '@/lib/supabase'
 import type { ApiResponse, ApiError } from '@/types'
 import type { Prisma } from '@prisma/client'
 
@@ -99,11 +100,21 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
 
   const existing = await prisma.transaction.findUnique({
     where: { id },
-    select: { userId: true },
+    select: { userId: true, receiptPath: true },
   })
 
   if (!existing || existing.userId !== session.user.id) {
     return NextResponse.json<ApiError>({ error: 'Tidak ditemukan' }, { status: 404 })
+  }
+
+  // Bersihkan file bukti transaksi dari Supabase Storage jika ada
+  if (existing.receiptPath) {
+    try {
+      await deleteReceiptFile(existing.receiptPath)
+    } catch (storageErr) {
+      console.error('[STORAGE_CLEANUP_ERROR] Gagal menghapus file bukti:', storageErr)
+      // Tetap lanjutkan penghapusan row database agar transaksi tidak tersangkut
+    }
   }
 
   await prisma.transaction.delete({ where: { id } })

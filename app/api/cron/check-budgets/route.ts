@@ -4,13 +4,27 @@
 // mengirim header "Authorization: Bearer $CRON_SECRET" untuk request
 // yang berasal dari Cron Jobs mereka, jadi ini aman dari akses publik.
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { checkBudgetAlertsForUser } from '@/lib/budget-alerts'
 import { sendPushToUser } from '@/lib/push'
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) {
+    console.error('[CRON_CONFIG_ERROR] CRON_SECRET is not configured in environment variables')
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+  }
+
+  const authHeader = req.headers.get('authorization') ?? ''
+  const expectedHeader = `Bearer ${cronSecret}`
+
+  // Constant-time comparison untuk mencegah timing attack pada cron secret
+  const isMatch =
+    authHeader.length === expectedHeader.length &&
+    crypto.timingSafeEqual(Buffer.from(authHeader), Buffer.from(expectedHeader))
+
+  if (!isMatch) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

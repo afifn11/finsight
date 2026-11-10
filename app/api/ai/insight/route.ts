@@ -8,7 +8,25 @@ import { GoogleGenAI } from '@google/genai'
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
 import { aiInsightRateLimiter, checkRateLimit } from '@/lib/rate-limit'
+import { z } from 'zod'
 import type { ApiResponse, ApiError, AiInsightData, Insight } from '@/types'
+
+const insightSchema = z.array(
+  z.object({
+    title: z.string().min(1).max(100),
+    description: z.string().min(1).max(300),
+    type: z.enum(['info', 'warning', 'tip', 'achievement']),
+  })
+)
+
+const FALLBACK_INSIGHTS: Insight[] = [
+  {
+    title: 'Data keuangan siap dianalisis',
+    description:
+      'Tambahkan lebih banyak transaksi untuk mendapatkan insight yang lebih akurat.',
+    type: 'info',
+  },
+]
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! })
 
@@ -148,51 +166,38 @@ export async function GET() {
     statusBudget: budgetStatus,
   }
 
-  const prompt = `Kamu adalah asisten keuangan personal yang analitis dan suportif.
-Berikan TEPAT 3 insight keuangan personal dalam format JSON berdasarkan data berikut:
+  // ── Call Gemini 2.5 Flash dengan systemInstruction & error boundary ──
+  let insights: Insight[] = FALLBACK_INSIGHTS
 
-${JSON.stringify(contextData, null, 2)}
-
+  try {
+    const response = await genAI.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: JSON.stringify(contextData, null, 2),
+      config: {
+        systemInstruction: `Kamu adalah asisten keuangan personal yang analitis dan suportif.
+Analisis data ringkasan keuangan berikut dan berikan TEPAT 3 insight personal.
 PENTING:
 - Setiap insight harus spesifik dengan angka nyata dari data (bukan generik)
-- Gunakan bahasa Indonesia yang natural dan friendly
+- Gunakan bahasa Indonesia yang natural dan ramah
 - Fokus pada insight yang actionable (bisa ditindaklanjuti)
-- Variasikan tipe insight: ada yang informatif, ada yang peringatan, ada yang pencapaian/tips
-
-Balas HANYA dengan JSON array berikut, tanpa teks lain, tanpa markdown:
-[
-  {
-    "title": "Judul singkat (max 8 kata)",
-    "description": "Penjelasan insight yang spesifik dengan angka (max 2 kalimat)",
-    "type": "info|warning|tip|achievement"
-  }
-]`
-
-  // ── Call Gemini 2.5 Flash ──────────────────────────────────
-  const response = await genAI.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
-    config: {
-      maxOutputTokens: 800,
-      temperature: 0.4,
-    },
-  })
-
-  const rawText = response.text ?? '[]'
-
-  let insights: Insight[] = []
-  try {
-    const cleaned = rawText.replace(/```json|```/g, '').trim()
-    insights = JSON.parse(cleaned) as Insight[]
-  } catch {
-    insights = [
-      {
-        title: 'Data keuangan siap dianalisis',
-        description:
-          'Tambahkan lebih banyak transaksi untuk mendapatkan insight yang lebih akurat.',
-        type: 'info',
+- Variasikan tipe insight: info, warning, tip, atau achievement
+- Balas HANYA dengan JSON array: [{"title": string, "description": string, "type": "info"|"warning"|"tip"|"achievement"}], tanpa markdown, tanpa teks lain.`,
+        maxOutputTokens: 800,
+        temperature: 0.3,
       },
-    ]
+    })
+
+    const rawText = response.text ?? '[]'
+    const cleaned = rawText.replace(/```json|```/g, '').trim()
+    const parsed: unknown = JSON.parse(cleaned)
+    const validation = insightSchema.safeParse(parsed)
+
+    if (validation.success && validation.data.length > 0) {
+      insights = validation.data
+    }
+  } catch (err) {
+    console.error('[AI_INSIGHT_ERROR] Gagal memanggil Gemini API atau validasi output:', err)
+    insights = FALLBACK_INSIGHTS
   }
 
   const insightData: AiInsightData = {

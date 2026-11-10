@@ -78,8 +78,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json<ApiError>({ error: 'Ukuran gambar maksimal 10MB.' }, { status: 400 })
+    // Batasi 4MB agar sesuai dengan batas payload Vercel Serverless Function (4.5MB)
+    if (file.size > 4 * 1024 * 1024) {
+      return NextResponse.json<ApiError>({ error: 'Ukuran gambar maksimal 4MB.' }, { status: 400 })
     }
 
     // Convert to base64
@@ -123,7 +124,18 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const extracted = JSON.parse(jsonMatch[0]) as OcrExtractedRaw
+    let extracted: OcrExtractedRaw
+    try {
+      extracted = JSON.parse(jsonMatch[0]) as OcrExtractedRaw
+    } catch {
+      return NextResponse.json<ApiError>(
+        { error: 'Gagal membaca struk. Format respon tidak valid.' },
+        { status: 422 }
+      )
+    }
+
+    const rawConfidence = Number(extracted.confidence)
+    const confidence = isNaN(rawConfidence) ? 0.5 : Math.min(1, Math.max(0, rawConfidence))
 
     return NextResponse.json({
       data: {
@@ -133,15 +145,14 @@ export async function POST(req: NextRequest) {
         merchant: extracted.merchant ?? null,
         category: extracted.category ?? null,
         type: extracted.type ?? 'EXPENSE',
-        confidence: Number(extracted.confidence) || 0.5,
+        confidence,
       },
       message: 'Struk berhasil dibaca',
     })
   } catch (err) {
-    console.error('OCR error:', err)
-    const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error('[OCR_SCAN_ERROR]', err)
     return NextResponse.json<ApiError>(
-      { error: `Gagal memproses gambar: ${message}` },
+      { error: 'Gagal memproses gambar struk. Silakan coba lagi atau masukkan transaksi secara manual.' },
       { status: 500 }
     )
   }
