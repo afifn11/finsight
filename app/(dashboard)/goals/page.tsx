@@ -10,10 +10,10 @@ export default function GoalsPage() {
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Page Header */}
       <div className="p-5 md:p-6 rounded-2xl glass-card">
-        <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           Target Finansial & Gamifikasi
         </h1>
-        <p className="text-xs sm:text-sm mt-0.5 text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
           Rencanakan impian masa depan, simulasikan kecepatan tabungan, dan buka lencana pencapaian
         </p>
       </div>

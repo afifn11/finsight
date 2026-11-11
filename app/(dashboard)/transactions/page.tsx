@@ -17,10 +17,10 @@ export default function TransactionsPage() {
       {/* Header & Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 md:p-6 rounded-2xl glass-card">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             Transaksi
           </h1>
-          <p className="text-xs sm:text-sm mt-0.5 text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
             Pencatatan, filter, dan riwayat arus kas masuk & keluar
           </p>
         </div>

@@ -2,8 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle } from 'lucide-react'
-import { ActionButton, ActionGroup } from '@/components/ui/ActionButton'
+import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Button } from '@/components/ui/Button'
 import { useForm, Controller } from 'react-hook-form'
@@ -28,55 +27,61 @@ function BudgetCard({
   const status = getBudgetStatus(budget.percentage)
   const color = getBudgetStatusColor(status)
   const capped = Math.min(budget.percentage, 100)
+  const isCompleted = status === 'safe' && budget.percentage < 40
 
   return (
-    <div className="card p-5">
+    <div className="card p-5 overflow-hidden border border-slate-200 dark:border-slate-800">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        {/* Left: Icon & Category Info */}
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div
-            className="flex items-center justify-center w-10 h-10 rounded-xl"
-            style={{ background: budget.category.color + '22' }}
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base"
+            style={{ background: budget.category.color ? budget.category.color + '22' : undefined }}
           >
-            <span className="text-lg">{budget.category.icon === 'utensils' ? '🍽' :
+            {budget.category.icon === 'utensils' ? '🍽' :
               budget.category.icon === 'car' ? '🚗' :
               budget.category.icon === 'shopping-bag' ? '🛍' :
               budget.category.icon === 'zap' ? '⚡' :
               budget.category.icon === 'heart-pulse' ? '❤️' :
               budget.category.icon === 'tv' ? '📺' :
               budget.category.icon === 'graduation-cap' ? '🎓' : '💰'}
-            </span>
           </div>
-          <div>
-            <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {budget.category.name}
-            </p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              Bulanan
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate">
+                {budget.category.name}
+              </h3>
+              {isCompleted ? (
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              ) : status === 'danger' || status === 'exceeded' ? (
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" style={{ color }} />
+              ) : null}
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
+              {budget.period ? budget.period.toLowerCase() : 'bulanan'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          {status === 'danger' || status === 'exceeded' ? (
-            <AlertTriangle className="w-4 h-4" style={{ color }} />
-          ) : status === 'safe' && budget.percentage < 40 ? (
-            <CheckCircle className="w-4 h-4" style={{ color: 'var(--color-success-500)' }} />
-          ) : null}
-          <ActionGroup>
-            <ActionButton
-              icon={<Pencil className="w-3.5 h-3.5" />}
-              label="Edit"
-              onClick={() => onEdit(budget)}
-              variant="default"
-            />
-            <ActionButton
-              icon={<Trash2 className="w-3.5 h-3.5" />}
-              label="Hapus"
-              onClick={() => onDelete(budget.id)}
-              variant="danger"
-            />
-          </ActionGroup>
+        {/* Right: Actions (Pencil & Trash) */}
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => onEdit(budget)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title="Edit budget"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(budget.id)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+            title="Hapus budget"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 

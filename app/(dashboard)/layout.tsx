@@ -24,7 +24,7 @@ export default async function DashboardLayout({
         <Sidebar user={session.user} />
 
         {/* Main content */}
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
           <Header user={session.user} />
           <main
             className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8 pt-[calc(4rem+1.5rem)] md:pt-6"
