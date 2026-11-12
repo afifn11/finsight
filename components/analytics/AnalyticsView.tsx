@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import html2canvas from 'html2canvas'
+import html2canvas from 'html2canvas-pro'
 import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
 import { useDashboard } from '@/hooks'
@@ -10,6 +10,7 @@ import { formatCurrencyShort, formatCurrency, formatPercentage } from '@/lib/uti
 import { MonthlyBarChart } from '@/components/dashboard/MonthlyBarChart'
 import { ChartSkeleton } from '@/components/dashboard/ChartSkeleton'
 import { DataError } from '@/components/ui/DataError'
+import { PdfReportTemplate } from './PdfReportTemplate'
 import {
   TrendingUp,
   ArrowDownLeft,
@@ -23,130 +24,93 @@ import type { MonthlySummary } from '@/types'
 
 type TimeRange = '1M' | '3M' | '6M' | 'YTD'
 
-function colorToRgb(colorStr: string): string {
-  if (!colorStr || colorStr === 'transparent' || colorStr === 'inherit') return colorStr
-  try {
-    const canvas = document.createElement('canvas')
-    canvas.width = 1
-    canvas.height = 1
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    if (!ctx) return colorStr
-    ctx.fillStyle = colorStr
-    ctx.fillRect(0, 0, 1, 1)
-    const data = ctx.getImageData(0, 0, 1, 1).data
-    const r = data[0] ?? 0
-    const g = data[1] ?? 0
-    const b = data[2] ?? 0
-    const a = data[3] ?? 255
-    return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(2)})`
-  } catch {
-    return colorStr
-  }
-}
-
-function sanitizeModernColorValue(val: string): string {
-  if (!val) return val
-  if (/(?:oklch|oklab|lab|lch|hwb|color)\(/i.test(val)) {
-    return val.replace(/(?:oklch|oklab|lab|lch|hwb|color)\([^)]+\)/gi, (match) =>
-      colorToRgb(match)
-    )
-  }
-  return colorToRgb(val)
-}
-
 export function AnalyticsView() {
   const { data, isLoading, error, refresh } = useDashboard()
   const [timeRange, setTimeRange] = useState<TimeRange>('6M')
   const [isExporting, setIsExporting] = useState(false)
-  const reportRef = useRef<HTMLDivElement>(null)
+  const pdfTemplateRef = useRef<HTMLDivElement>(null)
 
   const handleDownloadPDF = async () => {
-    if (!reportRef.current || isExporting) return
+    if (!pdfTemplateRef.current || isExporting) return
     setIsExporting(true)
 
-    const htmlEl = document.documentElement
-    const wasDark = htmlEl.classList.contains('dark')
-
     try {
-      // Temporarily force light mode for crisp PDF print clarity
-      if (wasDark) {
-        htmlEl.classList.remove('dark')
-        await new Promise((resolve) => setTimeout(resolve, 120))
-      }
-
-      const canvas = await html2canvas(reportRef.current, {
+      const canvas = await html2canvas(pdfTemplateRef.current, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
+        windowWidth: 850,
         onclone: (clonedDoc) => {
-          const container =
-            clonedDoc.querySelector('[data-pdf-container]') || clonedDoc.body
-          const allElements = [
-            clonedDoc.documentElement,
-            clonedDoc.body,
-            container,
-            ...Array.from(clonedDoc.querySelectorAll('*')),
-          ]
+          const wrapper = clonedDoc.getElementById('pdf-offscreen-wrapper')
+          if (wrapper) {
+            wrapper.style.position = 'static'
+            wrapper.style.left = '0'
+            wrapper.style.top = '0'
+            wrapper.style.opacity = '1'
+            wrapper.style.visibility = 'visible'
+            wrapper.style.display = 'block'
+          }
 
-          const colorProps: Array<{ camel: string; kebab: string }> = [
-            { camel: 'color', kebab: 'color' },
-            { camel: 'backgroundColor', kebab: 'background-color' },
-            { camel: 'borderColor', kebab: 'border-color' },
-            { camel: 'borderTopColor', kebab: 'border-top-color' },
-            { camel: 'borderRightColor', kebab: 'border-right-color' },
-            { camel: 'borderBottomColor', kebab: 'border-bottom-color' },
-            { camel: 'borderLeftColor', kebab: 'border-left-color' },
-            { camel: 'outlineColor', kebab: 'outline-color' },
-            { camel: 'textDecorationColor', kebab: 'text-decoration-color' },
-            { camel: 'boxShadow', kebab: 'box-shadow' },
-            { camel: 'fill', kebab: 'fill' },
-            { camel: 'stroke', kebab: 'stroke' },
-          ]
+          const pdfContainer = clonedDoc.getElementById('pdf-report-template')
+          if (pdfContainer) {
+            pdfContainer.style.color = '#09090b'
+            pdfContainer.style.backgroundColor = '#ffffff'
+          }
 
-          allElements.forEach((el) => {
-            const targetEl = el as HTMLElement
-            if (!targetEl || !targetEl.style) return
-            const view = clonedDoc.defaultView ?? window
-            const style = view.getComputedStyle(targetEl)
-
-            colorProps.forEach(({ camel, kebab }) => {
-              const val =
-                style.getPropertyValue(kebab) ||
-                (style as unknown as Record<string, string>)[camel] ||
-                ''
+          // Sanitize <style> tags to prevent any unsupported modern color syntax issues
+          const styleTags = clonedDoc.querySelectorAll('style')
+          styleTags.forEach((style) => {
+            try {
               if (
-                val &&
-                (val.includes('lab') ||
-                  val.includes('oklch') ||
-                  val.includes('lch') ||
-                  val.includes('hwb') ||
-                  val.includes('color('))
+                style.innerHTML.includes('lab(') ||
+                style.innerHTML.includes('oklch(') ||
+                style.innerHTML.includes('oklab(') ||
+                style.innerHTML.includes('lch(') ||
+                style.innerHTML.includes('hwb(')
               ) {
-                const converted = sanitizeModernColorValue(val)
-                targetEl.style.setProperty(kebab, converted, 'important')
+                style.innerHTML = style.innerHTML
+                  .replace(/oklch\([^)]+\)/gi, '#64748b')
+                  .replace(/oklab\([^)]+\)/gi, '#64748b')
+                  .replace(/lab\([^)]+\)/gi, '#64748b')
+                  .replace(/lch\([^)]+\)/gi, '#64748b')
+                  .replace(/hwb\([^)]+\)/gi, '#64748b')
               }
-            })
+            } catch (e) {}
           })
         },
       })
 
       const imgData = canvas.toDataURL('image/png')
       const pdf = new jsPDF('p', 'mm', 'a4')
-      const pageWidth = pdf.internal.pageSize.getWidth()
-      const margin = 10
-      const contentWidth = pageWidth - margin * 2
-      const contentHeight = (canvas.height * contentWidth) / canvas.width
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = pdf.internal.pageSize.getHeight()
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
 
-      pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, contentHeight)
-      pdf.save('FinSight-Report.pdf')
+      // Fit to full A4 width
+      const printWidth = pdfWidth
+      const printHeight = (imgHeight * printWidth) / imgWidth
+
+      let heightLeft = printHeight
+      let position = 0
+
+      pdf.addImage(imgData, 'PNG', 0, position, printWidth, printHeight)
+      heightLeft -= pdfHeight
+
+      // Multi-page handling if document exceeds one A4 page
+      while (heightLeft > 0) {
+        position = heightLeft - printHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 0, position, printWidth, printHeight)
+        heightLeft -= pdfHeight
+      }
+
+      pdf.save(`FinSight-Laporan-${new Date().toISOString().slice(0, 10)}.pdf`)
       toast.success('Laporan PDF berhasil diunduh!')
     } catch (err) {
       console.error('[PDF_EXPORT_ERROR]', err)
       toast.error('Gagal mengunduh laporan PDF')
     } finally {
-      if (wasDark) {
-        htmlEl.classList.add('dark')
-      }
       setIsExporting(false)
     }
   }
@@ -193,7 +157,7 @@ export function AnalyticsView() {
     totalIncome > 0 ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100) : 0
 
   return (
-    <div ref={reportRef} data-pdf-container="true" className="space-y-6">
+    <div className="space-y-6">
       {/* Time Range Selector & Download PDF Action */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80">
         <div className="flex items-center gap-2">
@@ -358,6 +322,24 @@ export function AnalyticsView() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Off-screen Dedicated Executive PDF Document Render Container */}
+      <div
+        id="pdf-offscreen-wrapper"
+        aria-hidden="true"
+        className="fixed -left-[9999px] top-0 pointer-events-none select-none overflow-hidden"
+      >
+        <PdfReportTemplate
+          ref={pdfTemplateRef}
+          timeRange={timeRange}
+          totalIncome={totalIncome}
+          totalExpense={totalExpense}
+          netSavings={netSavings}
+          savingsRate={savingsRate}
+          filteredTrend={filteredTrend}
+          breakdown={breakdown}
+        />
       </div>
     </div>
   )

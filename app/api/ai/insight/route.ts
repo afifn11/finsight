@@ -37,42 +37,55 @@ interface TypeAggRow {
 
 // ── GET /api/ai/insight ────────────────────────────────────────
 export async function GET() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json<ApiError>({ error: 'Unauthorized' }, { status: 401 })
-  }
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json<ApiError>({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-  const userId = session.user.id
+    const userId = session.user.id
+    const now = new Date()
+    const currentMonth = now.getMonth() + 1
+    const currentYear = now.getFullYear()
 
-  // P0.3: rate limit sebelum melakukan query berat / panggilan Gemini.
-  const { success, remaining, reset } = await checkRateLimit(aiInsightRateLimiter, userId)
-  if (!success) {
-    return NextResponse.json<ApiError>(
-      { error: 'Terlalu banyak permintaan insight. Coba lagi nanti.' },
-      {
-        status: 429,
-        headers: {
-          'X-RateLimit-Remaining': String(remaining),
-          'X-RateLimit-Reset': String(reset),
-        },
+    const buildRateLimitPayload = () => {
+      const fallbackMessage =
+        'Analisis AI sementara tidak tersedia (kuota terlampaui). Silakan coba beberapa saat lagi.'
+      const fallbackData: AiInsightData = {
+        insights: [
+          {
+            title: 'Analisis AI Sementara Tidak Tersedia',
+            description: fallbackMessage,
+            type: 'info',
+          },
+        ],
+        generatedAt: now.toISOString(),
+        month: currentMonth,
+        year: currentYear,
       }
-    )
-  }
+      return NextResponse.json({
+        insight: fallbackMessage,
+        status: 'rate_limited',
+        data: fallbackData,
+      })
+    }
 
-  const now = new Date()
-  const currentMonth = now.getMonth() + 1
-  const currentYear = now.getFullYear()
-
-  // ── Check cache first ──────────────────────────────────────
-  const cached = await prisma.aiInsight.findUnique({
-    where: { userId_month_year: { userId, month: currentMonth, year: currentYear } },
-  })
-
-  if (cached) {
-    return NextResponse.json<ApiResponse<AiInsightData>>({
-      data: cached.content as unknown as AiInsightData,
+    // ── Check cache first ──────────────────────────────────────
+    const cached = await prisma.aiInsight.findUnique({
+      where: { userId_month_year: { userId, month: currentMonth, year: currentYear } },
     })
-  }
+
+    if (cached) {
+      return NextResponse.json<ApiResponse<AiInsightData>>({
+        data: cached.content as unknown as AiInsightData,
+      })
+    }
+
+    // P0.3: rate limit sebelum melakukan query berat / panggilan Gemini.
+    const { success } = await checkRateLimit(aiInsightRateLimiter, userId)
+    if (!success) {
+      return buildRateLimitPayload()
+    }
 
   // ── Gather real user data ──────────────────────────────────
   const monthStart = startOfMonth(now)
@@ -197,7 +210,7 @@ PENTING:
     }
   } catch (err) {
     console.error('[AI_INSIGHT_ERROR] Gagal memanggil Gemini API atau validasi output:', err)
-    insights = FALLBACK_INSIGHTS
+    return buildRateLimitPayload()
   }
 
   const insightData: AiInsightData = {
@@ -220,4 +233,26 @@ PENTING:
   })
 
   return NextResponse.json<ApiResponse<AiInsightData>>({ data: insightData })
+  } catch (fatalErr) {
+    console.error('[AI_INSIGHT_FATAL_ERROR]', fatalErr)
+    const now = new Date()
+    const fallbackMessage =
+      'Analisis AI sementara tidak tersedia (kuota terlampaui). Silakan coba beberapa saat lagi.'
+    return NextResponse.json({
+      insight: fallbackMessage,
+      status: 'rate_limited',
+      data: {
+        insights: [
+          {
+            title: 'Analisis AI Sementara Tidak Tersedia',
+            description: fallbackMessage,
+            type: 'info',
+          },
+        ],
+        generatedAt: now.toISOString(),
+        month: now.getMonth() + 1,
+        year: now.getFullYear(),
+      },
+    })
+  }
 }
