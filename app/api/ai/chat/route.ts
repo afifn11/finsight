@@ -248,9 +248,10 @@ ${netSavings >= 0 ? 'Kondisi arus kasmu bulan ini masih dalam kondisi sehat (sur
         })
 
         const rawText = aiResult.text?.trim() ?? ''
-        const cleaned = rawText.replace(/^```json\s*|\s*```$/g, '').trim()
+        const cleaned = rawText.replace(/```(?:json)?/gi, '').trim()
 
         try {
+          // Attempt 1: Direct parse cleaned text
           const parsedJson = JSON.parse(cleaned) as { reply?: string; suggestions?: string[] }
           if (parsedJson.reply) {
             copilotResponse = {
@@ -262,10 +263,27 @@ ${netSavings >= 0 ? 'Kondisi arus kasmu bulan ini masih dalam kondisi sehat (sur
             }
           }
         } catch {
-          // If not strictly JSON, use the raw text as markdown reply
-          if (rawText) {
+          // Attempt 2: Extract JSON object via regex if there's surrounding text
+          const jsonMatch = rawText.match(/\{[\s\S]*"reply"[\s\S]*\}/)
+          if (jsonMatch) {
+            try {
+              const parsedJson = JSON.parse(jsonMatch[0]) as { reply?: string; suggestions?: string[] }
+              if (parsedJson.reply) {
+                copilotResponse = {
+                  reply: parsedJson.reply,
+                  suggestions:
+                    Array.isArray(parsedJson.suggestions) && parsedJson.suggestions.length > 0
+                      ? parsedJson.suggestions
+                      : copilotResponse.suggestions,
+                }
+              }
+            } catch {}
+          }
+
+          // If still no reply extracted, strip code blocks and use cleaned text as markdown reply
+          if (!copilotResponse.reply && cleaned) {
             copilotResponse = {
-              reply: rawText,
+              reply: cleaned,
               suggestions: copilotResponse.suggestions,
             }
           }

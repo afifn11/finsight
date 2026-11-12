@@ -181,7 +181,7 @@ export function SubscriptionWidget() {
   })
 
   return (
-    <div className="glass-card interactive-card p-5 rounded-2xl h-full flex flex-col justify-between">
+    <div className="glass-card interactive-card p-5 rounded-2xl h-full flex flex-col justify-between overflow-hidden">
       {/* Header */}
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -249,7 +249,7 @@ export function SubscriptionWidget() {
           </div>
         ) : activeTab === 'list' ? (
           /* List View */
-          <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+          <div className="space-y-2.5 max-h-[380px] overflow-y-auto overflow-x-hidden pr-1">
             {subscriptions.length === 0 ? (
               <div className="text-center py-8 text-[var(--text-muted)] text-xs space-y-2">
                 <CreditCard className="w-8 h-8 mx-auto opacity-40 text-lime-500" />
@@ -270,34 +270,34 @@ export function SubscriptionWidget() {
                 return (
                   <div
                     key={sub.id}
-                    className="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/60 hover:bg-[var(--bg-elevated)] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                    className="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/60 hover:bg-[var(--bg-elevated)] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 overflow-hidden min-w-0"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1 w-full sm:w-auto">
                       <div
                         className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-xs shrink-0"
                         style={{ backgroundColor: sub.color || '#8b5cf6' }}
                       >
                         {sub.name.slice(0, 2).toUpperCase()}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                             {sub.name}
                           </h4>
                           <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full border ${badge.className}`}
+                            className={`text-[10px] px-2 py-0.5 rounded-full border shrink-0 ${badge.className}`}
                           >
                             {badge.label}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] mt-0.5">
-                          <span className="font-bold text-[var(--text-primary)]">
+                        <div className="flex items-center gap-1.5 flex-wrap text-xs text-[var(--text-secondary)] mt-0.5">
+                          <span className="font-bold text-[var(--text-primary)] shrink-0">
                             {formatRupiah(Number(sub.amount))}
                           </span>
-                          <span>•</span>
-                          <span>{getCycleLabel(sub.billingCycle)}</span>
-                          <span>•</span>
-                          <span>
+                          <span className="shrink-0">•</span>
+                          <span className="shrink-0">{getCycleLabel(sub.billingCycle)}</span>
+                          <span className="shrink-0">•</span>
+                          <span className="truncate">
                             Jatuh tempo:{' '}
                             {format(new Date(sub.nextBillingDate), 'dd MMM yyyy', {
                               locale: localeId,
@@ -307,22 +307,23 @@ export function SubscriptionWidget() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 self-end sm:self-center">
+                    <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
                       <button
                         type="button"
                         onClick={() => handleAdvanceCycle(sub)}
                         disabled={isAdvancing}
                         title="Tandai lunas & perbarui siklus berikutnya"
-                        className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-lime-500/30 bg-lime-500/10 text-lime-600 dark:text-lime-400 hover:bg-lime-500/20 font-medium transition-colors"
+                        className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-lime-500/30 bg-lime-500/10 text-lime-600 dark:text-lime-400 hover:bg-lime-500/20 font-medium transition-colors whitespace-nowrap"
                       >
-                        <CheckCircle2 className={`w-3.5 h-3.5 ${isAdvancing ? 'animate-spin' : ''}`} />
-                        <span>Tandai Lunas</span>
+                        <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${isAdvancing ? 'animate-spin' : ''}`} />
+                        <span className="inline sm:hidden xl:inline">Tandai Lunas</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(sub.id, sub.name)}
-                        className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                        className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0"
                         title="Hapus"
+                        aria-label="Hapus langganan"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

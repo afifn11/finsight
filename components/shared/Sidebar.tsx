@@ -163,16 +163,16 @@ export function Sidebar({ user }: SidebarProps) {
       <div
         className={cn(
           'border-t border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-950/40 transition-all duration-200 shrink-0 mt-auto',
-          collapsed ? 'p-3 flex flex-col items-center gap-3' : 'p-3.5 space-y-2'
+          collapsed ? 'p-3 flex flex-col items-center gap-3' : 'p-3.5 flex flex-col gap-2'
         )}
       >
         {!collapsed ? (
-          <>
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80">
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 w-full">
               {user.image ? (
                 <img src={user.image} alt={userName} className="w-8 h-8 rounded-full object-cover shrink-0" />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-lime-600 dark:bg-lime-400 text-white dark:text-zinc-950 flex items-center justify-center font-semibold text-xs shrink-0">
+                <div className="w-8 h-8 rounded-full bg-lime-600 dark:bg-lime-400 text-white dark:text-zinc-950 flex items-center justify-center font-semibold text-xs shrink-0 select-none">
                   {userInitials}
                 </div>
               )}
@@ -189,21 +189,25 @@ export function Sidebar({ user }: SidebarProps) {
               <LogOut className="w-4 h-4 shrink-0"/>
               <span>Keluar</span>
             </button>
-          </>
+          </div>
         ) : (
-          <>
-            <div className="w-10 h-10 rounded-full bg-lime-600 dark:bg-lime-400 text-white dark:text-zinc-950 flex items-center justify-center font-semibold text-xs">
+          <div className="flex flex-col items-center gap-3 w-full">
+            <div
+              className="w-10 h-10 rounded-full bg-lime-600 dark:bg-lime-400 text-white dark:text-zinc-950 flex items-center justify-center font-semibold text-xs shrink-0 select-none"
+              title={userName}
+            >
               {userInitials}
             </div>
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: '/login' })}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors shrink-0"
               title="Keluar"
+              aria-label="Keluar"
             >
               <LogOut className="w-4.5 h-4.5 shrink-0"/>
             </button>
-          </>
+          </div>
         )}
       </div>
     </aside>

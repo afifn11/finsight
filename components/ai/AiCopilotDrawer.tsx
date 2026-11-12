@@ -96,9 +96,31 @@ export function AiCopilotDrawer() {
       }
 
       const data = (await res.json()) as { reply?: string; suggestions?: string[] }
-      const replyText =
+      let replyText =
         data.reply ??
         'Maaf, AI Copilot sedang mengalami sedikit kendala koneksi. Silakan coba beberapa saat lagi.'
+
+      // Parse JSON if replyText is wrapped in ```json or is raw JSON
+      try {
+        if (replyText.includes('```json')) {
+          const jsonMatch = replyText.match(/```json\s*([\s\S]*?)\s*```/)
+          if (jsonMatch && jsonMatch[1]) {
+            const parsed = JSON.parse(jsonMatch[1])
+            replyText = parsed.reply || replyText
+            if (Array.isArray(parsed.suggestions) && parsed.suggestions.length > 0 && (!data.suggestions || data.suggestions.length === 0)) {
+              setSuggestions(parsed.suggestions)
+            }
+          }
+        } else if (replyText.trim().startsWith('{')) {
+          const parsed = JSON.parse(replyText.trim())
+          replyText = parsed.reply || replyText
+          if (Array.isArray(parsed.suggestions) && parsed.suggestions.length > 0 && (!data.suggestions || data.suggestions.length === 0)) {
+            setSuggestions(parsed.suggestions)
+          }
+        }
+      } catch (e) {
+        // Fallback to raw text if parsing fails
+      }
 
       const modelMsg: ChatMessage = {
         id: `model-${Date.now()}`,
@@ -147,7 +169,23 @@ export function AiCopilotDrawer() {
 
   // Format markdown helper for bullet lists and bold text
   const renderFormattedText = (text: string) => {
-    const lines = text.split('\n')
+    let cleanText = text
+    try {
+      if (cleanText.includes('```json')) {
+        const jsonMatch = cleanText.match(/```json\s*([\s\S]*?)\s*```/)
+        if (jsonMatch && jsonMatch[1]) {
+          const parsed = JSON.parse(jsonMatch[1])
+          cleanText = parsed.reply || cleanText
+        }
+      } else if (cleanText.trim().startsWith('{')) {
+        const parsed = JSON.parse(cleanText.trim())
+        cleanText = parsed.reply || cleanText
+      }
+    } catch (e) {
+      // Keep original text on parse failure
+    }
+
+    const lines = cleanText.split('\n')
     return (
       <div className="space-y-1.5 text-xs sm:text-sm leading-relaxed">
         {lines.map((line, idx) => {
