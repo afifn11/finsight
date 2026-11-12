@@ -1,6 +1,6 @@
 // app/(dashboard)/analytics/page.tsx
 import type { Metadata } from 'next'
-import { AnalyticsView } from '@/components/dashboard/AnalyticsView'
+import { AnalyticsView } from '@/components/analytics/AnalyticsView'
 
 export const metadata: Metadata = { title: 'Analitik' }
 

@@ -1,8 +1,12 @@
 {
   "crons": [
     {
-      "path": "/api/cron/check-budgets",
-      "schedule": "0 8 * * *"
+      "path": "/api/cron/daily-check",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/monthly-report",
+      "schedule": "0 2 1 * *"
     }
   ]
 }
