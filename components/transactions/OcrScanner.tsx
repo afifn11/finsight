@@ -252,7 +252,7 @@ export function OcrScanner({ onResult, onClose }: Props) {
                 <button
                   onClick={handleUse}
                   className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white transition-colors"
-                  style={{ background: 'var(--color-primary-800)' }}
+                  style={{ background: 'var(--accent-solid)' }}
                 >
                   Gunakan data ini
                 </button>

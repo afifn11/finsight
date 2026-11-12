@@ -15,7 +15,7 @@ export default function NotFound() {
             className="flex items-center justify-center w-16 h-16 rounded-2xl"
             style={{ background: 'var(--color-primary-50)' }}
           >
-            <SearchX className="w-8 h-8" style={{ color: 'var(--color-primary-800)' }} />
+            <SearchX className="w-8 h-8" style={{ color: 'var(--accent-solid)' }} />
           </div>
         </div>
 
@@ -23,7 +23,7 @@ export default function NotFound() {
         <div>
           <p
             className="text-7xl font-bold leading-none mb-2"
-            style={{ color: 'var(--color-primary-800)' }}
+            style={{ color: 'var(--accent-solid)' }}
           >
             404
           </p>
@@ -41,7 +41,7 @@ export default function NotFound() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white"
-          style={{ background: 'var(--color-primary-800)' }}
+          style={{ background: 'var(--accent-solid)' }}
         >
           <Home className="w-4 h-4" />
           Kembali ke Dashboard

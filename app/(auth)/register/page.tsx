@@ -66,13 +66,13 @@ export default function RegisterPage() {
         <div className="flex flex-col items-center gap-2">
           <div
             className="flex items-center justify-center w-10 h-10 rounded-xl"
-            style={{ background: 'var(--color-primary-800)' }}
+            style={{ background: 'var(--accent-solid)' }}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="3" y="2.5" width="4" height="15" rx="1.5" fill="white"/>
               <rect x="3" y="2.5" width="13" height="4" rx="1.5" fill="white"/>
               <rect x="3" y="8.5" width="10" height="4" rx="1.5" fill="white"/>
-              <circle cx="17" cy="17" r="2.8" fill="#4ade80"/>
+              <circle cx="17" cy="17" r="2.8" fill="#a3e635"/>
             </svg>
           </div>
           <h1 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>

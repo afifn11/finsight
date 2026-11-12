@@ -79,7 +79,7 @@ describe('getBudgetStatus', () => {
 
 describe('getBudgetStatusColor', () => {
   it('returns green for safe', () => {
-    expect(getBudgetStatusColor('safe')).toBe('#10b981')
+    expect(getBudgetStatusColor('safe')).toBe('#84cc16')
   })
   it('returns amber for warning', () => {
     expect(getBudgetStatusColor('warning')).toBe('#f59e0b')

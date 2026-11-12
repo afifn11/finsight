@@ -75,17 +75,17 @@ export function OnboardingFlow({ user }: Props) {
         <div className="flex items-center justify-center gap-2.5 mb-8">
           <div
             className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0"
-            style={{ background: 'var(--color-primary-800)' }}
+            style={{ background: 'var(--accent-solid)' }}
           >
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="3" y="2.5" width="4" height="15" rx="1.5" fill="white"/>
               <rect x="3" y="2.5" width="13" height="4" rx="1.5" fill="white"/>
               <rect x="3" y="8.5" width="10" height="4" rx="1.5" fill="white"/>
-              <circle cx="17" cy="17" r="2.8" fill="#4ade80"/>
+              <circle cx="17" cy="17" r="2.8" fill="#a3e635"/>
             </svg>
           </div>
           <div>
-            <span className="text-lg font-bold leading-none" style={{ color: 'var(--color-primary-800)' }}>
+            <span className="text-lg font-bold leading-none" style={{ color: 'var(--accent-solid)' }}>
               FinSight
             </span>
             <p className="text-xs leading-none mt-0.5" style={{ color: 'var(--text-muted)' }}>
@@ -105,7 +105,7 @@ export function OnboardingFlow({ user }: Props) {
                     i < step
                       ? { background: 'var(--color-success-500)', color: '#fff' }
                       : i === step
-                      ? { background: 'var(--color-primary-800)', color: '#fff' }
+                      ? { background: 'var(--accent-solid)', color: '#fff' }
                       : { background: 'var(--bg-muted)', color: 'var(--text-muted)' }
                   }
                 >
@@ -166,7 +166,7 @@ export function OnboardingFlow({ user }: Props) {
             className="h-full rounded-full transition-all duration-500"
             style={{
               width: `${((step + 1) / STEPS.length) * 100}%`,
-              background: 'var(--color-primary-800)',
+              background: 'var(--accent-solid)',
             }}
           />
         </div>

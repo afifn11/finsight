@@ -19,14 +19,14 @@ interface TooltipProps {
 function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (!active || !payload?.length) return null
   return (
-    <div className="glass-card px-3.5 py-2.5 text-xs shadow-xl space-y-1.5 border border-cyan-500/20">
+    <div className="glass-card px-3.5 py-2.5 text-xs shadow-xl space-y-1.5 border border-lime-500/20">
       <p className="font-semibold text-xs border-b pb-1" style={{ color: 'var(--text-primary)', borderColor: 'var(--border-default)' }}>
         {label}
       </p>
       {payload.map((entry) => (
         <div key={entry.name} className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full shrink-0 shadow-sm" style={{ background: entry.color }} />
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: entry.color }} />
             <span style={{ color: 'var(--text-secondary)' }}>{entry.name}</span>
           </div>
           <span className="font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>

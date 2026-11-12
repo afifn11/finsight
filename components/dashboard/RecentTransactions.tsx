@@ -72,7 +72,7 @@ export function RecentTransactions() {
               >
                 {/* Category icon indicator */}
                 <div
-                  className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0 shadow-xs"
+                  className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0"
                   style={{ background: tx.category.color + '20' }}
                 >
                   {isIncome ? (

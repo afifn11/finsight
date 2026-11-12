@@ -9,7 +9,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useBudgets, useCategories } from '@/hooks'
-import { formatCurrencyShort, getBudgetStatus, getBudgetStatusColor } from '@/lib/utils'
+import { formatCurrencyShort, getBudgetStatus, getBudgetStatusColor, cn } from '@/lib/utils'
 import { budgetSchema, type BudgetInput } from '@/lib/validations'
 import type { BudgetWithCategory } from '@/types'
 import { BudgetCardSkeleton } from '@/components/ui/Skeleton'
@@ -28,11 +28,13 @@ function BudgetCard({
   const color = getBudgetStatusColor(status)
   const capped = Math.min(budget.percentage, 100)
   const isCompleted = status === 'safe' && budget.percentage < 40
+  const remaining = Number(budget.amount) - budget.spent
+  const isExceeded = remaining < 0
 
   return (
-    <div className="card p-5 overflow-hidden border border-slate-200 dark:border-slate-800">
+    <div className="card p-5 overflow-hidden border border-zinc-200 dark:border-zinc-800/80">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 mb-3">
+      <div className="flex items-center justify-between gap-3 mb-3">
         {/* Left: Icon & Category Info */}
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div
@@ -48,40 +50,22 @@ function BudgetCard({
               budget.category.icon === 'graduation-cap' ? '🎓' : '💰'}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate">
-                {budget.category.name}
-              </h3>
-              {isCompleted ? (
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              ) : status === 'danger' || status === 'exceeded' ? (
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" style={{ color }} />
-              ) : null}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
+            <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm truncate" title={budget.category.name}>
+              {budget.category.name}
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 capitalize">
               {budget.period ? budget.period.toLowerCase() : 'bulanan'}
             </p>
           </div>
         </div>
 
-        {/* Right: Actions (Pencil & Trash) */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            type="button"
-            onClick={() => onEdit(budget)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            title="Edit budget"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(budget.id)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-            title="Hapus budget"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+        {/* Right: Status Icon */}
+        <div className="shrink-0">
+          {isCompleted ? (
+            <CheckCircle2 className="w-4 h-4 text-lime-500 shrink-0" />
+          ) : status === 'danger' || status === 'exceeded' ? (
+            <AlertTriangle className="w-4 h-4 shrink-0" style={{ color }} />
+          ) : null}
         </div>
       </div>
 
@@ -103,7 +87,7 @@ function BudgetCard({
 
       {/* Progress bar */}
       <div
-        className="w-full h-2.5 rounded-full overflow-hidden mb-2"
+        className="w-full h-2 rounded-full overflow-hidden mb-1.5"
         style={{ background: 'var(--bg-muted)' }}
       >
         <div
@@ -112,19 +96,43 @@ function BudgetCard({
         />
       </div>
 
-      {/* Footer label */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-          {budget.percentage}% terpakai
-        </p>
-        <p className="text-xs font-medium" style={{ color }}>
-          {status === 'exceeded'
-            ? `Melewati ${formatCurrencyShort(budget.spent - Number(budget.amount))}`
-            : status === 'danger'
-            ? 'Mendekati limit!'
-            : `Sisa ${formatCurrencyShort(Number(budget.amount) - budget.spent)}`
+      {/* Percentage label */}
+      <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+        <span>{budget.percentage}% terpakai</span>
+        {status === 'danger' && <span className="font-medium text-amber-500">Mendekati limit!</span>}
+      </div>
+
+      {/* Footer Actions & Remaining Status */}
+      <div className="pt-3 mt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between gap-2">
+        <span className={cn(
+          'text-xs font-semibold shrink-0',
+          isExceeded
+            ? 'text-rose-600 dark:text-rose-400'
+            : 'text-lime-600 dark:text-lime-400'
+        )}>
+          {isExceeded
+            ? `Melewati ${formatCurrencyShort(Math.abs(remaining))}`
+            : `Sisa ${formatCurrencyShort(remaining)}`
           }
-        </p>
+        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => onEdit(budget)}
+            className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            title="Edit budget"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(budget.id)}
+            className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+            title="Hapus budget"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -352,7 +360,7 @@ export function BudgetManager() {
               <button
                 onClick={() => { setEditingBudget(null); setModalOpen(true) }}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
-                style={{ background: 'var(--color-primary-800)' }}
+                style={{ background: 'var(--accent-solid)' }}
               >
                 <Plus className="w-4 h-4" /> Tambah
               </button>
@@ -434,7 +442,7 @@ export function BudgetManager() {
           <button
             onClick={() => { setEditingBudget(null); setModalOpen(true) }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
-            style={{ background: 'var(--color-primary-800)' }}
+            style={{ background: 'var(--accent-solid)' }}
           >
             <Plus className="w-4 h-4" /> Buat budget pertama
           </button>

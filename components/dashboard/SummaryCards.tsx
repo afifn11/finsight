@@ -64,7 +64,7 @@ function StatCard({
           )}
         </div>
         <div
-          className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-105"
+          className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 transition-transform duration-200 group-hover:scale-105"
           style={{ background: iconBg }}
         >
           <Icon className="w-5 h-5" style={{ color: iconColor }} />

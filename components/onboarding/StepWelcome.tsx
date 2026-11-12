@@ -41,7 +41,7 @@ export function StepWelcome({ user, onNext }: Props) {
       {/* Greeting */}
       <div
         className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium mb-4"
-        style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary-800)' }}
+        style={{ background: 'var(--color-primary-50)', color: 'var(--accent-solid)' }}
       >
         <Sparkles className="w-3.5 h-3.5" />
         Akun berhasil dibuat

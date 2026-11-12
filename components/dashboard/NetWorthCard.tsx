@@ -29,7 +29,7 @@ export function NetWorthCard() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div
-                className="flex items-center justify-center w-8 h-8 rounded-xl shadow-xs"
+                className="flex items-center justify-center w-8 h-8 rounded-xl"
                 style={{ background: 'var(--color-primary-50)' }}
               >
                 <WalletIcon className="w-4 h-4" style={{ color: 'var(--color-primary-600)' }} />
@@ -51,7 +51,7 @@ export function NetWorthCard() {
                 }}
                 title="Transfer Antar Dompet"
               >
-                <ArrowRightLeft className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <ArrowRightLeft className="w-3.5 h-3.5 text-lime-600 dark:text-lime-400" />
                 <span className="hidden sm:inline">Transfer</span>
               </button>
 
@@ -84,25 +84,25 @@ export function NetWorthCard() {
           <div className="flex flex-wrap items-center gap-2 mt-4">
             {bankTotal > 0 && (
               <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border font-medium" style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-default)' }}>
-                <Landmark className="w-3 h-3 text-blue-500" />
+                <Landmark className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                 <span>Bank: {formatCurrencyShort(bankTotal)}</span>
               </span>
             )}
             {ewalletTotal > 0 && (
               <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border font-medium" style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-default)' }}>
-                <Smartphone className="w-3 h-3 text-cyan-500" />
+                <Smartphone className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                 <span>E-Wallet: {formatCurrencyShort(ewalletTotal)}</span>
               </span>
             )}
             {cashTotal > 0 && (
               <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border font-medium" style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-default)' }}>
-                <Banknote className="w-3 h-3 text-emerald-500" />
+                <Banknote className="w-3 h-3 text-lime-600 dark:text-lime-400" />
                 <span>Tunai: {formatCurrencyShort(cashTotal)}</span>
               </span>
             )}
             {investmentTotal > 0 && (
               <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border font-medium" style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-default)' }}>
-                <TrendingUp className="w-3 h-3 text-purple-500" />
+                <TrendingUp className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                 <span>Investasi: {formatCurrencyShort(investmentTotal)}</span>
               </span>
             )}
@@ -115,7 +115,7 @@ export function NetWorthCard() {
             <span>Dompet Aktif ({wallets.length})</span>
             <button
               onClick={() => setShowManager(true)}
-              className="text-xs hover:underline text-cyan-600 font-medium"
+              className="text-xs hover:underline text-lime-600 dark:text-lime-400 font-medium"
             >
               Lihat semua
             </button>

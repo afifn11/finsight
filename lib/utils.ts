@@ -94,7 +94,7 @@ export function getBudgetStatus(percentage: number): BudgetStatus {
 
 export function getBudgetStatusColor(status: BudgetStatus): string {
   const colors: Record<BudgetStatus, string> = {
-    safe: '#10b981',
+    safe: '#84cc16',
     warning: '#f59e0b',
     danger: '#ef4444',
     exceeded: '#dc2626',

@@ -71,7 +71,7 @@ export function BottomNav() {
             aria-label="Tambah transaksi atau scan struk"
             className="flex items-center justify-center w-14 h-14 rounded-full -mt-7 transition-transform active:scale-95"
             style={{
-              background: 'var(--color-primary-800)',
+              background: 'var(--accent-solid)',
               boxShadow: 'var(--shadow-modal)',
               border: '3px solid var(--bg-card)',
             }}
@@ -118,7 +118,7 @@ export function BottomNav() {
                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
                 style={
                   active
-                    ? { background: 'var(--color-primary-800)', color: '#fff' }
+                    ? { background: 'var(--accent-solid)', color: '#fff' }
                     : { color: 'var(--text-secondary)' }
                 }
               >
@@ -142,7 +142,7 @@ export function BottomNav() {
           >
             <span
               className="flex items-center justify-center w-10 h-10 rounded-full shrink-0"
-              style={{ background: 'var(--color-primary-800)' }}
+              style={{ background: 'var(--accent-solid)' }}
             >
               <Camera className="w-5 h-5 text-white" aria-hidden="true" />
             </span>

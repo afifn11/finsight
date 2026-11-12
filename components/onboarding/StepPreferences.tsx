@@ -67,7 +67,7 @@ export function StepPreferences({ data, onChange, onNext, onBack }: Props) {
                   style={{
                     color:
                       data.currency === c.value
-                        ? 'var(--color-primary-800)'
+                        ? 'var(--accent-solid)'
                         : 'var(--text-primary)',
                   }}
                 >
@@ -122,7 +122,7 @@ export function StepPreferences({ data, onChange, onNext, onBack }: Props) {
                 style={{
                   color:
                     data.timezone === tz.value
-                      ? 'var(--color-primary-800)'
+                      ? 'var(--accent-solid)'
                       : 'var(--text-primary)',
                   fontWeight: data.timezone === tz.value ? 500 : 400,
                 }}

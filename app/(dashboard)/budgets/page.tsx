@@ -9,11 +9,11 @@ export default function BudgetsPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Page Header */}
-      <div className="p-5 md:p-6 rounded-2xl glass-card">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+      <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 mb-6">
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
           Budget & Komitmen Rutin
         </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
           Tetapkan batas pengeluaran per kategori dan pantau jadwal tagihan berkala
         </p>
       </div>

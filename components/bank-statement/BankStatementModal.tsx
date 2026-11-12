@@ -194,7 +194,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
           style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-elevated)' }}
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-lime-50 dark:bg-lime-950/40 text-lime-600 dark:text-lime-400 border border-lime-200 dark:border-lime-800">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div>
@@ -202,7 +202,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                 <h3 className="font-bold text-sm sm:text-base" style={{ color: 'var(--text-primary)' }}>
                   Auto-Parser Mutasi Rekening Bank
                 </h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-lime-50 text-lime-700 dark:bg-lime-950/60 dark:text-lime-300 border border-lime-200 dark:border-lime-800">
                   <Sparkles className="w-3 h-3" />
                   Gemini AI Vision
                 </span>
@@ -236,7 +236,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                     <select
                       value={selectedWalletId}
                       onChange={(e) => setSelectedWalletId(e.target.value)}
-                      className="w-full bg-[var(--bg-elevated)] text-[var(--text-primary)] text-sm px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] focus:border-sky-500 focus:outline-hidden"
+                      className="w-full bg-[var(--bg-elevated)] text-[var(--text-primary)] text-sm px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] focus:border-lime-500 focus:outline-hidden"
                     >
                       <option value="">-- Tanpa Dompet (Hanya Catat Transaksi) --</option>
                       {wallets.map((w) => (
@@ -265,8 +265,8 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                 onClick={() => fileInputRef.current?.click()}
                 className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${
                   file
-                    ? 'border-sky-500/60 bg-sky-500/5'
-                    : 'border-[var(--border-subtle)] hover:border-sky-500/50 hover:bg-[var(--bg-elevated)]/50'
+                    ? 'border-lime-500/60 bg-lime-500/5'
+                    : 'border-[var(--border-subtle)] hover:border-lime-500/50 hover:bg-[var(--bg-elevated)]/50'
                 }`}
               >
                 <input
@@ -278,7 +278,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                 />
 
                 <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-sm text-sky-500 bg-sky-500/10"
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 text-lime-500 bg-lime-500/10"
                 >
                   <UploadCloud className="w-7 h-7" />
                 </div>
@@ -315,7 +315,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                   type="button"
                   disabled={!file || isParsing}
                   onClick={handleParse}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white shadow-xs transition-all duration-150 disabled:opacity-50 bg-emerald-600 hover:bg-emerald-700"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white dark:text-zinc-950 transition-all duration-150 disabled:opacity-50 bg-lime-600 dark:bg-lime-400 hover:bg-lime-700 dark:hover:bg-lime-300"
                 >
                   {isParsing ? (
                     <>
@@ -341,7 +341,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
               >
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5 font-bold text-[var(--text-primary)]">
-                    <Building2 className="w-4 h-4 text-sky-500" />
+                    <Building2 className="w-4 h-4 text-lime-500" />
                     <span>{detectedBank ?? 'Bank Statement'}</span>
                   </div>
                   <span className="text-[var(--text-muted)]">•</span>
@@ -349,7 +349,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <div className="flex items-center gap-1.5 text-lime-600 dark:text-lime-400 font-semibold">
                     <ArrowDownLeft className="w-3.5 h-3.5" />
                     <span>Pemasukan: {formatRupiah(totalSelectedIncome)}</span>
                   </div>
@@ -373,7 +373,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                           type="checkbox"
                           checked={selectedCount === transactions.length && transactions.length > 0}
                           onChange={(e) => toggleSelectAll(e.target.checked)}
-                          className="rounded border-[var(--border-subtle)] text-sky-600 focus:ring-0 cursor-pointer"
+                          className="rounded border-[var(--border-subtle)] text-lime-600 focus:ring-0 cursor-pointer"
                         />
                       </th>
                       <th className="p-3 w-28">Tanggal</th>
@@ -389,7 +389,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                       <tr
                         key={t.id}
                         className={`transition-colors ${
-                          t.selected ? 'bg-sky-500/5' : 'hover:bg-[var(--bg-elevated)]/40 opacity-70'
+                          t.selected ? 'bg-lime-500/5' : 'hover:bg-[var(--bg-elevated)]/40 opacity-70'
                         }`}
                       >
                         <td className="p-3 text-center">
@@ -397,7 +397,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                             type="checkbox"
                             checked={t.selected ?? false}
                             onChange={() => toggleSelectRow(t.id)}
-                            className="rounded border-[var(--border-subtle)] text-sky-600 focus:ring-0 cursor-pointer"
+                            className="rounded border-[var(--border-subtle)] text-lime-600 focus:ring-0 cursor-pointer"
                           />
                         </td>
                         <td className="p-3">
@@ -420,7 +420,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                           <span
                             className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
                               t.type === 'INCOME'
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                ? 'bg-lime-500/10 text-lime-600 dark:text-lime-400 border border-lime-500/20'
                                 : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
                             }`}
                           >
@@ -481,7 +481,7 @@ export function BankStatementModal({ open, onClose, onSuccess }: Props) {
                     type="button"
                     disabled={selectedCount === 0 || isImporting}
                     onClick={handleImportApproved}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white shadow-xs disabled:opacity-50 transition-all bg-emerald-600 hover:bg-emerald-700"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white dark:text-zinc-950 disabled:opacity-50 transition-all bg-lime-600 dark:bg-lime-400 hover:bg-lime-700 dark:hover:bg-lime-300"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>

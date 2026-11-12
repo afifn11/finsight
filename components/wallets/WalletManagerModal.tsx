@@ -165,7 +165,7 @@ export function WalletManagerModal({ open, onClose, wallets, onSuccess }: Wallet
             <button
               onClick={startCreate}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-white transition-opacity hover:opacity-90"
-              style={{ background: 'var(--color-primary-800)' }}
+              style={{ background: 'var(--accent-solid)' }}
             >
               <Plus className="w-3.5 h-3.5" /> Tambah Dompet
             </button>
@@ -224,12 +224,12 @@ export function WalletManagerModal({ open, onClose, wallets, onSuccess }: Wallet
                       onClick={() => setType(opt.type)}
                       className={cn(
                         'flex items-center gap-2 p-2 rounded-xl border text-xs font-medium transition-all text-left',
-                        isSelected ? 'border-primary-500 shadow-xs' : 'opacity-70 hover:opacity-100'
+                        isSelected ? 'border-primary-500' : 'opacity-70 hover:opacity-100'
                       )}
                       style={{
                         background: isSelected ? 'var(--color-primary-50)' : 'var(--bg-card)',
                         borderColor: isSelected ? 'var(--color-primary-600)' : 'var(--border-default)',
-                        color: isSelected ? 'var(--color-primary-800)' : 'var(--text-primary)',
+                        color: isSelected ? 'var(--accent-solid)' : 'var(--text-primary)',
                       }}
                     >
                       <Icon className="w-4 h-4 shrink-0" />
@@ -313,7 +313,7 @@ export function WalletManagerModal({ open, onClose, wallets, onSuccess }: Wallet
                 type="checkbox"
                 checked={isIncludedInNetWorth}
                 onChange={(e) => setIsIncludedInNetWorth(e.target.checked)}
-                className="w-4 h-4 accent-cyan-600 rounded cursor-pointer"
+                className="w-4 h-4 accent-lime-600 rounded cursor-pointer"
               />
             </div>
 
@@ -343,7 +343,7 @@ export function WalletManagerModal({ open, onClose, wallets, onSuccess }: Wallet
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs"
+                      className="w-3.5 h-3.5 rounded-full shrink-0"
                       style={{ background: w.color }}
                     />
                     <div className="min-w-0">

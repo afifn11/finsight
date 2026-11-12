@@ -22,7 +22,7 @@ export function AiInsightCard() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-lime-50 dark:bg-lime-950/40 text-lime-600 dark:text-lime-400 border border-lime-200 dark:border-lime-800">
               <Sparkles className="w-3.5 h-3.5" />
             </div>
             <div>
@@ -80,7 +80,7 @@ export function AiInsightCard() {
                   className="flex gap-3 p-2.5 rounded-xl transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <div
-                    className="flex items-center justify-center w-8 h-8 rounded-xl shrink-0 mt-0.5 shadow-xs"
+                    className="flex items-center justify-center w-8 h-8 rounded-xl shrink-0 mt-0.5"
                     style={{ background: style.bg }}
                   >
                     <Icon className="w-4 h-4" style={{ color: style.color }} />

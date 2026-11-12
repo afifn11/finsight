@@ -1,53 +1,57 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   --font-sans: 'Geist', 'Inter', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Fira Code', monospace;
 
-  /* Primary — Deep Emerald / Mint */
-  --color-primary-50:  #ecfdf5;
-  --color-primary-100: #d1fae5;
-  --color-primary-200: #a7f3d0;
-  --color-primary-400: #34d399;
-  --color-primary-500: #10b981;
-  --color-primary-600: #059669;
-  --color-primary-700: #047857;
-  --color-primary-800: #065f46;
-  --color-primary-900: #064e3b;
+  /* Primary — Lime (Tailwind lime scale) */
+  --color-primary-50:  #f7fee7;
+  --color-primary-100: #ecfccb;
+  --color-primary-200: #d9f99d;
+  --color-primary-400: #a3e635;
+  --color-primary-500: #84cc16;
+  --color-primary-600: #65a30d;
+  --color-primary-700: #4d7c0f;
+  --color-primary-800: #3f6212;
+  --color-primary-900: #365314;
 
-  --color-success-50:  #ecfdf5;
-  --color-success-500: #10b981;
-  --color-success-600: #059669;
-  --color-success-700: #047857;
+  /* Positive / Trend — Lime */
+  --color-success-50:  #f7fee7;
+  --color-success-100: #ecfccb;
+  --color-success-500: #84cc16;
+  --color-success-600: #65a30d;
+  --color-success-700: #4d7c0f;
 
   --color-warning-50:  #fffbeb;
   --color-warning-500: #f59e0b;
   --color-warning-600: #d97706;
 
-  /* Expense / Danger — Muted Rose */
+  /* Expense / Danger — Rose */
   --color-danger-50:   #fff1f2;
   --color-danger-500:  #f43f5e;
   --color-danger-600:  #e11d48;
   --color-danger-700:  #be123c;
 
-  /* AI Accent — Clean Emerald Slate */
-  --color-ai-accent-50:    #ecfdf5;
-  --color-ai-accent-start: #059669;
-  --color-ai-accent-end:   #10b981;
-  --color-ai-accent-600:   #047857;
+  /* AI Accent — Lime */
+  --color-ai-accent-50:    #f7fee7;
+  --color-ai-accent-start: #65a30d;
+  --color-ai-accent-end:   #84cc16;
+  --color-ai-accent-600:   #4d7c0f;
 
-  /* Neutral Slate */
-  --color-neutral-50:  #f8fafc;
-  --color-neutral-100: #f1f5f9;
-  --color-neutral-200: #e2e8f0;
-  --color-neutral-300: #cbd5e1;
-  --color-neutral-400: #94a3b8;
-  --color-neutral-500: #64748b;
-  --color-neutral-600: #475569;
-  --color-neutral-700: #334155;
-  --color-neutral-800: #1e293b;
-  --color-neutral-900: #0f172a;
-  --color-neutral-950: #020617;
+  /* Neutral — Zinc */
+  --color-neutral-50:  #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #e4e4e7;
+  --color-neutral-300: #d4d4d8;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-500: #71717a;
+  --color-neutral-600: #52525b;
+  --color-neutral-700: #3f3f46;
+  --color-neutral-800: #27272a;
+  --color-neutral-900: #18181b;
+  --color-neutral-950: #09090b;
 
   --radius-sm:   4px;
   --radius-md:   8px;
@@ -56,7 +60,7 @@
   --radius-2xl: 20px;
   --radius-full: 9999px;
 
-  --shadow-card:     0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  --shadow-card:     none;
   --shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
   --shadow-modal:    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
@@ -65,46 +69,67 @@
 }
 
 :root {
-  /* Light Mode (Stripe/Ramp inspired) */
-  --bg-page:        #f8fafc;
+  /* Light Mode — Zinc & Lime */
+  --bg-page:        #fafafa;   /* zinc-50  */
   --bg-card:        #ffffff;
-  --bg-muted:       #f1f5f9;
-  --bg-hover:       #f8fafc;
+  --bg-muted:       #f4f4f5;   /* zinc-100 */
+  --bg-hover:       #f4f4f5;
   --bg-elevated:    #ffffff;
 
-  --text-primary:   #0f172a;
-  --text-secondary: #475569;
-  --text-muted:     #64748b;
+  --text-primary:   #18181b;   /* zinc-900 */
+  --text-secondary: #52525b;   /* zinc-600 */
+  --text-muted:     #71717a;   /* zinc-500 */
   --text-inverse:   #ffffff;
 
-  --border-default: #e2e8f0;
-  --border-subtle:  #f1f5f9;
-  --border-focus:   #059669;
+  --border-default: #e4e4e7;   /* zinc-200 */
+  --border-subtle:  #f4f4f5;
+  --border-focus:   #65a30d;   /* lime-600 */
 
-  --color-income:       #059669;
-  --color-expense:      #e11d48;
+  /* Solid accent fill (buttons, logo tiles) + the text color that sits on it */
+  --accent-solid:    #65a30d;  /* lime-600 */
+  --accent-solid-fg: #ffffff;
+
+  --color-income:       #65a30d; /* lime-600 */
+  --color-expense:      #f43f5e; /* rose-500 */
   --color-warning-text: #d97706;
-  --color-danger-text:  #e11d48;
+  --color-danger-text:  #f43f5e;
 }
 
-/* Dark Mode (Linear/Wise inspired) */
+/* Dark Mode — Zinc & Lime */
 .dark {
-  --bg-page:        #0b0f19;
-  --bg-card:        #111827;
-  --bg-muted:       #1f2937;
-  --bg-hover:       #1e293b;
-  --bg-elevated:    #161f30;
+  --bg-page:        #09090b;   /* zinc-950 */
+  --bg-card:        #18181b;   /* zinc-900 */
+  --bg-muted:       #27272a;   /* zinc-800 */
+  --bg-hover:       #27272a;
+  --bg-elevated:    #1f1f23;
 
-  --text-primary:   #f9fafb;
-  --text-secondary: #9ca3af;
-  --text-muted:     #6b7280;
-  --text-inverse:   #0f172a;
+  --text-primary:   #ffffff;
+  --text-secondary: #d4d4d8;   /* zinc-300 */
+  --text-muted:     #a1a1aa;   /* zinc-400 */
+  --text-inverse:   #09090b;
 
-  --border-default: #1f2937;
-  --border-subtle:  #283548;
-  --border-focus:   #10b981;
+  --border-default: rgb(39 39 42 / 0.8);  /* zinc-800/80 */
+  --border-subtle:  #27272a;
+  --border-focus:   #a3e635;   /* lime-400 */
 
-  --color-income:       #10b981;
+  --accent-solid:    #a3e635;  /* lime-400 */
+  --accent-solid-fg: #09090b;
+
+  /* Lime accents flip to the brighter 400 tone on dark surfaces */
+  --color-primary-50:  rgb(163 230 53 / 0.12);
+  --color-primary-100: rgb(163 230 53 / 0.2);
+  --color-primary-500: #a3e635;
+  --color-primary-600: #a3e635;
+  --color-primary-700: #bef264;
+  --color-success-50:  rgb(163 230 53 / 0.12);
+  --color-success-100: rgb(163 230 53 / 0.2);
+  --color-success-500: #a3e635;
+  --color-success-600: #a3e635;
+  --color-success-700: #bef264;
+  --color-ai-accent-50:  rgb(163 230 53 / 0.12);
+  --color-ai-accent-600: #a3e635;
+
+  --color-income:       #a3e635; /* lime-400 */
   --color-expense:      #f43f5e;
   --color-warning-text: #f59e0b;
   --color-danger-text:  #f43f5e;
@@ -122,48 +147,60 @@ body {
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-.dark ::-webkit-scrollbar-thumb { background: #334155; }
-.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+.dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #52525b; }
 
+/* ── Flat surfaces: 1px border, rounded, no shadows ─────────────────── */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04);
+  border-radius: var(--radius-2xl);
+  box-shadow: none;
 }
 
-/* ── Minimalist Clean Card & Bento Grid UI utilities ─────────────────── */
 .glass-card,
 .clean-card {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-2xl);
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: none;
+  transition: border-color 0.2s ease;
 }
 
 .dark .glass-card,
 .dark .clean-card {
   background: var(--bg-card);
   border-color: var(--border-default);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.2);
+  box-shadow: none;
 }
 
-/* Clean interactive widget hover without neon glow */
+/* Interactive widget hover: border tint only, no glow */
 .interactive-card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .interactive-card:hover {
-  border-color: color-mix(in srgb, var(--color-primary-500) 50%, var(--border-default));
-  box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.06);
+  border-color: color-mix(in srgb, var(--color-primary-500) 55%, var(--border-default));
 }
 
 .dark .interactive-card:hover {
-  border-color: color-mix(in srgb, var(--color-primary-500) 40%, var(--border-default));
-  box-shadow: 0 4px 14px -2px rgb(0 0 0 / 0.35);
+  border-color: color-mix(in srgb, var(--color-primary-500) 45%, var(--border-default));
+}
+
+/* Text on a solid accent fill must contrast with the fill in both themes.
+   In dark mode the fill is bright lime-400, so force dark foreground. */
+.dark [style*="background: var(--accent-solid)"],
+.dark [style*="background: var(--accent-solid)"] *,
+.dark [style*="background: var(--color-primary-600)"] {
+  color: var(--accent-solid-fg) !important;
+}
+.dark [style*="background: var(--accent-solid)"] svg rect {
+  fill: var(--accent-solid-fg);
+}
+.dark [style*="background: var(--accent-solid)"] svg circle {
+  fill: var(--accent-solid-fg);
 }
 
 /* Clean badge utilities */
@@ -181,12 +218,12 @@ body {
 .badge-clean-success {
   background-color: var(--color-primary-50);
   color: var(--color-primary-700);
-  border: 1px solid color-mix(in srgb, var(--color-primary-500) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary-500) 30%, transparent);
 }
 .dark .badge-clean-success {
-  background-color: color-mix(in srgb, var(--color-primary-900) 40%, transparent);
-  color: var(--color-primary-400);
-  border-color: color-mix(in srgb, var(--color-primary-500) 25%, transparent);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-600);
+  border-color: color-mix(in srgb, var(--color-primary-500) 30%, transparent);
 }
 
 .badge-clean-danger {
@@ -195,7 +232,7 @@ body {
   border: 1px solid color-mix(in srgb, var(--color-danger-500) 25%, transparent);
 }
 .dark .badge-clean-danger {
-  background-color: color-mix(in srgb, var(--color-danger-900) 40%, transparent);
+  background-color: color-mix(in srgb, var(--color-danger-500) 15%, transparent);
   color: var(--color-danger-500);
   border-color: color-mix(in srgb, var(--color-danger-500) 25%, transparent);
 }
@@ -209,17 +246,17 @@ body {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d4d4d8;
   border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #a1a1aa;
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #3f3f46;
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #52525b;
 }
 
 .text-income  { color: var(--color-income); }

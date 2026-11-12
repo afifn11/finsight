@@ -60,15 +60,15 @@ export function AnalyticsView() {
   return (
     <div className="space-y-6">
       {/* Time Range Selector & KPI Cards */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl glass-card">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <Calendar className="w-4 h-4 text-lime-600 dark:text-lime-400" />
+          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Rentang Waktu Analisis
           </span>
         </div>
 
-        <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs self-start sm:self-auto">
+        <div className="flex items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs self-start sm:self-auto">
           {(['1M', '3M', '6M', 'YTD'] as TimeRange[]).map((range) => (
             <button
               key={range}
@@ -76,8 +76,8 @@ export function AnalyticsView() {
               onClick={() => setTimeRange(range)}
               className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
                 timeRange === range
-                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
             >
               {range}
@@ -88,46 +88,46 @@ export function AnalyticsView() {
 
       {/* KPI Metric Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass-card p-4 rounded-xl space-y-1">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-600" />
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 p-4 rounded-xl space-y-1">
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <ArrowDownLeft className="w-3.5 h-3.5 text-lime-600" />
             <span>Total Pemasukan</span>
           </div>
-          <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+          <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
             {formatCurrencyShort(totalIncome)}
           </p>
         </div>
 
-        <div className="glass-card p-4 rounded-xl space-y-1">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 p-4 rounded-xl space-y-1">
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
             <ArrowUpRight className="w-3.5 h-3.5 text-rose-600" />
             <span>Total Pengeluaran</span>
           </div>
-          <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+          <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
             {formatCurrencyShort(totalExpense)}
           </p>
         </div>
 
-        <div className="glass-card p-4 rounded-xl space-y-1">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 p-4 rounded-xl space-y-1">
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <DollarSign className="w-3.5 h-3.5 text-lime-600" />
             <span>Saldo Bersih</span>
           </div>
           <p
-            className={`text-base sm:text-lg font-bold ${
-              netSavings >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+            className={`text-2xl font-bold ${
+              netSavings >= 0 ? 'text-lime-600 dark:text-lime-400' : 'text-rose-600 dark:text-rose-400'
             }`}
           >
             {formatCurrencyShort(netSavings)}
           </p>
         </div>
 
-        <div className="glass-card p-4 rounded-xl space-y-1">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <TrendingUp className="w-3.5 h-3.5 text-sky-600" />
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 p-4 rounded-xl space-y-1">
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <TrendingUp className="w-3.5 h-3.5 text-lime-600" />
             <span>Saving Rate</span>
           </div>
-          <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+          <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
             {savingsRate}%
           </p>
         </div>
@@ -136,12 +136,12 @@ export function AnalyticsView() {
       {/* Charts Bento Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Cashflow Comparison Bar Chart */}
-        <div className="lg:col-span-7 glass-card p-5 md:p-6 rounded-2xl">
+        <div className="lg:col-span-7 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 p-5 md:p-6 rounded-2xl">
           <div className="mb-4">
-            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100">
+            <h3 className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-zinc-100">
               Arus Kas Bulanan ({timeRange})
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Perbandingan pemasukan vs pengeluaran antar bulan
             </p>
           </div>
@@ -149,18 +149,18 @@ export function AnalyticsView() {
         </div>
 
         {/* Category Breakdown Table */}
-        <div className="lg:col-span-5 glass-card p-5 md:p-6 rounded-2xl">
+        <div className="lg:col-span-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 p-5 md:p-6 rounded-2xl">
           <div className="mb-4">
-            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100">
+            <h3 className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-zinc-100">
               Komposisi Pengeluaran
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Alokasi pengeluaran per kategori bulan ini
             </p>
           </div>
 
           {breakdown.length === 0 ? (
-            <p className="text-xs text-center py-8 text-slate-400">
+            <p className="text-xs text-center py-8 text-zinc-400">
               Belum ada data pengeluaran tercatat
             </p>
           ) : (
@@ -173,23 +173,23 @@ export function AnalyticsView() {
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ background: cat.categoryColor }}
                       />
-                      <span className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                      <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate">
                         {cat.categoryName}
                       </span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-zinc-400">
                         ({cat.transactionCount}x)
                       </span>
                     </div>
                     <div className="flex items-center gap-2.5 shrink-0">
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      <span className="font-semibold text-zinc-700 dark:text-zinc-300">
                         {formatCurrencyShort(cat.total)}
                       </span>
-                      <span className="text-[11px] font-medium text-slate-400 w-9 text-right">
+                      <span className="text-[11px] font-medium text-zinc-400 w-9 text-right">
                         {formatPercentage(cat.percentage)}
                       </span>
                     </div>
                   </div>
-                  <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="w-full h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-300"
                       style={{ width: `${cat.percentage}%`, background: cat.categoryColor }}
@@ -198,8 +198,8 @@ export function AnalyticsView() {
                 </div>
               ))}
 
-              <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-200 dark:border-slate-800 text-xs font-semibold">
-                <span className="text-slate-900 dark:text-slate-100">Total Pengeluaran</span>
+              <div className="flex items-center justify-between pt-3 mt-2 border-t border-zinc-200 dark:border-zinc-800/80 text-xs font-semibold">
+                <span className="text-zinc-900 dark:text-zinc-100">Total Pengeluaran</span>
                 <span className="text-rose-600 dark:text-rose-400">
                   {formatCurrency(breakdown.reduce((s, c) => s + c.total, 0))}
                 </span>

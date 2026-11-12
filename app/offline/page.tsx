@@ -10,13 +10,13 @@ export default function OfflinePage() {
       <div className="text-center max-w-xs">
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
-          style={{ background: 'var(--color-primary-800)' }}
+          style={{ background: 'var(--accent-solid)' }}
         >
           <svg width="36" height="36" viewBox="0 0 20 20" fill="none">
             <rect x="3" y="2.5" width="4" height="15" rx="1.5" fill="white"/>
             <rect x="3" y="2.5" width="13" height="4" rx="1.5" fill="white"/>
             <rect x="3" y="8.5" width="10" height="4" rx="1.5" fill="white"/>
-            <circle cx="17" cy="17" r="2.8" fill="#4ade80"/>
+            <circle cx="17" cy="17" r="2.8" fill="#a3e635"/>
           </svg>
         </div>
 
@@ -30,7 +30,7 @@ export default function OfflinePage() {
         <button
           onClick={() => window.location.reload()}
           className="px-5 py-2.5 rounded-xl text-sm font-medium text-white"
-          style={{ background: 'var(--color-primary-800)' }}
+          style={{ background: 'var(--accent-solid)' }}
         >
           Coba lagi
         </button>

@@ -177,7 +177,7 @@ export function TransactionsList() {
             <button
               onClick={openAdd}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white shrink-0 transition-colors hover:opacity-90"
-              style={{ background: 'var(--color-primary-800)' }}
+              style={{ background: 'var(--accent-solid)' }}
             >
               <Plus className="w-4 h-4" /> Tambah
             </button>
@@ -198,7 +198,7 @@ export function TransactionsList() {
                 className="flex-1 py-2 text-sm font-medium transition-colors"
                 style={
                   filters.type === type
-                    ? { background: 'var(--color-primary-800)', color: '#fff' }
+                    ? { background: 'var(--accent-solid)', color: '#fff' }
                     : { background: 'var(--bg-card)', color: 'var(--text-secondary)' }
                 }
               >
@@ -236,7 +236,7 @@ export function TransactionsList() {
             <button
               onClick={openAdd}
               className="mt-4 px-4 py-2 rounded-lg text-sm font-medium text-white"
-              style={{ background: 'var(--color-primary-800)' }}
+              style={{ background: 'var(--accent-solid)' }}
             >
               Tambah transaksi
             </button>

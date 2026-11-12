@@ -228,7 +228,7 @@ export function GoalsManager() {
             <button
               onClick={openCreate}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white"
-              style={{ background: 'var(--color-primary-800)' }}
+              style={{ background: 'var(--accent-solid)' }}
             >
               <Plus className="w-3.5 h-3.5" />
               Tambah
@@ -254,7 +254,7 @@ export function GoalsManager() {
           <button
             onClick={openCreate}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white"
-            style={{ background: 'var(--color-primary-800)' }}
+            style={{ background: 'var(--accent-solid)' }}
           >
             <Plus className="w-4 h-4" />
             Buat goal pertama

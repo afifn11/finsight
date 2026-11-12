@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <button
             onClick={() => this.setState({ hasError: false })}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
-            style={{ background: 'var(--color-primary-800)' }}
+            style={{ background: 'var(--accent-solid)' }}
           >
             <RefreshCw className="w-4 h-4" />
             Coba lagi

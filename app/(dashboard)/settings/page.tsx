@@ -13,11 +13,11 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
-      <div className="p-5 md:p-6 rounded-2xl glass-card">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+      <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 mb-6">
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
           Pengaturan
         </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
           Kelola profil pengguna, preferensi aplikasi, dan integrasi rekening
         </p>
       </div>
@@ -29,12 +29,12 @@ export default async function SettingsPage() {
       <SettingsForm user={session!.user} />
 
       {/* Push Notification Controls */}
-      <div className="glass-card p-5 rounded-2xl space-y-3">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 p-5 rounded-2xl space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Notifikasi & Peringatan Budget
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Dapatkan peringatan instan saat pengeluaran mendekati ambang batas anggaran
           </p>
         </div>

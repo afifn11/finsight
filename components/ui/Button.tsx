@@ -42,7 +42,7 @@ const buttonVariants = cva(
 function tokenStyle(variant: NonNullable<VariantProps<typeof buttonVariants>['variant']>) {
   switch (variant) {
     case 'primary':
-      return { background: 'var(--color-primary-800)' }
+      return { background: 'var(--accent-solid)' }
     case 'danger':
       return { background: 'var(--color-danger-500)' }
     case 'secondary':

@@ -87,7 +87,7 @@ export function GoalSimulatorWidget() {
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-lime-50 dark:bg-lime-950/40 text-lime-600 dark:text-lime-400 border border-lime-200 dark:border-lime-800">
               <Trophy className="w-4 h-4" />
             </div>
             <div>
@@ -95,7 +95,7 @@ export function GoalSimulatorWidget() {
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                   Simulator Target & Lencana
                 </h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-lime-50 text-lime-700 dark:bg-lime-950/60 dark:text-lime-300 border border-lime-200 dark:border-lime-800">
                   <Zap className="w-3 h-3 fill-current" />
                   Level {userLevel} • {totalPoints} EXP
                 </span>
@@ -113,7 +113,7 @@ export function GoalSimulatorWidget() {
               onClick={() => setActiveTab('simulator')}
               className={`px-3 py-1 rounded-lg font-medium transition-colors ${
                 activeTab === 'simulator'
-                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -124,7 +124,7 @@ export function GoalSimulatorWidget() {
               onClick={() => setActiveTab('badges')}
               className={`px-3 py-1 rounded-lg font-medium transition-colors ${
                 activeTab === 'badges'
-                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -143,7 +143,7 @@ export function GoalSimulatorWidget() {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-sky-500" />
+                  <Target className="w-4 h-4 text-lime-500" />
                   {goals.length > 1 ? (
                     <select
                       value={selectedGoalId}
@@ -162,7 +162,7 @@ export function GoalSimulatorWidget() {
                     </span>
                   )}
                 </div>
-                <span className="text-xs font-bold text-sky-600 dark:text-sky-400">
+                <span className="text-xs font-bold text-lime-600 dark:text-lime-400">
                   {currentGoalProgress}%
                 </span>
               </div>
@@ -221,7 +221,7 @@ export function GoalSimulatorWidget() {
 
                 {monthsSaved > 0 && (
                   <div className="text-right">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-lime-500/10 text-lime-600 dark:text-lime-400 border border-lime-500/20">
                       <Sparkles className="w-3 h-3" />
                       {monthsSaved} bulan lebih cepat!
                     </span>
@@ -241,7 +241,7 @@ export function GoalSimulatorWidget() {
                   key={b.key}
                   className={`p-3 rounded-xl border transition-all relative flex flex-col justify-between ${
                     b.unlocked
-                      ? 'border-amber-500/40 bg-amber-500/5 shadow-xs'
+                      ? 'border-amber-500/40 bg-amber-500/5'
                       : 'border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 opacity-75'
                   }`}
                   title={b.description}
@@ -250,7 +250,7 @@ export function GoalSimulatorWidget() {
                     <div
                       className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                         b.unlocked
-                          ? 'bg-amber-500 text-white shadow-xs animate-bounce-short'
+                          ? 'bg-amber-500 text-white animate-bounce-short'
                           : 'bg-[var(--border-subtle)] text-[var(--text-muted)]'
                       }`}
                     >
@@ -258,7 +258,7 @@ export function GoalSimulatorWidget() {
                     </div>
 
                     {b.unlocked ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-lime-500 shrink-0" />
                     ) : (
                       <Lock className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
                     )}

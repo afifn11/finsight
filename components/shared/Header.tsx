@@ -103,16 +103,16 @@ export function Header({ user }: HeaderProps) {
       <Link href="/" className="md:hidden flex items-center gap-2">
         <div
           className="flex items-center justify-center w-7 h-7 rounded-lg shrink-0"
-          style={{ background: 'var(--color-primary-800)' }}
+          style={{ background: 'var(--accent-solid)' }}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="2" y="2" width="3" height="10" rx="1" fill="white"/>
             <rect x="2" y="2" width="9" height="2.5" rx="1" fill="white"/>
             <rect x="2" y="6" width="7" height="2.5" rx="1" fill="white"/>
-            <circle cx="11" cy="11" r="2" fill="#4ade80"/>
+            <circle cx="11" cy="11" r="2" fill="#a3e635"/>
           </svg>
         </div>
-        <span className="font-semibold text-base" style={{ color: 'var(--color-primary-800)' }}>
+        <span className="font-semibold text-base" style={{ color: 'var(--accent-solid)' }}>
           FinSight
         </span>
       </Link>
