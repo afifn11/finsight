@@ -336,8 +336,9 @@ export function BudgetManager() {
 
   return (
     <>
-      {/* Summary card */}
-      {!isLoading && budgets.length > 0 && (() => {
+      <div className="space-y-6">
+        {/* Summary card */}
+        {!isLoading && budgets.length > 0 && (() => {
         const totalBudget = budgets.reduce((s, b) => s + Number(b.amount), 0)
         const totalSpent  = budgets.reduce((s, b) => s + b.spent, 0)
         const safeCount   = budgets.filter((b) => getBudgetStatus(b.percentage) === 'safe').length
@@ -454,6 +455,7 @@ export function BudgetManager() {
           ))}
         </div>
       )}
+      </div>
 
       <BudgetFormModal
         open={modalOpen}
