@@ -36,14 +36,14 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: [
-    // Matches --bg-page in globals.css so the OS status/address bar tint lines
-    // up with the app background for the common case (defaultTheme="system").
-    { media: '(prefers-color-scheme: light)', color: '#f0f9ff' },
-    { media: '(prefers-color-scheme: dark)', color: '#071018' },
-  ],
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#09090b' },
+  ],
 }
 
 export default function RootLayout({
