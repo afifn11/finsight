@@ -1,6 +1,6 @@
 // tests/api/bank-statement.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { POST as parsePOST } from '@/app/api/bank-statement/parse/route'
+import { POST as parsePOST, safeParseAiJson } from '@/app/api/bank-statement/parse/route'
 import { POST as importPOST } from '@/app/api/bank-statement/import/route'
 import { prisma } from '@/lib/prisma'
 import {
@@ -50,6 +50,22 @@ describe('/api/bank-statement', () => {
 
       const res = await parsePOST(req)
       expect(res.status).toBe(400)
+    })
+
+    it('recovers completed transaction objects from truncated Gemini JSON output', () => {
+      const truncatedRawText = `[
+  { "date": "2026-10-02", "description": "HONORG URU SEPTEMBER 2026", "amount": 639000.00, "type": "INCOME", "categoryName": "Gaji" },
+  { "date": "2026-10-03", "description": "DANA TOPUP-MB-UBP", "amount": 15500.00, "type": "EXPENSE", "categoryName": "Lainnya" },
+  {`
+      const parsed = safeParseAiJson(truncatedRawText) as Array<{
+        date: string
+        description: string
+        amount: number
+      }>
+      expect(Array.isArray(parsed)).toBe(true)
+      expect(parsed).toHaveLength(2)
+      expect(parsed[0]?.description).toBe('HONORG URU SEPTEMBER 2026')
+      expect(parsed[1]?.amount).toBe(15500)
     })
   })
 

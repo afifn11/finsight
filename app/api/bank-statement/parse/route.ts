@@ -19,6 +19,52 @@ const parsedTxSchema = z.object({
 
 const parsedListSchema = z.array(parsedTxSchema)
 
+export function safeParseAiJson(rawText: string): unknown {
+  // Remove illegal unescaped control characters inside JSON strings
+  const sanitized = rawText.replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ').trim()
+
+  // 1. Extract all completed individual JSON objects matching {"date":...}
+  const objectMatches = sanitized.match(/\{[^{}]*"date"[^{}]*\}/g) || []
+  if (objectMatches.length > 0) {
+    try {
+      const reconstructedJson = `[${objectMatches.join(',')}]`
+      return JSON.parse(reconstructedJson)
+    } catch {
+      // Per-object salvage if one object has malformed characters
+      const validObjects: unknown[] = []
+      for (const objStr of objectMatches) {
+        try {
+          validObjects.push(JSON.parse(objStr))
+        } catch {
+          // Skip malformed individual object
+        }
+      }
+      if (validObjects.length > 0) {
+        return validObjects
+      }
+    }
+  }
+
+  // 2. Fallback: strip markdown fences and slice from '[' to last completed '}'
+  const cleaned = sanitized
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim()
+
+  const startBracket = cleaned.indexOf('[')
+  const lastCloseBrace = cleaned.lastIndexOf('}')
+  if (startBracket !== -1 && lastCloseBrace > startBracket) {
+    try {
+      const salvaged = `${cleaned.slice(startBracket, lastCloseBrace + 1)}]`
+      return JSON.parse(salvaged)
+    } catch {
+      // Continue to final fallback
+    }
+  }
+
+  return JSON.parse(cleaned)
+}
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
@@ -107,7 +153,8 @@ ATURAN EKSTRAKSI:
    - Debet (DB), Uang Keluar, Pembelian, Tarik Tunai, Biaya Admin = "EXPENSE"
 4. Tanggal: Konversi ke format ISO "YYYY-MM-DD". Jika tahun tidak tertulis, gunakan ${currentYear}.
 5. Amount: Angka positif murni (float/integer), jangan ada tanda minus, titik ribuan, atau huruf Rp.
-6. Buang baris saldo awal, saldo akhir, atau total mutasi.`
+6. Buang baris saldo awal, saldo akhir, atau total mutasi.
+7. PENTING: Balas HANYA dengan JSON array murni [...] tanpa markdown code block (\`\`\`json), tanpa komentar tambahan. Ringkas deskripsi maksimal 60 karakter agar output ringkas dan tidak terpotong.`
 
     const apiKey = process.env.GOOGLE_AI_API_KEY
     if (!apiKey) {
@@ -157,14 +204,31 @@ ATURAN EKSTRAKSI:
       contents: promptContent as any,
       config: {
         systemInstruction,
-        maxOutputTokens: 4000,
+        maxOutputTokens: 8192,
         temperature: 0.1,
+        responseMimeType: 'application/json',
+        thinkingConfig: {
+          thinkingBudget: 0,
+        },
       },
     })
 
     const rawText = aiResult.text?.trim() ?? '[]'
-    const cleaned = rawText.replace(/^```json\s*|\s*```$/g, '').trim()
-    const parsedData: unknown = JSON.parse(cleaned)
+
+    let parsedData: unknown
+    try {
+      parsedData = safeParseAiJson(rawText)
+    } catch (err) {
+      console.error('[BANK_STATEMENT_PARSE_JSON_FAIL]', { rawText, error: err })
+      return NextResponse.json<ApiError>(
+        {
+          error:
+            'Gagal membaca format mutasi. Respons AI terpotong atau tidak valid. Silakan coba unggah kembali.',
+        },
+        { status: 422 }
+      )
+    }
+
     const validated = parsedListSchema.safeParse(parsedData)
 
     if (!validated.success) {
