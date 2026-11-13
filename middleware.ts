@@ -29,7 +29,8 @@ export default withAuth(
     callbacks: {
       authorized({ token, req }) {
         const pathname = req.nextUrl.pathname
-        // Public paths and webhook/cron endpoints authenticated via Bearer headers
+        // Public paths (including landing root '/') and webhook/cron endpoints
+        if (pathname === '/') return true
         const publicPaths = ['/login', '/register', '/api/auth', '/api/cron']
         const isPublic = publicPaths.some((p) => pathname.startsWith(p))
         if (isPublic) return true

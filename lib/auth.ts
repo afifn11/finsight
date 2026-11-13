@@ -80,6 +80,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.image = user.image ?? null
         token.name = user.name ?? null
+        token.isDemo = user.email === 'demo@finsight.app'
         // Fetch onboardingDone saat login pertama
         const dbUser1 = await prisma.user.findUnique({
           where: { id: user.id as string },
@@ -104,6 +105,9 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.id) {
         session.user.id = token.id as string
         session.user.onboardingDone = (token.onboardingDone as boolean) ?? false
+        session.user.isDemo = Boolean(
+          token.isDemo || session.user.email === 'demo@finsight.app'
+        )
         if (token.image) session.user.image = token.image as string
         if (token.name) session.user.name = token.name as string
       }
@@ -134,6 +138,7 @@ declare module 'next-auth' {
       name?: string | null
       image?: string | null
       onboardingDone?: boolean
+      isDemo?: boolean
     }
   }
 }
@@ -142,5 +147,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id?: string
     onboardingDone?: boolean
+    isDemo?: boolean
   }
 }
